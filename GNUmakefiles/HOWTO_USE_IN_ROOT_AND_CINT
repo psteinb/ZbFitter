@@ -1,0 +1,43 @@
+$Id: HOWTO_USE_IN_ROOT_AND_CINT,v 1.1 2008/02/06 15:50:32 petzold Exp $
+
+AP 08/02/06:
+
+Environment setup:
+------------------------
+
+o Use 'setROOTpath' and 'setANALpath' to configure the complete build env.
+  See https://pktwiki.phy.tu-dresden.de/twiki/bin/view/IKTP/SetRootPath
+  and https://pktwiki.phy.tu-dresden.de/twiki/bin/view/IKTP/IktpLoginScripts
+  for documentation on how to get these aliases into your env.
+
+o Appropriately set CVSROOT (default should be /raid5/users/cvsroot)
+
+ROOT setup:
+-----------------------
+
+o all necassary dictionaries are already created and linked into the shared lib when using 
+  GNUmakefile in this package, if the correct <package name>_LinkDef.hh file has been setup
+
+o Example for foading the shared lib libTTools.so and libTFunctions.so at ROOT start-up
+
+  $HOME/.rootlogon.C: 
+
+	    // In order to be able to use ACliC (i.e. compile your scripts via .L <bla>.cc+)
+	    // the include path needs to be setup correctly
+	    cout << "Adding "<<Form("-I%s",gSystem->Getenv("SRC"))<< " to include path."<<endl;
+	    gSystem->SetIncludePath(Form("-I%s",gSystem->Getenv("SRC")));
+
+	    if ( gSystem->Load(Form("%s/%s",gSystem->Getenv("LIB"),"libTFunctions.so")) == 0)
+	      cout<<"Successfully loaded "<<Form("%s/%s",gSystem->Getenv("LIB"),"libTFunctions.so")<<endl;
+
+	    if ( gSystem->Load(Form("%s/%s",gSystem->Getenv("LIB"),"libTTools.so")) == 0)
+	      cout<<"Successfully loaded "<<Form("%s/%s",gSystem->Getenv("LIB"),"libTTools.so")<<endl;
+
+Coding hints:
+-----------------------
+
+o Howto correctly include headers:
+
+	#include "<package name>/<header>.hh"
+
+  The include path for gcc is correcly setup in the GNUmakefile if setANALpath was run.

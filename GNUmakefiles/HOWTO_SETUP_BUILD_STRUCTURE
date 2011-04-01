@@ -1,0 +1,101 @@
+$Id: HOWTO_SETUP_BUILD_STRUCTURE,v 1.4 2008/04/09 11:41:47 petzold Exp $
+
+AP 08/04/07:
+
+o Support for specifying custom source and header file extensions.
+  Add 
+
+	CXXHDREXT = hxx
+	CXXSRCEXT = cxx
+
+  to the GNUmakefile in your package before including GNUmakefiles/GNUmakefile.
+  The GNUmakefile from package GNUmakefiles will honor your settings. 
+  The defaults defined in GNUmakefiles/GNUmakefile are
+
+	CXXHDREXT = hh
+	CXXSRCEXT = cc
+
+
+AP 08/02/04:
+
+Environment setup:
+------------------------
+
+o Use 'setROOTpath' and 'setANALpath' to configure the complete build env. 
+  See https://pktwiki.phy.tu-dresden.de/twiki/bin/view/IKTP/SetRootPath
+  and https://pktwiki.phy.tu-dresden.de/twiki/bin/view/IKTP/IktpLoginScripts
+  for documentation on how to get these aliases into your env.
+
+o Appropriately set CVSROOT (default should be /raid5/users/cvsroot)
+
+Package operations:
+------------------------
+
+o go to your source directory
+
+	cd $SRC
+
+o check out GNUmakefiles
+
+	cvs co GNUmakefiles
+
+o if it already exists check out your package. 
+
+	cvs co <package name>
+
+  Otherwise create the package directory
+
+	mkdir <package name>
+
+  It should contain a GNUmakefile which includes the top
+  level GNUmakefile from the GNUmakefiles package and define the package name like so
+
+	PACKAGE=<package name>
+	include $(SRC)/GNUmakefiles/GNUmakefile
+
+  See the import section of man cvs for instructions on how to get your packe into CVS.
+
+o Setup and build your package:
+
+	cd <package name>
+	make installdirs
+	make
+
+
+======================================================================================================
+JES 06/??/??:
+
+
+Directory setup:
+------------------
+
+My directory setup look like:
+
+/raid/users/jsunderm/analysis/source  _____  Package_1
+                                     |_____  Package_2
+                                     |_____  ...
+                                     |_____  lib (DIR)
+                                     |_____  GNUmakefile
+
+
+Environment setup:
+------------------------
+
+export ROOTRELEASE=<You root version number>    (e.g. export ROOTRELEASE=4.03.02-slc3.gcc3.2.3)
+export BFARCH=<Your architecture>               (e.g. export BFARCH=Linux24SL3_i386_gcc323)
+export SRC=<Your source directory>              (e.g. export SRC=/raid/users/jsunderm/analysis/source)
+export LIB=$SRC/lib/$BFARCH/$ROOTRELEASE
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIB
+
+... copy the GNUmakefile to the $SRC directory
+
+
+
+How to setup and compile a package:
+-----------------------------------
+
+cd $SRC				
+cvs co <packagename>
+cd <packagename>
+gmake install
+gmake

@@ -1,0 +1,30 @@
+# $Id: GNUmakefile.package.template,v 1.1 2008/06/02 09:18:40 petzold Exp $
+
+# copy this file into the package source directory
+# customize it and rename it to GNUmakefile
+
+# This definition is required! Please customize it!
+PACKAGE = MyPackage
+
+#
+# some optional settings, uncomment when needed
+#
+
+# sometimes some hdrs should not be included in the rootcint dict
+# NOTINDICT = a_special_hdr_file.hh
+
+# if there are source files, that should not be compiled, put them into NOTTOCOMPILE
+# the files PACKAGE_Cint* are added by default in GNUmakefiles/GNUmakefile
+# NOTTOCOMPILE = 
+
+# if the package depends on extra libraries, put them into EXTRALIBS
+# EXTRALIBS = 
+
+# the default c++ header file extension is .hh, can be redefined here
+# CXXHDREXT =
+
+# the default c++ source file extension is .cc, can be redefined here
+# CXXSRCEXT = 
+
+# do not change this line
+include $(SRC)/GNUmakefiles/GNUmakefile
