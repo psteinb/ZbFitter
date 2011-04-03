@@ -4,6 +4,7 @@
 //  
 
 PaveTextResult::PaveTextResult ( ) {
+initAttributes();
 }
 
 PaveTextResult::~PaveTextResult ( ) { }
@@ -20,4 +21,6 @@ PaveTextResult::~PaveTextResult ( ) { }
 // Other methods
 //  
 
+void PaveTextResult::initAttributes ( ) {
+}
 

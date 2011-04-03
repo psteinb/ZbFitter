@@ -1,5 +1,14 @@
 #include "FitRunner.h"
 
+// Constructors/Destructors
+//  
+
+FitRunner::FitRunner ( ) {
+initAttributes();
+}
+
+FitRunner::~FitRunner ( ) { }
+
 //  
 // Methods
 //  
@@ -12,4 +21,7 @@
 // Other methods
 //  
 
+void FitRunner::initAttributes ( ) {
+  m_resources = 0;
+}
 

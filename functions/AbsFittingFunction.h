@@ -17,54 +17,63 @@ class AbsFittingFunction
 public:
 
 
-		// Public attribute accessor methods
-		//  
+  // Public attribute accessor methods
+  //  
 
 
-		// Public attribute accessor methods
-		//  
+  // Public attribute accessor methods
+  //  
 
 
 
-		/**
-		 * @param  _values
-		 */
-		virtual void operator_ (double* _values = 0 )
-		{
-		}
+  /**
+   * @return double
+   * @param  _values
+   */
+  virtual double operator_ (double* _values = 0 )
+  {
+  }
 
 
-		/**
-		 * @param  _data function to extract the data from a STL container
-		 */
-		virtual void setData (std::vector<double> _data )
-		{
-		}
+  /**
+   * @param  _data function to extract the data from a STL container
+   */
+  virtual void setData (std::vector<double> _data )
+  {
+  }
 
 
-		/**
-		 * @param  _parameters function to set the function parameters from the inline stl
-		 * container
-		 */
-		virtual void setParameters (std::vector<double> _parameters )
-		{
-		}
+  /**
+   * @param  _parameters function to set the function parameters from the inline stl
+   * container
+   */
+  virtual void setParameters (std::vector<double> _parameters )
+  {
+  }
+
+
+  /**
+   * @return double
+   */
+  virtual double up ( )
+  {
+  }
 
 protected:
 
 public:
 
 
-		// Protected attribute accessor methods
-		//  
+  // Protected attribute accessor methods
+  //  
 
 protected:
 
 public:
 
 
-		// Protected attribute accessor methods
-		//  
+  // Protected attribute accessor methods
+  //  
 
 protected:
 
@@ -74,16 +83,16 @@ private:
 public:
 
 
-		// Private attribute accessor methods
-		//  
+  // Private attribute accessor methods
+  //  
 
 private:
 
 public:
 
 
-		// Private attribute accessor methods
-		//  
+  // Private attribute accessor methods
+  //  
 
 private:
 

@@ -1,6 +1,6 @@
 
-#ifndef PAVETEXTRESULT_H
-#define PAVETEXTRESULT_H
+#ifndef HISTRESULTS_H
+#define HISTRESULTS_H
 #include "core/AbsResult.h"
 
 #include <string>
@@ -9,11 +9,11 @@ namespace core {
 
 
 /**
-  * class PaveTextResult
+  * class HistResults
   * 
   */
 
-class PaveTextResult : virtual public AbsResult
+class HistResults : virtual public AbsResult
 {
 public:
 
@@ -24,12 +24,12 @@ public:
   /**
    * Empty Constructor
    */
-  PaveTextResult ( );
+  HistResults ( );
 
   /**
    * Empty Destructor
    */
-  virtual ~PaveTextResult ( );
+  virtual ~HistResults ( );
 
   // Static Public attributes
   //  
@@ -52,7 +52,6 @@ public:
    */
   void addResult (void _aobject )
   {
-    m_results.push_back(_aobject);
   }
 
 
@@ -95,7 +94,7 @@ private:
   // Private attributes
   //  
 
-  std::vector<TObject> m_results;
+  std::vector<TObject> _results;
 public:
 
 
@@ -112,19 +111,19 @@ public:
 
 
   /**
-   * Set the value of m_results
-   * @param new_var the new value of m_results
+   * Set the value of _results
+   * @param new_var the new value of _results
    */
-  void setM_results ( std::vector<TObject> new_var )   {
-      m_results = new_var;
+  void set_results ( std::vector<TObject> new_var )   {
+      _results = new_var;
   }
 
   /**
-   * Get the value of m_results
-   * @return the value of m_results
+   * Get the value of _results
+   * @return the value of _results
    */
-  std::vector<TObject> getM_results ( )   {
-    return m_results;
+  std::vector<TObject> get_results ( )   {
+    return _results;
   }
 private:
 
@@ -134,4 +133,4 @@ private:
 };
 }; // end of package namespace
 
-#endif // PAVETEXTRESULT_H
+#endif // HISTRESULTS_H

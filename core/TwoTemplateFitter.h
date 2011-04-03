@@ -13,85 +13,85 @@ namespace core {
   * 
   */
 
-class TwoTemplateFitter : virtual public FitRunner
+class TwoTemplateFitter : public FitRunner
 {
 public:
 
-		// Constructors/Destructors
-		//  
+  // Constructors/Destructors
+  //  
 
 
-		/**
-		 * Empty Constructor
-		 */
-		TwoTemplateFitter ( );
+  /**
+   * Empty Constructor
+   */
+  TwoTemplateFitter ( );
 
-		/**
-		 * Empty Destructor
-		 */
-		virtual ~TwoTemplateFitter ( );
+  /**
+   * Empty Destructor
+   */
+  virtual ~TwoTemplateFitter ( );
 
-		// Static Public attributes
-		//  
+  // Static Public attributes
+  //  
 
-		// Public attributes
-		//  
-
-
-		// Public attribute accessor methods
-		//  
+  // Public attributes
+  //  
 
 
-		// Public attribute accessor methods
-		//  
+  // Public attribute accessor methods
+  //  
+
+
+  // Public attribute accessor methods
+  //  
 
 
 protected:
 
-		// Static Protected attributes
-		//  
+  // Static Protected attributes
+  //  
 
-		// Protected attributes
-		//  
+  // Protected attributes
+  //  
 
 public:
 
 
-		// Protected attribute accessor methods
-		//  
+  // Protected attribute accessor methods
+  //  
 
 protected:
 
 public:
 
 
-		// Protected attribute accessor methods
-		//  
+  // Protected attribute accessor methods
+  //  
 
 protected:
 
 
 private:
 
-		// Static Private attributes
-		//  
+  // Static Private attributes
+  //  
 
-		// Private attributes
-		//  
+  // Private attributes
+  //  
 
 public:
 
 
-		// Private attribute accessor methods
-		//  
+  // Private attribute accessor methods
+  //  
 
 private:
 
 public:
 
 
-		// Private attribute accessor methods
-		//  
+  // Private attribute accessor methods
+  //  
 
 private:
 
