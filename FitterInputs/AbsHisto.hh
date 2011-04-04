@@ -3,6 +3,7 @@
 #define ABSHISTO_H
 
 #include <string>
+#include <vector>
 
 namespace FitterInputs {
 

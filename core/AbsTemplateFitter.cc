@@ -1,4 +1,4 @@
-#include "AbsHisto.hh"
+#include "AbsTemplateFitter.h"
 
 //  
 // Methods
