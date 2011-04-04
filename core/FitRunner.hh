@@ -1,205 +1,201 @@
 
 #ifndef FITRUNNER_H
 #define FITRUNNER_H
-
+#include <iomanip>
 #include <string>
+#include <sstream>
+#include <map>
+#include <vector>
+
+#include "Math/Minimizer.h"
+
+
+namespace FitterResults{
+
+  class AbsResult;
+
+};
 
 namespace core {
 
 
-/**
-  * class FitRunner
-  * responsibilities:
-  * * load resources from given AbsHisto
-  * * create a ROOT::Math::Minimizer as illustrated here:
-  * http://root.cern.ch/drupal/content/numerical-minimization
-  * * conduct fit
-  * * produce results
-  */
-
-class FitRunner
-{
-public:
-
-  // Constructors/Destructors
-  //  
-
-
   /**
-   * Empty Constructor
+   * class FitRunner
+   * responsibilities:
+   * * load resources from given AbsHisto
+   * * create a ROOT::Math::Minimizer as illustrated here:
+   * http://root.cern.ch/drupal/content/numerical-minimization
+   * * conduct fit
+   * * produce results
    */
-  FitRunner ( );
-
-  /**
-   * Empty Destructor
-   */
-  virtual ~FitRunner ( );
-
-  // Static Public attributes
-  //  
-
-  // Public attributes
-  //  
-
-
-  // Public attribute accessor methods
-  //  
-
-
-  // Public attribute accessor methods
-  //  
 
 
 
-  /**
-   * @param  _fileName
-   */
-  void configureFromFile (std::string _fileName = "" )
+  class FitRunner
   {
-  }
+
+  private:
+
+    // containing data and templates accessible through interface
+    FitterInputs::AbsHisto* m_resources;
+
+    // objet to store formatted results into if necessary
+    FitterResults::AbsResult* m_result;
+
+    //function to minimize
+    functions::AbsFittingFunction m_fcn;
+    
+    //configuration map
+    std::map<std::string,std::string> m_config;
+
+    //minimizer to use
+    ROOT::Math::Minimizer* m_minimizer;
+
+    //config file
+    std::string m_configFile;
+
+    /**
+     */
+    void printConfig ( )
+    {
+      std::map<std::string,std::string>::const_iterator cfgItr = m_config.begin();
+      std::map<std::string,std::string>::const_iterator cfgEnd = m_config.end();
+      std::cout << "FitRunner:\tusing the following configurations\n";
+      for (;cfgItr!=cfgEnd;++cfgEnd)
+      {
+        std::cout << std::setw(20) << cfgItr->first << "\t"<< std::setw(30) << cfgItr->second << std::endl;
+      }
+    }
 
 
-  /**
-   * @param  _verbosity
-   */
-  void fit (bool _verbosity )
-  {
-  }
+  public:
 
 
-  /**
-   * @param  _function
-   */
-  void setFittingFunction (functions::AbsFittingFunction _function )
-  {
-  }
+    /**
+     * Empty Constructor
+     */
+    FitRunner ( );
+
+    /**
+     * Empty Destructor
+     */
+    virtual ~FitRunner ( );
+
+    
+    /**
+       Stub for later
+       * @param  _fileName
+       */
+    void configureFromFile (const std::string& _fileName = "" ){
+      m_configFile = _fileName;
+    };
+
+    /**
+     * apply the available configuration to all attributes necessary
+     * 
+     */
+    void setupMachinery();
+
+    /**
+     * @param  _verbosity
+     */
+    void fit (const bool& );
 
 
-  /**
-   * @return bool
-   * @param  _name
-   */
-  bool isConfigured (std::string _name )
-  {
-  }
-
-protected:
-
-  // Static Protected attributes
-  //  
-
-  // Protected attributes
-  //  
-
-public:
+    /**
+     * @param  _function
+     */
+    void setFittingFunction (const functions::AbsFittingFunction& _function )
+    {
+      m_fcn = _function;
+    }
 
 
-  // Protected attribute accessor methods
-  //  
+    /**
+     * @return bool
+     * @param  _name
+     */
+    bool isConfigured (const std::string& _name ) const
+    {
+      std::map<std::string,std::string>::const_iterator cfgItr = m_config.find(_name);
+      if(cfgItr!=m_config.end())
+        return true;
+      else
+        return false;
+    }
 
-protected:
+    /**
+     * set the configuration directly
+     * @return bool
+     * @param  _name
+     */
+    bool configureKeyWithValue (const std::string& _key, const std::string& _value )
+    {
+      m_config[_key] = _value;
+    }
+    
 
-public:
-
-
-  // Protected attribute accessor methods
-  //  
-
-protected:
-
-
-private:
-
-  // Static Private attributes
-  //  
-
-  // Private attributes
-  //  
-
-  // containing data and templates accessible through interface
-  FitterInputs::AbsHisto m_resources;
-  // objet to store formatted results into if necessary
-  core::AbsResult m_result;
-  functions::AbsFittingFunction m_fcn;
-public:
-
-
-  // Private attribute accessor methods
-  //  
-
-private:
-
-public:
-
-
-  // Private attribute accessor methods
-  //  
-
-
-  /**
-   * Set the value of m_resources
-   * containing data and templates accessible through interface
-   * @param new_var the new value of m_resources
-   */
-  void setM_resources ( FitterInputs::AbsHisto new_var )   {
+    /**
+     * Set the value of m_resources
+     * containing data and templates accessible through interface
+     * @param new_var the new value of m_resources
+     */
+    void setM_resources ( FitterInputs::AbsHisto* new_var )   {
       m_resources = new_var;
-  }
+    }
 
-  /**
-   * Get the value of m_resources
-   * containing data and templates accessible through interface
-   * @return the value of m_resources
-   */
-  FitterInputs::AbsHisto getM_resources ( )   {
-    return m_resources;
-  }
+    /**
+     * Get the value of m_resources
+     * containing data and templates accessible through interface
+     * @return the value of m_resources
+     */
+    FitterInputs::AbsHisto* getM_resources ( )   {
+      return m_resources;
+    }
 
-  /**
-   * Set the value of m_result
-   * objet to store formatted results into if necessary
-   * @param new_var the new value of m_result
-   */
-  void setM_result ( core::AbsResult new_var )   {
+    /**
+     * Set the value of m_result
+     * objet to store formatted results into if necessary
+     * @param new_var the new value of m_result
+     */
+    void setM_result ( FitterResults::AbsResult* new_var )   {
       m_result = new_var;
-  }
+    }
 
-  /**
-   * Get the value of m_result
-   * objet to store formatted results into if necessary
-   * @return the value of m_result
-   */
-  core::AbsResult getM_result ( )   {
-    return m_result;
-  }
+    /**
+     * Get the value of m_result
+     * objet to store formatted results into if necessary
+     * @return the value of m_result
+     */
+    FitterResults::AbsResult getM_result ( )   {
+      return m_result;
+    }
 
-  /**
-   * Set the value of m_fcn
-   * @param new_var the new value of m_fcn
-   */
-  void setM_fcn ( functions::AbsFittingFunction new_var )   {
-      m_fcn = new_var;
-  }
+    ROOT::Math::Minimizer* getMinimizer(){return m_minimizer;}
 
-  /**
-   * Get the value of m_fcn
-   * @return the value of m_fcn
-   */
-  functions::AbsFittingFunction getM_fcn ( )   {
-    return m_fcn;
-  }
-private:
+    int getIntFromString(const std::string& _text){
+      int value =0;
+      std::istringstream inNumber;inNumber.str(_text);
+      if(!(inNumber>>value) ){
+        std::cerr << "couldn't convert "<<_text<<" to int\n";
+        return 0;
+      }
+      else
+        return value;
+    }
+    
+    double getDoubleFromString(const std::string& _text){
+      double value =0;
+      std::istringstream inNumber;inNumber.str(_text);
+      if(!(inNumber>>value) ){
+        std::cerr << "couldn't convert "<<_text<<" to double\n";
+        return 0;
+      }
+      else
+        return value;
+    }
 
-
-
-  /**
-   */
-  void printConfig ( )
-  {
-  }
-
-  void initAttributes ( ) ;
-
-};
+  };
 }; // end of package namespace
 
 #endif // FITRUNNER_H
