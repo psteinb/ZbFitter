@@ -18,7 +18,8 @@ class AbsFittingFunction
   std::vector<std::vector<double> > m_weights;
 
  public:
-
+  AbsFittingFunction(){};
+  virtual ~AbsFittingFunction(){};
 
 
   /**
@@ -40,8 +41,7 @@ class AbsFittingFunction
 
 
   /**
-   * @param  _parameters function to set the function parameters from the inline stl
-   * container
+   * @param  _weights function to set the weights
    */
   virtual void setWeights (const std::vector<std::vector<double> >& _weights ) =0;
 

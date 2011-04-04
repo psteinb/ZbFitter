@@ -1,9 +1,7 @@
-
 #ifndef SIMPLEMAXLLH_H
 #define SIMPLEMAXLLH_H
 #include "functions/AbsFittingFunction.hh"
 
-#include <string>
 
 namespace functions {
 
@@ -17,13 +15,6 @@ class SimpleMaxLLH : virtual public AbsFittingFunction
 {
 public:
 
-  // Constructors/Destructors
-  //  
-
-
-  /**
-   * Empty Constructor
-   */
   SimpleMaxLLH ( );
 
   /**
@@ -31,27 +22,12 @@ public:
    */
   virtual ~SimpleMaxLLH ( );
 
-  // Static Public attributes
-  //  
-
-  // Public attributes
-  //  
-
-
-  // Public attribute accessor methods
-  //  
-
-
-  // Public attribute accessor methods
-  //  
-
-
 
   /**
    * @return double
    * @param  _values
    */
-  double operator_ (double* _values = 0 )
+  double operator() (double* _values = 0 )
   {
   }
 
@@ -59,76 +35,32 @@ public:
   /**
    * @param  _data
    */
-  void setData (std::vector<double> _data )
+  void setData (const std::vector<double>& _data )
   {
+    m_data = _data;
   }
 
 
   /**
    * @param  _parameters
    */
-  void setParameters (std::vector<double> _parameters )
-  {
+  void setTemplates (const std::vector<std::vector<double> >& _templates ){
+    m_templates = _templates;
   }
 
+  /**
+   * @param  _weights function to set the weights
+   */
+  virtual void setWeights (const std::vector<std::vector<double> >& _weights ){
+    m_weights = _weights;
+  };
 
   /**
    * @return double
    */
   double up ( )
   {
-    {}
   }
-
-protected:
-
-  // Static Protected attributes
-  //  
-
-  // Protected attributes
-  //  
-
-public:
-
-
-  // Protected attribute accessor methods
-  //  
-
-protected:
-
-public:
-
-
-  // Protected attribute accessor methods
-  //  
-
-protected:
-
-
-private:
-
-  // Static Private attributes
-  //  
-
-  // Private attributes
-  //  
-
-  std::vector<double> m_parameters;
-  std::vector<double> m_data;
-public:
-
-
-  // Private attribute accessor methods
-  //  
-
-private:
-
-public:
-
-
-  // Private attribute accessor methods
-  //  
-
 
   /**
    * Set the value of m_parameters
