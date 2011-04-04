@@ -15,6 +15,17 @@ namespace FitterResults{
   class AbsResult;
 
 };
+namespace FitterInputs{
+
+  class AbsHisto;
+
+};
+
+namespace functions{
+
+  class AbsFittingFunction;
+
+};
 
 namespace core {
 

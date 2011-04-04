@@ -1,4 +1,4 @@
-#include "WeightedMaxLLH.h"
+#include "WeightedMaxLLH.hh"
 
 // Constructors/Destructors
 //  

@@ -1,4 +1,4 @@
-#include "WeightedNattiMaxLLH.h"
+#include "WeightedNattiMaxLLH.hh"
 
 // Constructors/Destructors
 //  

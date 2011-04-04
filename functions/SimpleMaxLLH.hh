@@ -1,7 +1,7 @@
 
-#ifndef WEIGHTEDMAXLLH_H
-#define WEIGHTEDMAXLLH_H
-#include "functions/AbsFittingFunction.h"
+#ifndef SIMPLEMAXLLH_H
+#define SIMPLEMAXLLH_H
+#include "functions/AbsFittingFunction.hh"
 
 #include <string>
 
@@ -9,12 +9,11 @@ namespace functions {
 
 
 /**
-  * class WeightedMaxLLH
-  * simple Likelihood presented in ATL-COM-PHYS-2011-108 including correction for
-  * weights as in Froedesen
+  * class SimpleMaxLLH
+  * Let's try the simple Likelihood presented in ATL-COM-PHYS-2011-108
   */
 
-class WeightedMaxLLH : virtual public AbsFittingFunction
+class SimpleMaxLLH : virtual public AbsFittingFunction
 {
 public:
 
@@ -25,12 +24,12 @@ public:
   /**
    * Empty Constructor
    */
-  WeightedMaxLLH ( );
+  SimpleMaxLLH ( );
 
   /**
    * Empty Destructor
    */
-  virtual ~WeightedMaxLLH ( );
+  virtual ~SimpleMaxLLH ( );
 
   // Static Public attributes
   //  
@@ -170,4 +169,4 @@ private:
 };
 }; // end of package namespace
 
-#endif // WEIGHTEDMAXLLH_H
+#endif // SIMPLEMAXLLH_H

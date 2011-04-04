@@ -1,7 +1,7 @@
 
-#ifndef WEIGHTEDNATTIMAXLLH_H
-#define WEIGHTEDNATTIMAXLLH_H
-#include "functions/AbsFittingFunction.h"
+#ifndef WEIGHTEDMAXLLH_H
+#define WEIGHTEDMAXLLH_H
+#include "functions/AbsFittingFunction.hh"
 
 #include <string>
 
@@ -9,11 +9,12 @@ namespace functions {
 
 
 /**
-  * class WeightedNattiMaxLLH
-  * Likelihood as discussed in arXiv:0803.2711
+  * class WeightedMaxLLH
+  * simple Likelihood presented in ATL-COM-PHYS-2011-108 including correction for
+  * weights as in Froedesen
   */
 
-class WeightedNattiMaxLLH : virtual public AbsFittingFunction
+class WeightedMaxLLH : virtual public AbsFittingFunction
 {
 public:
 
@@ -24,12 +25,12 @@ public:
   /**
    * Empty Constructor
    */
-  WeightedNattiMaxLLH ( );
+  WeightedMaxLLH ( );
 
   /**
    * Empty Destructor
    */
-  virtual ~WeightedNattiMaxLLH ( );
+  virtual ~WeightedMaxLLH ( );
 
   // Static Public attributes
   //  
@@ -48,9 +49,10 @@ public:
 
 
   /**
+   * @return double
    * @param  _values
    */
-  void operator_ (double* _values = 0 )
+  double operator_ (double* _values = 0 )
   {
   }
 
@@ -168,4 +170,4 @@ private:
 };
 }; // end of package namespace
 
-#endif // WEIGHTEDNATTIMAXLLH_H
+#endif // WEIGHTEDMAXLLH_H

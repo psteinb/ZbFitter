@@ -1,7 +1,7 @@
 PACKAGE=core
 #CXXFLAGS=-Wfatal-errors
 EXTRALIBS=-L$(LIBDIR) #-lTLog 
-CXXHDREXT = h
-CXXSRCEXT = cpp
+CXXHDREXT = hh
+CXXSRCEXT = cc
 
 include $(SRC)/GNUmakefiles/GNUmakefile

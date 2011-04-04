@@ -1,4 +1,4 @@
-#include "SimpleMaxLLH.h"
+#include "SimpleMaxLLH.hh"
 
 // Constructors/Destructors
 //  

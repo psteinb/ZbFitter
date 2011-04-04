@@ -1,6 +1,6 @@
 #include "FitRunner.hh"
 #include <stdexcept>
-#include "TStopWatch.h"
+#include "TStopwatch.h"
 
 // Constructors/Destructors
 //  
