@@ -40,17 +40,20 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
   std::vector<double>::const_iterator dataItr = getData()->begin();
   std::vector<double>::const_iterator dataEnd = getData()->end();
   double mcPredictionPerBin = 0.;
-  double firstTerm = 0.;
-  double secondTerm = 0.;
+
+  double dataTerm = 0.;
+  double binSum =0;
   for (; dataItr!=dataEnd; ++dataItr,++bin)
   {
     mcPredictionPerBin = this->getTotalMCFractionPerBin(bin);
 
-    firstTerm = (mcPredictionPerBin)*(std::log(mcPredictionPerBin));
-    secondTerm = std::log(TMath::Factorial(*dataItr));
+    if(!mcPredictionPerBin)
+      continue;
 
-    value += (((*dataItr)*firstTerm) + secondTerm);
+    dataTerm = std::log(TMath::Factorial(*dataItr));
+
+    binSum += dataTerm + mcPredictionPerBin - std::log(mcPredictionPerBin);
   }
 
-  return value;
+  return (value + binSum);
 }

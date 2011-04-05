@@ -52,7 +52,7 @@ RunnerConfig::RunnerConfig():
   p_configFile(""),
   p_fitEngine("Minuit2"),
   p_fitMode  ("Scan"),
-  p_msgLevel(2),
+  p_msgLevel(3),
   p_threads(1),
   p_giveHelp(false)
 {}
@@ -65,7 +65,7 @@ RunnerConfig::RunnerConfig(int inArgc, char** inArgv):
   p_configFile(""),
   p_fitEngine("Minuit2"),
   p_fitMode  ("Scan"),
-  p_msgLevel(2),
+  p_msgLevel(3),
   p_threads(1),
   p_giveHelp(false)
 {

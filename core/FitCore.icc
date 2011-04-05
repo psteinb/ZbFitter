@@ -53,7 +53,8 @@ void core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   /////////////////////////////////////////
   loadDataToFunction();
   loadTemplatesToFunction();
-
+  if(_verbose)
+    m_fcn.print();
   /////////////////////////////////////////
   /// provide the Likelihood function
   /////////////////////////////////////////

@@ -3,6 +3,8 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
+#include <iterator>
+#include <iostream>
 
 namespace functions {
 
@@ -88,13 +90,35 @@ namespace functions {
       //shooting into the blind
       //std::assert( _params[(m_nParameters-1)] > 0);
       //copy parameters to vector
-      m_parameters.reserve(m_nParameters);
+      m_parameters.resize(m_nParameters,0);
       std::copy(_params,_params+int(m_nParameters),m_parameters.begin());
     };
   
     virtual int getNumberOfParameters() const {return m_nParameters;};
     
     virtual double getParameterValue(const short& _idx) const {return m_parameters.at(_idx);};
+
+    virtual void print(){
+      std::ostream_iterator<double> dblOutIt (std::cout,", ");
+
+      std::cout << "Parameters\n";
+      std::copy(m_parameters.begin(), m_parameters.end(),dblOutIt);
+      std::cout << "\n";
+
+      std::cout << "data\n";
+      std::copy(m_data.begin(), m_data.end(),dblOutIt);
+      std::cout << "\n";
+
+      std::cout << "templates\n";
+      for (int i = 0; i < m_templates.size(); ++i)
+      {
+        std::cout << i << "\t";      std::copy(m_templates.at(i).begin(), m_templates.at(i).end(),dblOutIt);
+        std::cout << "\n";
+        std::cout << i << "\t";      std::copy(m_weights.at(i).begin(), m_weights.at(i).end(),dblOutIt);
+        std::cout << "\n";
+      }
+      
+    };
   };
 }; // end of package namespace
 
