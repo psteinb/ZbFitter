@@ -8,24 +8,10 @@
 #include <vector>
 
 #include "Math/Minimizer.h"
+#include <stdexcept>
+#include "TStopwatch.h"
 
 
-namespace FitterResults{
-
-  class AbsResult;
-
-};
-namespace FitterInputs{
-
-  class AbsHisto;
-
-};
-
-namespace functions{
-
-  class AbsFittingFunction;
-
-};
 
 namespace core {
 
@@ -41,20 +27,20 @@ namespace core {
    */
 
 
-
+  template <class Fcn, class Scr, class Res>
   class FitRunner
   {
-
+    
   private:
 
     // containing data and templates accessible through interface
-    FitterInputs::AbsHisto* m_resources;
+    Scr* m_resources;
 
     // objet to store formatted results into if necessary
-    FitterResults::AbsResult* m_result;
+    Res* m_result;
 
     //function to minimize
-    functions::AbsFittingFunction m_fcn;
+    Fcn m_fcn;
     
     //configuration map
     std::map<std::string,std::string> m_config;
@@ -85,12 +71,21 @@ namespace core {
     /**
      * Empty Constructor
      */
-    FitRunner ( );
-
+    FitRunner ( ):
+      m_resources(0),
+      m_result(0),
+      m_fcn(),
+      m_config(),
+      m_minimizer(0),
+      m_configFile("")
+    {};
     /**
      * Empty Destructor
      */
-    virtual ~FitRunner ( );
+    virtual ~FitRunner ( ){
+        //the only ownership we have is on m_minimizer
+      delete m_minimizer;m_minimizer=0;
+    };
 
     
     /**
@@ -116,7 +111,7 @@ namespace core {
     /**
      * @param  _function
      */
-    void setFittingFunction (const functions::AbsFittingFunction& _function )
+    void setFittingFunction (const Fcn& _function )
     {
       m_fcn = _function;
     }
@@ -151,7 +146,7 @@ namespace core {
      * containing data and templates accessible through interface
      * @param new_var the new value of m_resources
      */
-    void setM_resources ( FitterInputs::AbsHisto* new_var )   {
+    void setM_resources ( Scr* new_var )   {
       m_resources = new_var;
     }
 
@@ -160,7 +155,7 @@ namespace core {
      * containing data and templates accessible through interface
      * @return the value of m_resources
      */
-    FitterInputs::AbsHisto* getM_resources ( )   {
+    Scr* getM_resources ( )   {
       return m_resources;
     }
 
@@ -169,7 +164,7 @@ namespace core {
      * objet to store formatted results into if necessary
      * @param new_var the new value of m_result
      */
-    void setM_result ( FitterResults::AbsResult* new_var )   {
+    void setM_result ( Res* new_var )   {
       m_result = new_var;
     }
 
@@ -178,7 +173,7 @@ namespace core {
      * objet to store formatted results into if necessary
      * @return the value of m_result
      */
-    FitterResults::AbsResult getM_result ( )   {
+    Res* getM_result ( )   {
       return m_result;
     }
 
@@ -209,4 +204,5 @@ namespace core {
   };
 }; // end of package namespace
 
+#include "FitRunner.icc"
 #endif // FITRUNNER_H
