@@ -1,11 +1,10 @@
-
+#pragma once
 #ifndef HISTORESULT_H
 #define HISTORESULT_H
-#include "core/AbsResult.h"
+#include "AbsResult.hh"
+#include "TObject.h"
 
-#include <string>
-
-namespace core {
+namespace FitterResults {
 
 
 /**
@@ -13,8 +12,10 @@ namespace core {
   * 
   */
 
-class HistoResult : virtual public AbsResult
+class HistoResult : public AbsResult
 {
+private:
+
 public:
 
   // Constructors/Destructors
@@ -24,77 +25,23 @@ public:
   /**
    * Empty Constructor
    */
-  HistoResult ( );
+  HistoResult ( ):
+    AbsResult()
+  {};
 
   /**
    * Empty Destructor
    */
-  virtual ~HistoResult ( );
+  virtual ~HistoResult ( ){};
 
-  // Static Public attributes
-  //  
-
-  // Public attributes
-  //  
-
-
-  // Public attribute accessor methods
-  //  
+   /**
+   * add new data to be formatted
+   * @param  _aobject
+   */
+  virtual void addResult (TObject* _object=0 ) {};
 
 
-  // Public attribute accessor methods
-  //  
-
-
-protected:
-
-  // Static Protected attributes
-  //  
-
-  // Protected attributes
-  //  
-
-public:
-
-
-  // Protected attribute accessor methods
-  //  
-
-protected:
-
-public:
-
-
-  // Protected attribute accessor methods
-  //  
-
-protected:
-
-
-private:
-
-  // Static Private attributes
-  //  
-
-  // Private attributes
-  //  
-
-public:
-
-
-  // Private attribute accessor methods
-  //  
-
-private:
-
-public:
-
-
-  // Private attribute accessor methods
-  //  
-
-private:
-
+  virtual void print ( ) {};
 
 
 };

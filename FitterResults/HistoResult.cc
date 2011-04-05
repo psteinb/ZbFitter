@@ -1,23 +1,2 @@
-#include "HistoResult.h"
-
-// Constructors/Destructors
-//  
-
-HistoResult::HistoResult ( ) {
-}
-
-HistoResult::~HistoResult ( ) { }
-
-//  
-// Methods
-//  
-
-
-// Accessor methods
-//  
-
-
-// Other methods
-//  
-
+#include "HistoResult.hh"
 

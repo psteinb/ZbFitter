@@ -1,23 +1,28 @@
 
-#ifndef FITRUNNER_H
-#define FITRUNNER_H
+#ifndef FITCORE_H
+#define FITCORE_H
 #include <iomanip>
 #include <string>
 #include <sstream>
 #include <map>
 #include <vector>
-
-#include "Math/Minimizer.h"
 #include <stdexcept>
+
+#include "Math/Factory.h"
+#include "Math/Functor.h"
+#include "Math/Minimizer.h"
+
 #include "TStopwatch.h"
+#include "TEnv.h"
+#include "THashList.h"
 
 
 
 namespace core {
-
+  
 
   /**
-   * class FitRunner
+   * class FitCore
    * responsibilities:
    * * load resources from given AbsHisto
    * * create a ROOT::Math::Minimizer as illustrated here:
@@ -28,11 +33,11 @@ namespace core {
 
 
   template <class Fcn, class Scr, class Res>
-  class FitRunner
+  class FitCore
   {
     
   private:
-
+    
     // containing data and templates accessible through interface
     Scr* m_resources;
 
@@ -50,20 +55,33 @@ namespace core {
 
     //config file
     std::string m_configFile;
-
+    TEnv        m_environment;
     /**
      */
     void printConfig ( )
     {
       std::map<std::string,std::string>::const_iterator cfgItr = m_config.begin();
       std::map<std::string,std::string>::const_iterator cfgEnd = m_config.end();
-      std::cout << "FitRunner:\tusing the following configurations\n";
+      std::cout << "FitCore:\tusing the following configurations\n";
       for (;cfgItr!=cfgEnd;++cfgEnd)
       {
         std::cout << std::setw(20) << cfgItr->first << "\t"<< std::setw(30) << cfgItr->second << std::endl;
       }
     }
 
+    void loadDataToFunction(){
+      std::vector<double> metaData;
+      m_resources->getData(metaData);
+      m_fcn.setData(metaData);
+    };
+
+    void loadTemplatesToFunction(){
+      std::vector<std::vector<double> > metaTemplates;
+      std::vector<std::vector<double> > metaWeights;
+      m_resources->getTemplatesWithWeights(metaTemplates,metaWeights);
+      m_fcn.setTemplates(metaTemplates);
+      m_fcn.setWeights(metaWeights);
+    };
 
   public:
 
@@ -71,18 +89,19 @@ namespace core {
     /**
      * Empty Constructor
      */
-    FitRunner ( ):
-      m_resources(0),
-      m_result(0),
+    FitCore (Scr* _sources=0,Res* _results=0 ):
+      m_resources(_sources),
+      m_result(_results),
       m_fcn(),
       m_config(),
       m_minimizer(0),
-      m_configFile("")
+      m_configFile(""),
+      m_environment()
     {};
     /**
      * Empty Destructor
      */
-    virtual ~FitRunner ( ){
+    virtual ~FitCore ( ){
         //the only ownership we have is on m_minimizer
       delete m_minimizer;m_minimizer=0;
     };
@@ -94,6 +113,16 @@ namespace core {
        */
     void configureFromFile (const std::string& _fileName = "" ){
       m_configFile = _fileName;
+      if(m_environment.ReadFile(_fileName.c_str(),kEnvLocal)<0)
+        throw std::invalid_argument(_fileName);
+      
+      THashList* envTable = m_environment.GetTable();
+      TEnvRec* currentEntry=0;
+      for (int i = 0; i < envTable->GetEntries(); ++i)
+      {
+        currentEntry = dynamic_cast<TEnvRec*>(envTable->At(i));
+        configureKeyWithValue(currentEntry->GetName(),currentEntry->GetValue());
+      }
     };
 
     /**
@@ -204,5 +233,5 @@ namespace core {
   };
 }; // end of package namespace
 
-#include "FitRunner.icc"
-#endif // FITRUNNER_H
+#include "core/FitCore.icc"
+#endif // FITCORE_H

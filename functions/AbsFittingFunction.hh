@@ -38,7 +38,7 @@ namespace functions {
      * @return double
      * @param  _values
      */
-    virtual double operator() (double* _values = 0 ) = 0;
+    virtual double operator() (const double* _values = 0 ) = 0;
 
 
     /**
@@ -83,7 +83,7 @@ namespace functions {
      */
     virtual double up() = 0;
 
-    virtual void setParameters(double* _params){
+    virtual void setParameters(const double* _params){
 
       //shooting into the blind
       //std::assert( _params[(m_nParameters-1)] > 0);

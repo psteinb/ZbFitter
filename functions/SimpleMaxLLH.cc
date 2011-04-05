@@ -1,4 +1,5 @@
-#include "SimpleMaxLLH.hh"
+#define SIMPLEMAXLLH__CC
+#include "functions/SimpleMaxLLH.hh"
 #include <cmath>
 #include "TMath.h"
 #include <numeric>
@@ -17,7 +18,7 @@ functions::SimpleMaxLLH::SimpleMaxLLH ( ) :
 
 functions::SimpleMaxLLH::~SimpleMaxLLH ( ) { }
 
-double functions::SimpleMaxLLH::operator()(double* _values ){
+double functions::SimpleMaxLLH::operator()(const double* _values ){
 
   //_values include all fit parameters
   //[0]: b-fraction

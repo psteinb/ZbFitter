@@ -1,0 +1,99 @@
+
+// Constructors/Destructors
+//  
+
+template <class Fcn, class Scr, class Res>
+void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
+  
+  if(isConfigured("Engine") && isConfigured("Mode"))
+    m_minimizer = ROOT::Math::Factory::CreateMinimizer(m_config["Engine"], m_config["Mode"]);
+  else{
+    throw std::runtime_error("FitCore::setupMachinery for neither engine nor mode was configured");
+  }
+
+  if(isConfigured("MaxFunCalls"))
+    m_minimizer->SetMaxFunctionCalls(getIntFromString(m_config["MaxFunCalls"]));
+
+  if(isConfigured("MaxIterations"))
+    m_minimizer->SetMaxIterations(getIntFromString(m_config["MaxIterations"]));
+
+  if(isConfigured("Tolerance"))
+    m_minimizer->SetTolerance(getDoubleFromString(m_config["Tolerance"]));
+  
+  // Set the free variables to be minimized!
+  /////////////////////////////////////////
+  /// FIXME: need to automise the following, current implementation hinders manual set of Start/Step/Name through other methods than TEnv
+  /////////////////////////////////////////
+
+  m_minimizer->SetVariable(0,
+                           m_environment.GetValue("Parameter1.Name","fb"), 
+                           m_environment.GetValue("Parameter1.Start",0.1),
+                           m_environment.GetValue("Parameter1.Step",0.1));
+
+  m_minimizer->SetVariable(1,
+                           m_environment.GetValue("Parameter2.Name","fc"), 
+                           m_environment.GetValue("Parameter2.Start",0.1),
+                           m_environment.GetValue("Parameter2.Step",0.1));
+
+  m_minimizer->SetVariable(2,
+                           m_environment.GetValue("Parameter3.Name","fl"), 
+                           m_environment.GetValue("Parameter3.Start",0.1),
+                           m_environment.GetValue("Parameter3.Step",0.1));
+  
+
+
+
+  
+}
+
+template <class Fcn, class Scr, class Res>
+void core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
+  /////////////////////////////////////////
+  /// laod data/templates to Likelihood function
+  /////////////////////////////////////////
+  loadDataToFunction();
+  loadTemplatesToFunction();
+
+  /////////////////////////////////////////
+  /// provide the Likelihood function
+  /////////////////////////////////////////
+ 
+  ROOT::Math::Functor f(m_fcn,3);
+  m_minimizer->SetFunction(f);
+  /////////////////////////////////////////
+  /// run the fit
+  /////////////////////////////////////////
+
+  TStopwatch watch;
+  watch.Start();
+  m_minimizer->Minimize(); 
+  watch.Stop();
+  
+  
+  /////////////////////////////////////////
+  /// present results
+  /////////////////////////////////////////
+  if(_verbose){
+    //const double *xs = m_minimizer->X();
+    //std::cout << "Minimum: f(b = " << xs[0] << ", c = " << xs[1] << ", l = "<< xs[2]<< " ): " 
+    //          << m_fcn(xs) << std::endl;
+    m_minimizer->PrintResults();
+  }
+
+  std::cout << "FitCore::fit \t  CpuTime = \t"<< std::setw(10) << std::setprecision(4)<< watch.CpuTime() << "\n";
+  std::cout << "FitCore::fit \t  RealTime = \t"<< std::setw(10) << std::setprecision(4)<< watch.RealTime() << "\n";
+
+}
+//  
+// Methods
+//  
+
+
+// Accessor methods
+//  
+
+
+// Other methods
+//  
+
+

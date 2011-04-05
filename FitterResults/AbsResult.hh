@@ -2,27 +2,14 @@
 #ifndef ABSRESULT_H
 #define ABSRESULT_H
 
-#include <string>
+class TObject;
 
-namespace core {
+namespace FitterResults {
 
-
-/**
-  * class AbsResult
-  * 
-  */
 
 class AbsResult
 {
 public:
-
-
-  // Public attribute accessor methods
-  //  
-
-
-  // Public attribute accessor methods
-  //  
 
 
 
@@ -30,54 +17,14 @@ public:
    * add new data to be formatted
    * @param  _aobject
    */
-  virtual void addResult (TObject _aobject )
-  {
-  }
+  virtual void addResult (TObject* _object=0 ) = 0;
 
 
   /**
    */
-  virtual void printIt ( )
-  {
-  }
+  virtual void print ( ) = 0;
 
 protected:
-
-public:
-
-
-  // Protected attribute accessor methods
-  //  
-
-protected:
-
-public:
-
-
-  // Protected attribute accessor methods
-  //  
-
-protected:
-
-
-private:
-
-public:
-
-
-  // Private attribute accessor methods
-  //  
-
-private:
-
-public:
-
-
-  // Private attribute accessor methods
-  //  
-
-private:
-
 
 
 };

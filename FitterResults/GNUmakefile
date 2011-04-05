@@ -1,4 +1,4 @@
-PACKAGE=FitterInputs
+PACKAGE=FitterResults
 #CXXFLAGS=-Wfatal-errors
 EXTRALIBS=-L$(LIBDIR) #-lTLog 
 

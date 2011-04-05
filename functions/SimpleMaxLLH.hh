@@ -1,6 +1,6 @@
 #ifndef SIMPLEMAXLLH_H
 #define SIMPLEMAXLLH_H
-#include "AbsFittingFunction.hh"
+#include "functions/AbsFittingFunction.hh"
 
 
 namespace functions {
@@ -29,7 +29,7 @@ namespace functions {
      * @return double
      * @param  _values
      */
-    double operator()(double* _values = 0 );
+    double operator()(const double* _values = 0 );
     
 
 

@@ -1,5 +1,5 @@
 #define TH1BUNDLE_CC
-#include "TH1Bundle.hh"
+#include "FitterInputs/TH1Bundle.hh"
 #include <algorithm>
 #include "TString.h"
 #include "TObjString.h"
