@@ -1,0 +1,37 @@
+RunFitter running on
+[-d] data path/file = StacoUnweighted_Btimes0.4.root
+[-o] output file name =
+none given
+[-c] config file name =
+../functions/SimpleMaxLLH.env
+[-m] message level = 3
+[-t] N(threads) = 1
+[-t] fitEngine = Minuit2
+[-t] fitMode = Migrad
+Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
+Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
+TH1Bundle::loadTemplatesFromOneFile	loaded mcb from StacoUnweighted_Btimes0.4.root
+Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
+TH1Bundle::loadTemplatesFromOneFile	loaded mcc from StacoUnweighted_Btimes0.4.root
+Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
+TH1Bundle::loadTemplatesFromOneFile	loaded mcl from StacoUnweighted_Btimes0.4.root
+Parameters
+
+data
+70.8681, 154.548, 76.8553, 30.724, 6.00398, 1.54705, 0, 0, 0, 0, 
+templates
+0	10.6307, 39.5356, 28.9659, 11.7996, 2.40159, 0.618821, 0, 0, 0, 0, 
+0	4.25229, 15.8142, 11.5864, 4.71982, 0.960637, 0.247528, 0, 0, 0, 0, 
+1	22.4648, 47.8319, 3.49257, 1.22509, 0, 0, 0, 0, 0, 0, 
+1	22.4648, 47.8319, 3.49257, 1.22509, 0, 0, 0, 0, 0, 0, 
+2	21.8265, 7.87758, 0.948005, 0, 0, 0, 0, 0, 0, 0, 
+2	21.8265, 7.87758, 0.948005, 0, 0, 0, 0, 0, 0, 0, 
+Minuit2Minimizer : Valid minimum - status = 0
+FVAL  = -2835.80858012089266
+Edm   = 6.04955193209876585e-09
+Nfcn  = 151
+fb	  = 2.5	 +/-  0.35345
+fc	  = 1.00003	 +/-  0.585833
+fl	  = 0.999968	 +/-  0.814431
+FitCore::fit 	  CpuTime = 	         0
+FitCore::fit 	  RealTime = 	  0.002279

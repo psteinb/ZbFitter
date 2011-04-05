@@ -1,0 +1,37 @@
+RunFitter running on
+[-d] data path/file = MuidUnweighted_Btimes0.4.root
+[-o] output file name =
+none given
+[-c] config file name =
+../functions/SimpleMaxLLH.env
+[-m] message level = 3
+[-t] N(threads) = 1
+[-t] fitEngine = Minuit2
+[-t] fitMode = Migrad
+Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
+Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
+TH1Bundle::loadTemplatesFromOneFile	loaded mcb from MuidUnweighted_Btimes0.4.root
+Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
+TH1Bundle::loadTemplatesFromOneFile	loaded mcc from MuidUnweighted_Btimes0.4.root
+Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
+TH1Bundle::loadTemplatesFromOneFile	loaded mcl from MuidUnweighted_Btimes0.4.root
+Parameters
+
+data
+73.3164, 161.104, 81.9313, 32.4519, 6.28353, 1.54705, 0, 0, 0, 0, 
+templates
+0	10.8985, 40.8381, 30.9701, 12.4907, 2.51341, 0.618821, 0, 0, 0, 0, 
+0	4.35942, 16.3353, 12.388, 4.99629, 1.00536, 0.247528, 0, 0, 0, 0, 
+1	23.3763, 50.5905, 3.558, 1.22509, 0, 0, 0, 0, 0, 0, 
+1	23.3763, 50.5905, 3.558, 1.22509, 0, 0, 0, 0, 0, 0, 
+2	22.6937, 8.41819, 0.948005, 0, 0, 0, 0, 0, 0, 0, 
+2	22.6937, 8.41819, 0.948005, 0, 0, 0, 0, 0, 0, 0, 
+Minuit2Minimizer : Valid minimum - status = 0
+FVAL  = -3002.31297705793168
+Edm   = 2.74452055074678728e-07
+Nfcn  = 144
+fb	  = 2.50002	 +/-  0.339269
+fc	  = 1.00012	 +/-  0.560219
+fl	  = 0.999611	 +/-  0.793239
+FitCore::fit 	  CpuTime = 	         0
+FitCore::fit 	  RealTime = 	  0.002166

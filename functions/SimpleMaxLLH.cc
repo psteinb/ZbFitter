@@ -41,7 +41,7 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
   std::vector<double>::const_iterator dataEnd = getData()->end();
   double mcPredictionPerBin = 0.;
 
-  double dataTerm = 0.;
+  //  double dataTerm = 0.;
   double binSum =0;
   for (; dataItr!=dataEnd; ++dataItr,++bin)
   {
@@ -50,9 +50,11 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
     if(!mcPredictionPerBin)
       continue;
 
-    dataTerm = std::log(TMath::Factorial(*dataItr));
+    //    dataTerm = std::log(TMath::Factorial(*dataItr));
 
-    binSum += dataTerm + mcPredictionPerBin - std::log(mcPredictionPerBin);
+    //the dataTerm does not depend on beta, so we may drop it
+    binSum += (/*dataTerm +*/ mcPredictionPerBin - ((*dataItr)*std::log(mcPredictionPerBin)));
+               
   }
 
   return (value + binSum);
