@@ -13,7 +13,7 @@ namespace functions {
 
   class SimpleMaxLLH : public AbsFittingFunction
   {
-  
+    
     
   public:
 
@@ -32,6 +32,7 @@ namespace functions {
     double operator()(const double* _values = 0 );
     
 
+    
 
     /**
      * @return double
@@ -48,7 +49,7 @@ namespace functions {
       
       for (short i=0; i < this->getNumberOfParameters(); ++i)
       {
-        value+=((getParameterValue(i))*(getTemplate(i)->at(_bin)));
+        value+=((getParameterValue(i))*(m_templates.at(i).getContent()->at(_bin)));
       }
       
       return value;

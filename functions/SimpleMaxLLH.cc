@@ -3,7 +3,10 @@
 #include <cmath>
 #include "TMath.h"
 #include <numeric>
-#include <functional>
+//#include <functional>
+//#include <utility>
+//#include <algorithm>
+
 
 
 
@@ -11,12 +14,12 @@
 //  
 
 functions::SimpleMaxLLH::SimpleMaxLLH ( ) :
-  AbsFittingFunction()
+  functions::AbsFittingFunction()
 {
   
 }
 
-functions::SimpleMaxLLH::~SimpleMaxLLH ( ) { }
+functions::SimpleMaxLLH::~SimpleMaxLLH( ) { }
 
 double functions::SimpleMaxLLH::operator()(const double* _values ){
 
@@ -26,9 +29,12 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
   //[2]: l-fraction
   setParameters(_values);
 
-  double sumData = std::accumulate(getData()->begin(), getData()->end(),0.,std::plus<double>());
+  double sumData = std::accumulate(
+                                   m_data.getContent()->begin(), 
+                                   m_data.getContent()->end(),
+                                   0.,std::plus<double>());
   double sumTemp = 0.;
-  for (short tidx = 0; tidx < getData()->size(); ++tidx)
+  for (short tidx = 0; tidx < m_data.getContent()->size(); ++tidx)
   {
     sumTemp += this->getTotalMCFractionPerBin(tidx);
   }
@@ -37,8 +43,8 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
   double value = - (sumData*(std::log(sumTemp))) + sumTemp;
   
   short bin = 0;
-  std::vector<double>::const_iterator dataItr = getData()->begin();
-  std::vector<double>::const_iterator dataEnd = getData()->end();
+  std::vector<double>::const_iterator dataItr = m_data.getContent()->begin();
+  std::vector<double>::const_iterator dataEnd = m_data.getContent()->end();
   double mcPredictionPerBin = 0.;
 
   //  double dataTerm = 0.;
@@ -59,3 +65,5 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
 
   return (value + binSum);
 }
+
+

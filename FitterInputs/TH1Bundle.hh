@@ -26,13 +26,13 @@ namespace FitterInputs {
       if(metaName.Contains("data"))
         return 0;
       if(metaName.Contains("true") || metaName.Contains("mc")){
-        if(metaName.Contains("sys")){
-          if(metaName.Contains("up") || metaName.Contains("+"))
-            return 3;
-          if(metaName.Contains("down") || metaName.Contains("-"))
-            return 4;
+        if(metaName.Contains("sys"))
           return 2;
-        }
+        if(metaName.Contains("up") || metaName.Contains("+"))
+          return 3;
+        if(metaName.Contains("down") || metaName.Contains("-"))
+          return 4;
+               
         return 1;
       }
 

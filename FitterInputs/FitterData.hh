@@ -69,10 +69,10 @@ public:
     std::copy(m_weights.begin(), m_weights.end(),_weights.begin());
   };
 
-  short getType(){return (short)m_type;};
+  short getType() const {return (short)m_type;};
   short setType(const short& _type=0){m_type=(dataType)_type;};
-  bool isA(const short& _type=0){ return (m_type==(dataType)_type);}
-  bool isA(const dataType& _type=eData){ return (m_type==_type);}
+  bool isA(const short& _type=0) const { return (m_type==(dataType)_type);}
+  bool isA(const dataType& _type=eData) const { return (m_type==_type);}
 
   void print(){
     std::ostream_iterator<double> comma(std::cout,", ");
@@ -85,7 +85,7 @@ public:
 
   void clear(){m_values.clear();m_weights.clear();};
 
-  const std::string& getName(){return m_name;};
+  const std::string& getName() const {return m_name;};
   void setName(const std::string&  _name="defaultValue"){ m_name = _name;};
 };
 

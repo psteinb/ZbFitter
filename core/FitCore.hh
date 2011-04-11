@@ -32,7 +32,7 @@ namespace core {
    */
 
 
-  template <class Fcn, class Scr, class Res>
+  template <class Fcn, class Scr, class Res, class Input>
   class FitCore
   {
     
@@ -70,18 +70,9 @@ namespace core {
     }
 
     void loadDataToFunction(){
-      std::vector<double> metaData;
-      m_resources->getData(metaData);
-      m_fcn.setData(metaData);
+      m_fcn.setupFromInput(m_resource);
     };
 
-    void loadTemplatesToFunction(){
-      std::vector<std::vector<double> > metaTemplates;
-      std::vector<std::vector<double> > metaWeights;
-      m_resources->getTemplatesWithWeights(metaTemplates,metaWeights);
-      m_fcn.setTemplates(metaTemplates);
-      m_fcn.setWeights(metaWeights);
-    };
 
   public:
 

@@ -46,13 +46,13 @@ void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
   
 }
 
-template <class Fcn, class Scr, class Res>
+template <class Fcn, class Scr, class Res, class Input>
 void core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   /////////////////////////////////////////
   /// laod data/templates to Likelihood function
   /////////////////////////////////////////
   loadDataToFunction();
-  loadTemplatesToFunction();
+
   if(_verbose)
     m_fcn.print();
   /////////////////////////////////////////
