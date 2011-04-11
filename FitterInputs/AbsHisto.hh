@@ -2,8 +2,9 @@
 #ifndef ABSHISTO_H
 #define ABSHISTO_H
 
-#include <string>
 #include <vector>
+
+#include "FitterInputs/FitterData.hh"
 
 namespace FitterInputs {
 
@@ -15,14 +16,7 @@ public:
 		/**
 		 * @param  _data
 		 */
-  virtual void getData (std::vector<double>& _data ) = 0;
-		
-
-		/**
-		 * @param  _templates
-		 */
-  virtual void getTemplates (std::vector<std::vector<double> >& _templates ) = 0;
-		
+  virtual void getData (std::vector<FitterData>& _data ) = 0;
 
 
 };

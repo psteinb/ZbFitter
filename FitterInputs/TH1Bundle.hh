@@ -2,12 +2,13 @@
 #ifndef TH1BUNDLE_H
 #define TH1BUNDLE_H
 #include "FitterInputs/AbsHisto.hh"
+#include "FitterInputs/FitterData.hh"
 
 #include <string>
 #include <vector>
 #include "TH1D.h"
 #include "TFile.h"
-
+#include "TString.h"
 
 namespace FitterInputs {
 
@@ -18,32 +19,60 @@ namespace FitterInputs {
     }
   };
 
+  struct DecideDataTypeFromString : std::unary_function<std::string,int>{
+    int operator()(const std::string& _name) const {
+      TString metaName = _name.c_str();
+      metaName.ToLower();
+      if(metaName.Contains("data"))
+        return 0;
+      if(metaName.Contains("true") || metaName.Contains("mc")){
+        if(metaName.Contains("sys")){
+          if(metaName.Contains("up") || metaName.Contains("+"))
+            return 3;
+          if(metaName.Contains("down") || metaName.Contains("-"))
+            return 4;
+          return 2;
+        }
+        return 1;
+      }
+
+    };
+  };
 
   class TH1Bundle : public AbsHisto
   {
   private:
 
     // Private attributes
-    //  
+    // the values that need to be handed to the outside at some point
+    std::vector<FitterData> m_values;
 
-    // string that represents the object to be loaded from <m_dataFile>
-    std::string m_dataPlotName;
     // file name to open for data plot
     std::string m_dataFile;
+    // string that represents the object to be loaded from <m_dataFile>
+    std::string m_dataPlotName;
+    TH1* m_data;
+
     // file name or comma separated list of file names (if the latter, the order of the mcPlotNames must be the same as here)
     std::string m_mcFileNames;
     std::string m_mcPlotNames;
-    TH1* m_data;
     std::vector<TH1*> m_templates;
-    std::vector<double> m_dataEntries;
-    std::vector<std::vector<double> > m_templatesEntries;
     std::vector<TFile*> m_files;
 
+    //open file at _fileName and add the TFile object to m_files
     TFile* openFile(const std::string& _fileNames = "");
+
+    //open 1 file of name _fileNames and retrieve all TH1* objects according to _histoNames
     void loadTemplatesFromOneFile (const std::string& _fileNames = "", const std::string& _histoNames = "" );
+
+    //open files of name _fileNames and retrieve all TH1* objects according to _histoNames using loadTemplatesFromOneFile
     void loadTemplatesFromMultipleFiles (const std::string& _fileNames = "", const std::string& _histoNames = "" );
+
+    
     void pushBinContentsToVector(TH1*, std::vector<double>&);
     void pushBinWeightsToVector(TH1*, std::vector<double>&);
+    void setupFitterData();
+    void createFitterDataFromTH1(TH1*, FitterData&);
 
   protected:
                 
@@ -66,6 +95,7 @@ namespace FitterInputs {
 
 
     /**
+     * open _fileName and retrieve histoNames
      * @param  _fileName file to be opened
      * @param  _histoNames single plot 
      * from files
@@ -84,15 +114,7 @@ namespace FitterInputs {
     /**
      * @param  _data
      */
-    virtual void getData (std::vector<double>& _data );
-		
-
-    /**
-     * @param  _templates
-     */
-    virtual void getTemplates (std::vector<std::vector<double> >& _templates );
-    virtual void getTemplatesWithWeights (std::vector<std::vector<double> >& _templates, std::vector<std::vector<double> >& _weights );
-
+    virtual void getData (std::vector<FitterData>& _data );
 
 
 

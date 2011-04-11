@@ -1,7 +1,7 @@
 #define TH1BUNDLE_CC
 #include "FitterInputs/TH1Bundle.hh"
 #include <algorithm>
-#include "TString.h"
+
 #include "TObjString.h"
 #include "TObjArray.h"
 #include <iostream>
@@ -13,14 +13,13 @@
 
 FitterInputs::TH1Bundle::TH1Bundle ( ):
   AbsHisto(),
-  m_dataPlotName(""),
+  m_values(),
   m_dataFile    (""),
+  m_dataPlotName(""),
+  m_data(0),
   m_mcFileNames (""),
   m_mcPlotNames (""),
-  m_data(0),
   m_templates(),
-  m_dataEntries(),
-  m_templatesEntries(),
   m_files()
 {
   m_files.reserve(4);
@@ -116,7 +115,7 @@ void FitterInputs::TH1Bundle::loadTemplatesFromOneFile (const std::string& _file
   }
 
   TString HistNames(_histoNames.c_str());
-  TObjArray* Histo = HistNames.Tokenize(",");
+  TObjArray* Histo = HistNames.Tokenize(",");m_templates.reserve(Histo->GetSize());
   TString aHistName;
   TH1* metaObject = 0;
   for (int i = 0; i < Histo->GetEntries(); ++i)
@@ -226,56 +225,50 @@ void FitterInputs::TH1Bundle::pushBinWeightsToVector(TH1* _hist, std::vector<dou
 }
 
 
-void FitterInputs::TH1Bundle::getData (std::vector<double>& _data ){
+void FitterInputs::TH1Bundle::getData (std::vector<FitterData>& _data ){
   _data.clear();
-  if(!m_data){
-    std::cerr<< __FILE__ << ":"<< __LINE__ << "\t no data histo available\n";
-    return;
+  if(m_values.empty()){
+    std::cerr<< __FILE__ << ":"<< __LINE__ << "\t no data available, trying to reload it ... \n";
+    this->setupFitterData();
   }
 
-  _data.reserve(m_data->GetNbinsX());
-  
-  pushBinContentsToVector(dynamic_cast<TH1*>(m_data),_data);
-
+  _data.assign(m_values.begin(),m_values.end());
 }
 
-void FitterInputs::TH1Bundle::getTemplates (std::vector<std::vector<double> >& _templates ){
-  _templates.clear();
+void FitterInputs::TH1Bundle::createFitterDataFromTH1(TH1* _hist, FitterData& _fdata){
+  //setup
+  _fdata.setName(_hist->GetName());
+  _fdata.setType(DecideDataTypeFromString()(_hist->GetName()));
+  _fdata.clear();
   
+  //retrieve content
+  std::vector<double> m_content;    
+  pushBinContentsToVector(_hist,m_content);
 
-  if(m_templates.empty()){
-    std::cerr<< __FILE__ << ":"<< __LINE__ << "\t no template histos available\n";
-    return;
-  }
+  //retrieve weights
+  std::vector<double> m_weights;
+  pushBinWeightsToVector(_hist,m_weights);
 
-  _templates.resize(m_templates.size());
-    
-  for (int i = 0; i < m_templates.size(); ++i)
-  {
-    pushBinContentsToVector(dynamic_cast<TH1*>(this->m_templates.at(i)),_templates.at(i));
-  }
-  
-
+  //ship to _fdata
+  _fdata.setContentAndWeights(m_content,m_weights);
 }
 
-void FitterInputs::TH1Bundle::getTemplatesWithWeights (std::vector<std::vector<double> >& _templates , std::vector<std::vector<double> >& _weights){
+void FitterInputs::TH1Bundle::setupFitterData(){
 
-  _templates.clear();
-  _weights.clear();
-
-  if(m_templates.empty()){
-    std::cerr<< __FILE__ << ":"<< __LINE__ << "\t no template histos available\n";
-    return;
+  FitterData metaData;
+  if(m_data){
+    m_values.reserve(m_values.capacity()+1);
+    createFitterDataFromTH1(m_data,metaData);
+    m_values.push_back(metaData);  
   }
 
-  _templates.resize(m_templates.size());
-  _weights.resize(m_templates.size());
-    
-  for (int i = 0; i < m_templates.size(); ++i)
+  std::vector<TH1*>::const_iterator tempItr = m_templates.begin();
+  std::vector<TH1*>::const_iterator tempEnd = m_templates.end();
+  m_values.reserve(m_values.capacity()+m_templates.size());
+  for (; tempItr!=tempEnd; ++tempItr)
   {
-    pushBinContentsToVector(dynamic_cast<TH1*>(this->m_templates.at(i)),_templates.at(i));
-    pushBinWeightsToVector(dynamic_cast<TH1*>(this->m_templates.at(i)),_weights.at(i));
+    createFitterDataFromTH1((*tempItr),metaData);
+    m_values.push_back(metaData);  
   }
-  
 
 }
