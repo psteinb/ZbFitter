@@ -228,7 +228,7 @@ void FitterInputs::TH1Bundle::pushBinWeightsToVector(TH1* _hist, std::vector<dou
 void FitterInputs::TH1Bundle::getData (std::vector<FitterData>& _data ){
   _data.clear();
   if(m_values.empty()){
-    std::cerr<< __FILE__ << ":"<< __LINE__ << "\t no data available, trying to reload it ... \n";
+    //std::cerr<< __FILE__ << ":"<< __LINE__ << "\t no data available, trying to reload it ... \n";
     this->setupFitterData();
   }
 

@@ -32,7 +32,7 @@ namespace core {
    */
 
 
-  template <class Fcn, class Scr, class Res, class Input>
+  template <class Fcn, class Scr, class Res>
   class FitCore
   {
     
@@ -70,7 +70,7 @@ namespace core {
     }
 
     void loadDataToFunction(){
-      m_fcn.setupFromInput(m_resource);
+      m_fcn.setupFromInput(m_resources);
     };
 
 

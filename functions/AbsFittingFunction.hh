@@ -56,7 +56,7 @@ namespace functions {
     FitterInputs::FitterData m_data;
     std::vector<FitterInputs::FitterData> m_templates;
     std::vector<std::vector<FitterInputs::FitterData> > m_templatesSys;
-
+    
 
   public:
     AbsFittingFunction():
@@ -96,14 +96,16 @@ namespace functions {
       std::cout << "\n";
       
     };
-
+    
+    
     /**
      * method to extract all necessary infos from _input
      * @param  _input 
      */
     virtual void setupFromInput (FitterInputs::AbsHisto* _input=0 );
 
-
+    const FitterInputs::FitterData* getTemplate(const int& _idx) const { return &(m_templates.at(_idx));};
+    const FitterInputs::FitterData* getData() const { return &(m_data);};
     /////////////////////////////////////////////////////////////////////////////////////////
     /// to be overloaded by decendent
     ///

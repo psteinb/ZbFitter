@@ -6,6 +6,9 @@
 #include <algorithm>
 #include <vector>
 #include <string>
+#include <cmath>
+#include <numeric>
+
 
 namespace FitterInputs {
 
@@ -23,13 +26,23 @@ class FitterData
   dataType m_type;
   std::string m_name;
   std::vector<double> m_values;
+  double m_sum;
+  double m_sumError;
   std::vector<double> m_weights;
+
+  void calcSumAndUncertainty(){
+    m_sum = std::accumulate(m_values.begin(), m_values.end(),0,std::plus<double>());
+    m_sumError = std::sqrt(m_sum);
+  };
+
 
 public:
   FitterData(const std::string& _name="defaultValues",const short& _type=0) : 
     m_name(_name), 
     m_type((dataType)_type), 
     m_values(), 
+    m_sum(0.),
+    m_sumError(0.),
     m_weights(){};
 
   virtual ~FitterData(){};
@@ -39,6 +52,11 @@ public:
       m_values.assign(_values.begin(), _values.end());
       // m_values.reserve(_values.size());
       // std::copy(,m_values.begin());
+      try{
+        calcSumAndUncertainty();}
+      catch(std::exception& thisExc){
+        std::cerr << __FILE__ << "("<< __LINE__ <<")\t Could not calculate total sum and uncertainty\t> "<< thisExc.what() <<" <\n";
+      }
     }
     else
       std::cerr << __FILE__ << "("<< __LINE__ <<")\t NOTHING TO COPY\n";
@@ -87,6 +105,10 @@ public:
 
   const std::string& getName() const {return m_name;};
   void setName(const std::string&  _name="defaultValue"){ m_name = _name;};
+
+  double getSum() const {return m_sum;};
+  double getSumError() const {return m_sumError;};
+  double getSumAndError(double& _sum,double& _err) const {_sum=m_sum;_err=m_sumError;};
 };
 
 };
