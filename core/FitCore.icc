@@ -87,10 +87,10 @@ void core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
     }
   }  
   
-
+  if(_verbose){
   std::cout << "FitCore::fit \t  CpuTime = \t"<< std::setw(10) << std::setprecision(6)<< watch.CpuTime() << "\n";
   std::cout << "FitCore::fit \t  RealTime = \t"<< std::setw(10) << std::setprecision(4)<< watch.RealTime() << "\n";
-
+  }
 }
 
 

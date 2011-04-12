@@ -21,6 +21,8 @@
 #include "TRegexp.h"
 #include "TGraphErrors.h"
 #include "TCanvas.h"
+#include "AtlasStyle.h"
+#include "TRandom3.h"
 
 //small class
 class RunnerConfig {
@@ -59,7 +61,7 @@ public:
 RunnerConfig::RunnerConfig():
   m_argc(0),m_argv(0),
   p_datadir("/some/path/"),
-  p_outputfile(""),
+  p_outputfile("pseudo.eps"),
   p_configFile(""),
   p_fitEngine("Minuit2"),
   p_fitMode  ("Scan"),
@@ -75,7 +77,7 @@ RunnerConfig::RunnerConfig():
 RunnerConfig::RunnerConfig(int inArgc, char** inArgv):
   m_argc(inArgc),m_argv(inArgv),
   p_datadir("/some/path/"),
-  p_outputfile(""),
+  p_outputfile("pseudo.eps"),
   p_configFile(""),
   p_fitEngine("Minuit2"),
   p_fitMode  ("Scan"),
@@ -192,8 +194,8 @@ void RunnerConfig::printConf(){
   std::cout << "[-c] config file name =\n"    << ((!p_configFile.empty()) ? p_configFile.c_str() : "none given") << std::endl;
   std::cout << "[-m] message level = "<< p_msgLevel << std::endl;
   std::cout << "[-t] N(threads) = "<< p_threads << std::endl;
-  std::cout << "[-t] fitEngine = "<< p_fitEngine << std::endl;
-  std::cout << "[-t] fitMode = "<< p_fitMode << std::endl;
+  std::cout << "[-E] fitEngine = "<< p_fitEngine << std::endl;
+  std::cout << "[-M] fitMode = "<< p_fitMode << std::endl;
   std::cout << "[-D] dataTitle = "<< p_dataTitle << std::endl;
   std::cout << "[-T] tempTitle = "<< p_tempTitle << std::endl;
   std::cout << "[-i] NumIterations = "<< p_nIter << std::endl;
@@ -224,19 +226,39 @@ void RunnerConfig::setOpt(int inArgc, char** inArgv){
 // }
 void createOutput(const std::string& _name,TH1* _fb=0,TH1* _fc=0,TH1* _fl=0){
 
-  TCanvas c(_name.c_str(),"",1200,400);
+  TStyle* aStyle =  AtlasStyle();
+  aStyle->SetOptStat(220002211);
+  gROOT->SetStyle("ATLAS");
+  gROOT->ForceStyle();
+  
+  TCanvas c(_name.c_str(),"",3000,1500);
   c.Clear();
   c.Draw();
-  c.Divide(3,1);
+  c.Divide(3,2);
   c.cd(1);
-  if(_fb)
+  if(_fb){
     _fb->Draw();
+  }
   c.cd(2);
   if(_fc)
     _fc->Draw();
   c.cd(3);
   if(_fl)
     _fl->Draw();
+  
+  c.cd(4);
+  gPad->SetLogy();
+  if(_fb)
+    _fb->Draw();
+  c.cd(5);
+  gPad->SetLogy();
+  if(_fc)
+    _fc->Draw();
+  c.cd(6);
+  gPad->SetLogy();
+  if(_fl)
+    _fl->Draw();
+
   c.Update();
   c.Print(_name.c_str());
 
@@ -272,6 +294,8 @@ void createScaledData(const std::vector<TH1*>& _vector,
 
 int main(int argc, char* argv[])
 {
+
+
   //set root message level
   //gErrorIgnoreLevel = 2001;
   //
@@ -290,10 +314,10 @@ int main(int argc, char* argv[])
   std::vector<TH1*> m_templates;
   input->getTemplatesDeepCopy(m_templates);
 
-  TH1D* m_data=0;
-  input->getDataDeepCopy(m_data);
-  int dataIntegral = m_data->Integral();
-
+  TH1D* m_data=input->getDataDeepCopy();
+  
+  double dataIntegral = m_data->Integral();
+  TRandom3 myRand3;
   // ----- Templates ----- 
   functions::SimpleMaxLLH fcn;
   
@@ -301,9 +325,9 @@ int main(int argc, char* argv[])
   FitterResults::HistoResult* result;
 
   // ----- FitterCore ------
-  TH1D pull_fb("fb",";pull;N",50,-5.,5.);
-  TH1D pull_fc("fc",";pull;N",50,-5.,5.);
-  TH1D pull_fl("fl",";pull;N",50,-5.,5.);
+  TH1D pull_fb("fb",";pull fb;N",50,-5.,5.);
+  TH1D pull_fc("fc",";pull fc;N",50,-5.,5.);
+  TH1D pull_fl("fl",";pull fl;N",50,-5.,5.);
   
 
   std::vector<double> fitValues(m_templates.size(),0.);
@@ -324,7 +348,10 @@ int main(int argc, char* argv[])
     fitter.setupMachinery();
 
     //run the fitter
-    fitter.fit(false);
+    if(conf.p_msgLevel<3)
+      fitter.fit(true);
+    else
+      fitter.fit(false);
 
     //collect the results
     for (int i = 0; i < m_templates.size(); ++i)
@@ -356,7 +383,7 @@ int main(int argc, char* argv[])
     m_data->ResetStats();
 
     //scale b content and add all histos
-    createScaledData(m_templates,fitValues,m_data,dataIntegral);
+    createScaledData(m_templates,metaValues,m_data,myRand3.Poisson(dataIntegral));
 
     //reset the input
     input->setTemplateHistos(m_templates);
@@ -365,8 +392,8 @@ int main(int argc, char* argv[])
 
 
     //clear or save results
-    metaValues = fitValues;
-    metaErrors = fitErrors;
+    fitValues = metaValues;
+    fitErrors = metaErrors;
     metaValues.clear();
     metaErrors.clear();
     metaValues.resize(m_templates.size());
@@ -374,7 +401,7 @@ int main(int argc, char* argv[])
     
   }
 
-  
+  createOutput(conf.p_outputfile,&pull_fb,&pull_fc,&pull_fl);
   return 0; 
    
 

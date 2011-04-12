@@ -111,9 +111,9 @@ namespace FitterInputs {
         std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer nil\n";
     };
 
-    void getDataDeepCopy(TH1* _new){
+    TH1D* getDataDeepCopy(){
       std::string name = m_data->GetName();name+="_new";
-      _new = dynamic_cast<TH1*>(m_data->Clone(name.c_str()));
+      return dynamic_cast<TH1D*>(m_data->Clone(name.c_str()));
     };
 
     /**
