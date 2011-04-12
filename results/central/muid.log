@@ -1,0 +1,160 @@
+RunFitter running on
+[-d] data path/file = ./extractedSV0.root
+[-o] output file name =
+none given
+[-c] config file name =
+/home/psteinb/development/sandbox/fitter/functions/SimpleMaxLLH.env
+[-m] message level = 3
+[-t] N(threads) = 1
+[-t] fitEngine = Minuit2
+[-t] fitMode = MIGRAD
+[-D] dataTitle = data_muid
+[-D] tempTitle = z_muid_trueB,z_muid_trueC,z_muid_trueL
+TH1Bundle::loadTemplatesFromOneFile	loaded z_muid_trueB from ./extractedSV0.root
+TH1Bundle::loadTemplatesFromOneFile	loaded z_muid_trueC from ./extractedSV0.root
+TH1Bundle::loadTemplatesFromOneFile	loaded z_muid_trueL from ./extractedSV0.root
+Parameters
+
+Minuit2Minimizer: Minimize with max iterations 1000000 edmval 0.01 strategy 1
+Number of iterations 12
+----------> Iteration 0
+            FVAL = -83.0135879333 Edm = 157.856053573 Nfcn = 13
+            Error matrix change = 1
+            Parameters :  p0 = 0.01 p1 = 0.01 p2 = 0.01
+----------> Iteration 1
+            FVAL = -238.451482254 Edm = 11.3262637992 Nfcn = 26
+            Error matrix change = 0.56405
+            Parameters :  p0 = 0.0233615 p1 = 0.0461976 p2 = 0.0680553
+----------> Iteration 2
+            FVAL = -383.898683467 Edm = 0.0026328556903 Nfcn = 46
+            Error matrix change = 0.732313
+            Parameters :  p0 = 0.12681 p1 = 0.301507 p2 = 0.447637
+----------> Iteration 3
+            FVAL = -384.103848941 Edm = 0.00106495302556 Nfcn = 55
+            Error matrix change = 0.777333
+            Parameters :  p0 = 0.133709 p1 = 0.31784 p2 = 0.470594
+----------> Iteration 4
+            FVAL = -384.119839026 Edm = 0.0133922766995 Nfcn = 64
+            Error matrix change = 0.664704
+            Parameters :  p0 = 0.136166 p1 = 0.322244 p2 = 0.473914
+----------> Iteration 5
+            FVAL = -385.335322282 Edm = 0.000754875641018 Nfcn = 75
+            Error matrix change = 0.813531
+            Parameters :  p0 = 0.176431 p1 = 0.296072 p2 = 0.190303
+----------> Iteration 6
+            FVAL = -385.339514706 Edm = 1.5490386987e-05 Nfcn = 83
+            Error matrix change = 0.485482
+            Parameters :  p0 = 0.174909 p1 = 0.29806 p2 = 0.2044
+----------> Iteration 7
+            FVAL = -385.339561351 Edm = 2.69421681622e-05 Nfcn = 91
+            Error matrix change = 0.253375
+            Parameters :  p0 = 0.174659 p1 = 0.297948 p2 = 0.205026
+----------> Iteration 8
+            FVAL = -385.372808774 Edm = 0.00375467912016 Nfcn = 104
+            Error matrix change = 0.55273
+            Parameters :  p0 = 0.171033 p1 = 0.328866 p2 = 0.153099
+----------> Iteration 9
+            FVAL = -385.382455481 Edm = 4.7039590414e-05 Nfcn = 112
+            Error matrix change = 0.293742
+            Parameters :  p0 = 0.166016 p1 = 0.350879 p2 = 0.1411
+----------> Iteration 10
+            FVAL = -385.382503185 Edm = 4.78418000357e-08 Nfcn = 119
+            Error matrix change = 0.1571
+            Parameters :  p0 = 0.166111 p1 = 0.35017 p2 = 0.143174
+----------> Iteration 11
+            FVAL = -385.382503185 Edm = 4.69323020476e-08 Nfcn = 141
+            Error matrix change = 0
+            Parameters :  p0 = 0.166111 p1 = 0.35017 p2 = 0.143174
+Minuit2Minimizer : Valid minimum - status = 0
+FVAL  = -385.382503184875418
+Edm   = 4.69323020475692743e-08
+Nfcn  = 141
+fb	  = 0.166111	 +/-  0.0573095
+fc	  = 0.35017	 +/-  0.252479
+fl	  = 0.143174	 +/-  0.370761
+Info in <TGraph::SaveAs>: ROOT file fitResult.root has been created
+FitCore::fit 	  CpuTime = 	      0.01
+FitCore::fit 	  RealTime = 	  0.002771
+fb:	40.53	+/-	13.98
+fc:	26.96	+/-	19.44
+fl:	4.295	+/-	11.12
+RunFitter running on
+[-d] data path/file = ./extractedSV0.root
+[-o] output file name =
+none given
+[-c] config file name =
+/home/psteinb/development/sandbox/fitter/functions/SimpleMaxLLH.env
+[-m] message level = 3
+[-t] N(threads) = 1
+[-t] fitEngine = Minuit2
+[-t] fitMode = MINOS
+[-D] dataTitle = data_muid
+[-D] tempTitle = z_muid_trueB,z_muid_trueC,z_muid_trueL
+TH1Bundle::loadTemplatesFromOneFile	loaded z_muid_trueB from ./extractedSV0.root
+TH1Bundle::loadTemplatesFromOneFile	loaded z_muid_trueC from ./extractedSV0.root
+TH1Bundle::loadTemplatesFromOneFile	loaded z_muid_trueL from ./extractedSV0.root
+Parameters
+
+Minuit2Minimizer: Minimize with max iterations 1000000 edmval 0.01 strategy 1
+Number of iterations 12
+----------> Iteration 0
+            FVAL = -83.0135879333 Edm = 157.856053573 Nfcn = 13
+            Error matrix change = 1
+            Parameters :  p0 = 0.01 p1 = 0.01 p2 = 0.01
+----------> Iteration 1
+            FVAL = -238.451482254 Edm = 11.3262637992 Nfcn = 26
+            Error matrix change = 0.56405
+            Parameters :  p0 = 0.0233615 p1 = 0.0461976 p2 = 0.0680553
+----------> Iteration 2
+            FVAL = -383.898683467 Edm = 0.0026328556903 Nfcn = 46
+            Error matrix change = 0.732313
+            Parameters :  p0 = 0.12681 p1 = 0.301507 p2 = 0.447637
+----------> Iteration 3
+            FVAL = -384.103848941 Edm = 0.00106495302556 Nfcn = 55
+            Error matrix change = 0.777333
+            Parameters :  p0 = 0.133709 p1 = 0.31784 p2 = 0.470594
+----------> Iteration 4
+            FVAL = -384.119839026 Edm = 0.0133922766995 Nfcn = 64
+            Error matrix change = 0.664704
+            Parameters :  p0 = 0.136166 p1 = 0.322244 p2 = 0.473914
+----------> Iteration 5
+            FVAL = -385.335322282 Edm = 0.000754875641018 Nfcn = 75
+            Error matrix change = 0.813531
+            Parameters :  p0 = 0.176431 p1 = 0.296072 p2 = 0.190303
+----------> Iteration 6
+            FVAL = -385.339514706 Edm = 1.5490386987e-05 Nfcn = 83
+            Error matrix change = 0.485482
+            Parameters :  p0 = 0.174909 p1 = 0.29806 p2 = 0.2044
+----------> Iteration 7
+            FVAL = -385.339561351 Edm = 2.69421681622e-05 Nfcn = 91
+            Error matrix change = 0.253375
+            Parameters :  p0 = 0.174659 p1 = 0.297948 p2 = 0.205026
+----------> Iteration 8
+            FVAL = -385.372808774 Edm = 0.00375467912016 Nfcn = 104
+            Error matrix change = 0.55273
+            Parameters :  p0 = 0.171033 p1 = 0.328866 p2 = 0.153099
+----------> Iteration 9
+            FVAL = -385.382455481 Edm = 4.7039590414e-05 Nfcn = 112
+            Error matrix change = 0.293742
+            Parameters :  p0 = 0.166016 p1 = 0.350879 p2 = 0.1411
+----------> Iteration 10
+            FVAL = -385.382503185 Edm = 4.78418000357e-08 Nfcn = 119
+            Error matrix change = 0.1571
+            Parameters :  p0 = 0.166111 p1 = 0.35017 p2 = 0.143174
+----------> Iteration 11
+            FVAL = -385.382503185 Edm = 4.69323020476e-08 Nfcn = 141
+            Error matrix change = 0
+            Parameters :  p0 = 0.166111 p1 = 0.35017 p2 = 0.143174
+Minuit2Minimizer : Valid minimum - status = 0
+FVAL  = -385.382503184875418
+Edm   = 4.69323020475692743e-08
+Nfcn  = 141
+fb	  = 0.166111	 +/-  0.0573095
+fc	  = 0.35017	 +/-  0.252479
+fl	  = 0.143174	 +/-  0.370761
+Info in <TGraph::SaveAs>: ROOT file fitResult.root has been created
+FitCore::fit 	  CpuTime = 	      0.01
+FitCore::fit 	  RealTime = 	  0.002737
+fb:	40.53	+/-	13.98
+fc:	26.96	+/-	19.44
+fl:	4.295	+/-	11.12

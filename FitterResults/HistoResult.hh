@@ -3,6 +3,8 @@
 #define HISTORESULT_H
 #include "AbsResult.hh"
 #include "TObject.h"
+#include <string>
+
 
 namespace FitterResults {
 
@@ -16,6 +18,9 @@ class HistoResult : public AbsResult
 {
 private:
 
+  int m_verbosity;
+  std::string m_filename;
+
 public:
 
   // Constructors/Destructors
@@ -25,8 +30,12 @@ public:
   /**
    * Empty Constructor
    */
-  HistoResult ( ):
-    AbsResult()
+  HistoResult (ROOT::Math::Minimizer* _min=0 , 
+               const int& _verb=1,
+               const std::string& _text="histoResult.root"):
+    AbsResult(_min),
+    m_verbosity(_verb),
+    m_filename(_text)
   {};
 
   /**
@@ -34,14 +43,9 @@ public:
    */
   virtual ~HistoResult ( ){};
 
-   /**
-   * add new data to be formatted
-   * @param  _aobject
-   */
-  virtual void addResult (TObject* _object=0 ) {};
+  
 
-
-  virtual void print ( ) {};
+  virtual void print ( );
 
 
 };

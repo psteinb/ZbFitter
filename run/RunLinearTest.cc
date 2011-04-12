@@ -17,6 +17,10 @@
 #include "FitterResults/HistoResult.hh"
 #include "functions/SimpleMaxLLH.hh"
 
+#include "TString.h"
+#include "TRegexp.h"
+#include "TGraphErrors.h"
+
 //small class
 class RunnerConfig {
 
@@ -38,6 +42,7 @@ public:
   int         p_msgLevel;
   int         p_threads;
   bool        p_giveHelp;
+  double      p_stepsize;
   
   RunnerConfig();
   RunnerConfig(int , char**);
@@ -60,7 +65,8 @@ RunnerConfig::RunnerConfig():
   p_tempTitle("mcb,mcc,mcl"),
   p_msgLevel(3),
   p_threads(1),
-  p_giveHelp(false)
+  p_giveHelp(false),
+  p_stepsize(.2)
 {}
 
 //constructor with initialisation
@@ -75,7 +81,8 @@ RunnerConfig::RunnerConfig(int inArgc, char** inArgv):
   p_tempTitle("mcb,mcc,mcl"),
   p_msgLevel(3),
   p_threads(1),
-  p_giveHelp(false)
+  p_giveHelp(false),
+  p_stepsize(.2)
 {
 
   parse();
@@ -86,11 +93,12 @@ void RunnerConfig::parse(){
 
 
   int opt = 0;
-  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:E:M:D:T:h" ))!=-1 ){
+  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:E:M:D:T:s:h" ))!=-1 ){
     std::istringstream instream;
     std::ostringstream outstream;
     size_t found;
     int meta=0;
+    double dmeta=0;
     switch(opt){
     case 'd':
       p_datadir = std::string(optarg);
@@ -124,14 +132,14 @@ void RunnerConfig::parse(){
       }
 
       break;
-    case 't':
+    case 's':
       instream.str(optarg);
-      if( !(instream >> meta) ){
-        std::cerr << "RunFitter \t invalid argument format for [-T]" << std::endl;
-        p_threads = 0;
+      if( !(instream >> dmeta) ){
+        std::cerr << "RunFitter \t invalid argument format for [-s]" << std::endl;
+        p_stepsize = 0;
       }
       else{
-        p_threads = meta;
+        p_stepsize = dmeta;
       }
 
       break;
@@ -166,6 +174,7 @@ void RunnerConfig::printHelp(){
   std::cout << "\t -M <TMinuitMode> define fit mode" << std::endl;
   std::cout << "\t -D <ObjectName> define data object to retrieve from root file" << std::endl;
   std::cout << "\t -T <ObjectName> define template (+systematics) object(s) to retrieve from root file" << std::endl;
+  std::cout << "\t -s <step size> define step size to go from 0 .. 1 of the b fraction" << std::endl;
   std::cout << "\t -h print this help" << std::endl;
   std::cout << std::endl;
 
@@ -184,7 +193,8 @@ void RunnerConfig::printConf(){
   std::cout << "[-t] fitEngine = "<< p_fitEngine << std::endl;
   std::cout << "[-t] fitMode = "<< p_fitMode << std::endl;
   std::cout << "[-D] dataTitle = "<< p_dataTitle << std::endl;
-  std::cout << "[-D] tempTitle = "<< p_tempTitle << std::endl;
+  std::cout << "[-T] tempTitle = "<< p_tempTitle << std::endl;
+  std::cout << "[-s] stepSize = "<< p_stepsize << std::endl;
   
 }
 
@@ -197,8 +207,45 @@ void RunnerConfig::setOpt(int inArgc, char** inArgv){
 
 }
 
+// TH1* findHisto(const std::vector<TH1*>& _vector, const std::string& _search=""){
+  
+//   TH1* value =0;
+//   TString name;
+//   for (int i = 0; i < _vector.size(); ++i)
+//   {
+//     name = _vector.at(i)->GetName();
+//     if(name.Contains(_search.c_str()))
+//       value = 
+//   }
+  
 
+// }
 
+void createScaledData(const std::vector<TH1*>& _vector,double _scale,TH1D* _data){
+
+  if(_vector.empty() || !_data){
+    std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer vector empty or data histo nil\n";
+    return;}
+
+  std::cout << ">>> old content " << _data->GetEntries() << "\n";
+  TString name;
+  for (int i = 0; i < _vector.size(); ++i)
+  {
+    name = _vector.at(i)->GetName();
+    name.ToLower();
+    if(name.Contains(TRegexp(".*mcb.*")) || name.Contains(TRegexp(".*trueb.*"))){
+      std::cout << ">>> scaled " << name.Data() << " by " << _scale << " ("<<_vector.at(i)->GetEntries() << ")\n";
+      _data->Add(_vector.at(i),_scale);
+    }
+    else{
+      _data->Add(_vector.at(i),1.);
+      std::cout << ">>> added "<<_vector.at(i)->GetEntries() << "\n";
+    }
+  }
+
+  std::cout << ">>> new content " << _data->GetEntries() << "\n";
+
+}
 
 int main(int argc, char* argv[])
 {
@@ -216,6 +263,9 @@ int main(int argc, char* argv[])
   FitterInputs::TH1Bundle* input = new FitterInputs::TH1Bundle();
   input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str());
   input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str());
+  
+  std::vector<TH1*> m_templates;
+  input->getTemplatesDeepCopy(m_templates);
 
   // ----- Templates ----- 
   functions::SimpleMaxLLH fcn;
@@ -224,18 +274,50 @@ int main(int argc, char* argv[])
   FitterResults::HistoResult* result;
 
   // ----- FitterCore ------
-  core::FitCore<functions::SimpleMaxLLH,FitterInputs::TH1Bundle,FitterResults::AbsResult> fitter(input);
-  fitter.configureFromFile(conf.p_configFile);
-  fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
-  fitter.configureKeyWithValue("Mode",conf.p_fitMode);
-  
-  fitter.setupMachinery();
+  TH1D* m_data = dynamic_cast<TH1D*>(m_templates.front()->Clone("linearData"));
 
-  if(conf.p_msgLevel>2)
+  int steps = 1./conf.p_stepsize;
+  TGraphErrors linResults(steps);
+  double fitValue = 0;
+  double fitUncertainty = 0;
+  double scale = 0.;
+
+  for (int i = 1; i < (steps+1); ++i)
+  {
+    //clear input
+    //input->clear();
+    m_data->Reset("MICE");
+    m_data->ResetStats();
+
+    //scale b content and add all histos
+    scale = i*conf.p_stepsize;
+    createScaledData(m_templates,scale,m_data);
+
+    //reset the input
+    input->setTemplateHistos(m_templates);
+    input->setDataHisto(m_data);
+    input->init();
+
+    //init the fitter
+    core::FitCore<functions::SimpleMaxLLH,FitterInputs::TH1Bundle,FitterResults::AbsResult> fitter(input);
+    fitter.configureFromFile(conf.p_configFile);
+    fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
+    fitter.configureKeyWithValue("Mode",conf.p_fitMode);
+    fitter.setupMachinery();
+
+    //fit
     fitter.fit(true);
-  else
-    fitter.fit(false);
 
+    //plot the results
+    fitValue = fitter.getMinimizer()->X()[0];
+    fitUncertainty = fitter.getMinimizer()->Errors()[0];
+
+    linResults.SetPoint(i-1,scale,fitValue );
+    linResults.SetPointError(i-1,0,fitUncertainty);
+  }
+
+  linResults.SetTitle(";scale factor;f_b");
+  linResults.SaveAs(conf.p_outputfile.c_str());
   return 0; 
    
 

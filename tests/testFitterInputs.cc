@@ -131,5 +131,41 @@ BOOST_AUTO_TEST_CASE( fullLoadTemplatesWithWeightsSize )
   BOOST_CHECK( temps.at(0).getContent()->size() && temps.at(0).getWeights()->size());
 }
 
+BOOST_AUTO_TEST_CASE( fullLoadDeepCopy )
+{
+
+  FitterInputs::TH1Bundle m_BUNDLE;
+  m_BUNDLE.loadTemplates("./ToyToFit_NoWeight.root","mcb,mcc,mcl");
+  std::vector<TH1*> temps;temps.clear();
+  m_BUNDLE.getTemplatesDeepCopy(temps);
+  BOOST_CHECK( temps.at(0) );
+  BOOST_CHECK( temps.at(0)->GetEntries() );
+}
+
+BOOST_AUTO_TEST_CASE( fullLoadDeepCopyClean )
+{
+  FitterInputs::TH1Bundle m_BUNDLE;
+  m_BUNDLE.loadTemplates("./ToyToFit_NoWeight.root","mcb,mcc,mcl");
+  std::vector<TH1*> temps;temps.clear();
+  m_BUNDLE.getTemplatesDeepCopy(temps);
+  int beforeClear = temps.at(0)->GetEntries();
+  m_BUNDLE.clear();
+  BOOST_CHECK( temps.at(0) );
+  BOOST_CHECK( temps.at(0)->GetEntries() == beforeClear );
+}
+
+BOOST_AUTO_TEST_CASE( fullLoadDeepCopyCleanDestroy )
+{
+  FitterInputs::TH1Bundle* m_BUNDLE = new FitterInputs::TH1Bundle;
+  m_BUNDLE->loadTemplates("./ToyToFit_NoWeight.root","mcb,mcc,mcl");
+  std::vector<TH1*> temps;temps.clear();
+  m_BUNDLE->getTemplatesDeepCopy(temps);
+  int beforeClear = temps.at(0)->GetEntries();
+  m_BUNDLE->clear();
+  delete m_BUNDLE;
+  m_BUNDLE = 0;
+  BOOST_CHECK( temps.at(0) );
+  BOOST_CHECK( temps.at(0)->GetEntries() == beforeClear );
+}
 
 BOOST_AUTO_TEST_SUITE_END()

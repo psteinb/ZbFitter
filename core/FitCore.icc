@@ -53,8 +53,10 @@ void core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   /////////////////////////////////////////
   loadDataToFunction();
 
-  if(_verbose)
+  if(_verbose){
     m_fcn.print();
+    m_minimizer->SetPrintLevel(1001);
+  }
   /////////////////////////////////////////
   /// provide the Likelihood function
   /////////////////////////////////////////
@@ -70,46 +72,38 @@ void core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   m_minimizer->Minimize(); 
   watch.Stop();
   
+
   
   /////////////////////////////////////////
   /// present results
   /////////////////////////////////////////
-  if(_verbose){
-    const double *xs = m_minimizer->X();
-    const double *xErrors = m_minimizer->Errors();
-    m_minimizer->PrintResults();
-    double up=0.;
-    double down=0.;
-    if(!(m_config["Mode"].count("MINOS") || m_config["Mode"].count("Minos"))){
-    std::cout << m_minimizer->VariableName(0) << ":\t" << xs[0]*(m_fcn.getTemplate(0)->getSum()) 
-              << "\t+/-\t" << xErrors[0]*(m_fcn.getTemplate(0)->getSum()) << std::endl;
-
-    std::cout << m_minimizer->VariableName(1) << ":\t" << xs[1]*(m_fcn.getTemplate(1)->getSum()) 
-              << "\t+/-\t" << xErrors[1]*(m_fcn.getTemplate(1)->getSum()) << std::endl;
+  if( m_result ){
+    printTo(m_result);
     
-    std::cout << m_minimizer->VariableName(2) << ":\t" << xs[2]*(m_fcn.getTemplate(2)->getSum()) 
-              << "\t+/-\t" << xErrors[2]*(m_fcn.getTemplate(2)->getSum()) << std::endl;}
-    else{
-      
-      std::cout << m_minimizer->VariableName(0) << ":\t" << xs[0]*(m_fcn.getTemplate(0)->getSum()) 
-                << "\t(+ "<< up*(m_fcn.getTemplate(0)->getSum()) <<")\t(-"<< down*(m_fcn.getTemplate(0)->getSum()) <<")\n";
-      m_minimizer->GetMinosError(1,down,up);
-      std::cout << m_minimizer->VariableName(1) << ":\t" << xs[1]*(m_fcn.getTemplate(1)->getSum()) 
-                << "\t(+ "<< up*(m_fcn.getTemplate(1)->getSum()) 
-                << ")\t(-"<< down*(m_fcn.getTemplate(1)->getSum()) <<")\n";
-    
-      m_minimizer->GetMinosError(2,down,up);
-      std::cout << m_minimizer->VariableName(2) << ":\t" << xs[2]*(m_fcn.getTemplate(2)->getSum()) 
-                << "\t(+ "<< up*(m_fcn.getTemplate(2)->getSum()) 
-                <<")\t(-"<< down*(m_fcn.getTemplate(2)->getSum()) <<")\n";
-    }
-      
-
   }
+  else{
+    if(_verbose){
+      m_minimizer->PrintResults();
+    }
+  }  
+  
 
   std::cout << "FitCore::fit \t  CpuTime = \t"<< std::setw(10) << std::setprecision(6)<< watch.CpuTime() << "\n";
   std::cout << "FitCore::fit \t  RealTime = \t"<< std::setw(10) << std::setprecision(4)<< watch.RealTime() << "\n";
 
+}
+
+
+
+template <class Fcn, class Scr, class Res>
+void core::FitCore<Fcn,Scr,Res>::printTo(Res* _result=0){
+  if(_result){
+    _result->setMinimizer(dynamic_cast<ROOT::Math::Minimizer*>(m_minimizer));
+    _result->setFunction(dynamic_cast< Fcn* >(&m_fcn));
+    _result->print();
+  }
+  else
+    throw std::runtime_error("FitCore::printTo AbsResult pointer invalid");
 }
 //  
 // Methods

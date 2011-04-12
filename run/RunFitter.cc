@@ -15,6 +15,7 @@
 #include "core/FitCore.hh"
 #include "FitterInputs/TH1Bundle.hh"
 #include "FitterResults/HistoResult.hh"
+#include "FitterResults/TermResult.hh"
 #include "functions/SimpleMaxLLH.hh"
 
 //small class
@@ -221,10 +222,11 @@ int main(int argc, char* argv[])
   functions::SimpleMaxLLH fcn;
   
   // ----- Results ------
-  FitterResults::HistoResult* result;
+  FitterResults::AbsResult* hresult = new FitterResults::HistoResult(0,conf.p_msgLevel,"fitResult.root");
+  FitterResults::AbsResult* tresult = new FitterResults::TermResult(0,conf.p_msgLevel);
 
   // ----- FitterCore ------
-  core::FitCore<functions::SimpleMaxLLH,FitterInputs::TH1Bundle,FitterResults::AbsResult> fitter(input);
+  core::FitCore<functions::SimpleMaxLLH,FitterInputs::TH1Bundle,FitterResults::AbsResult> fitter(input, hresult);
   fitter.configureFromFile(conf.p_configFile);
   fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
   fitter.configureKeyWithValue("Mode",conf.p_fitMode);
@@ -236,6 +238,7 @@ int main(int argc, char* argv[])
   else
     fitter.fit(false);
 
+  fitter.printTo(tresult);
   return 0; 
    
 

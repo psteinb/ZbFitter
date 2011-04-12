@@ -27,31 +27,7 @@ FitterInputs::TH1Bundle::TH1Bundle ( ):
 }
 
 FitterInputs::TH1Bundle::~TH1Bundle ( ) {
-  delete m_data;
-  m_data = 0;
-
-  for (int i = 0; i < m_templates.size(); ++i)
-  {
-    if(!m_templates.at(i)){
-      delete m_templates.at(i);
-      m_templates.at(i) = 0;
-    }
-      
-  }
-  m_templates.clear();
-
-
-  for (int i = 0; i < m_files.size(); ++i)
-  {
-    if(!m_files.at(i)){
-      m_files.at(i)->Close();
-      delete m_files.at(i);
-      m_files.at(i) = 0;
-    }
-      
-  }
-  m_files.clear();
-
+  this->clear();
 }
 
 TFile* FitterInputs::TH1Bundle::openFile(const std::string& _fileName){
@@ -235,6 +211,11 @@ void FitterInputs::TH1Bundle::getData (std::vector<FitterData>& _data ){
   _data.assign(m_values.begin(),m_values.end());
 }
 
+void FitterInputs::TH1Bundle::init(){
+  m_values.clear();
+  this->setupFitterData();
+}
+
 void FitterInputs::TH1Bundle::createFitterDataFromTH1(TH1* _hist, FitterData& _fdata){
   //setup
   _fdata.setName(_hist->GetName());
@@ -269,6 +250,19 @@ void FitterInputs::TH1Bundle::setupFitterData(){
   {
     createFitterDataFromTH1((*tempItr),metaData);
     m_values.push_back(metaData);  
+  }
+
+}
+
+void FitterInputs::TH1Bundle::getTemplatesDeepCopy(std::vector<TH1*>& _templates){
+  _templates.clear();
+  _templates.reserve(m_templates.size());
+  std::string name;
+  for (int i = 0; i < m_templates.size(); ++i)
+  {
+    name = m_templates.at(i)->GetName();
+    name += "_new";
+    _templates.push_back(dynamic_cast<TH1*>(m_templates.at(i)->Clone(name.c_str())));
   }
 
 }

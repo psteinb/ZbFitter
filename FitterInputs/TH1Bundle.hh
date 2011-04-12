@@ -71,8 +71,9 @@ namespace FitterInputs {
     
     void pushBinContentsToVector(TH1*, std::vector<double>&);
     void pushBinWeightsToVector(TH1*, std::vector<double>&);
-    void setupFitterData();
+
     void createFitterDataFromTH1(TH1*, FitterData&);
+    void setupFitterData();
 
   protected:
                 
@@ -93,7 +94,7 @@ namespace FitterInputs {
     virtual ~TH1Bundle ( );
 
 
-
+    void init();
     /**
      * open _fileName and retrieve histoNames
      * @param  _fileName file to be opened
@@ -101,22 +102,74 @@ namespace FitterInputs {
      * from files
      */
     void loadData (const std::string& _fileName = "", const std::string& _histoNames = "" ) ;
+    void setDataHisto (TH1* _iHisto=0) {
+      if(_iHisto){
+        //delete this->m_data;
+        this->m_data = _iHisto;
+      }
+      else
+        std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer nil\n";
+    };
 
+    void getDataDeepCopy(TH1* _new){
+      std::string name = m_data->GetName();name+="_new";
+      _new = dynamic_cast<TH1*>(m_data->Clone(name.c_str()));
+    };
 
     /**
      * @param  _fileNames (comma-separated) file(s) name(s)
      * @param  _histoNames comma-separated list of histo names to load from _fileNames
      */
     void loadTemplates (const std::string& _fileNames = "", const std::string& _histoNames = "" ) ;
-  
+    void addTemplateHisto(TH1* _iHisto=0){
+      if(_iHisto)
+      {
+        if((m_templates.capacity()-m_templates.size())<1)
+          m_templates.reserve(m_templates.capacity()+1);
+        m_templates.push_back(_iHisto);
+      }
+      else
+        std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer nil\n";
+    }
 
-
+    void setTemplateHistos(const std::vector<TH1*>& _templates){
+      m_templates = _templates;
+    };
+    
+    void getTemplatesDeepCopy(std::vector<TH1*>&);
+    
     /**
      * @param  _data
      */
     virtual void getData (std::vector<FitterData>& _data );
 
+    void clear(){
+      delete m_data;
+      m_data = 0;
 
+      for (int i = 0; i < m_templates.size(); ++i)
+      {
+        if(!m_templates.at(i)){
+          delete m_templates.at(i);
+          m_templates.at(i) = 0;
+        }
+      
+      }
+      m_templates.clear();
+
+
+      for (int i = 0; i < m_files.size(); ++i)
+      {
+        if(!m_files.at(i)){
+          m_files.at(i)->Close();
+          delete m_files.at(i);
+          m_files.at(i) = 0;
+        }
+      
+      }
+      m_files.clear();
+  
+    };
 
   };
 }; // end of package namespace
