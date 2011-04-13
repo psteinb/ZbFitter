@@ -20,6 +20,7 @@
 #include "TString.h"
 #include "TRegexp.h"
 #include "TGraphErrors.h"
+#include "TCanvas.h"
 
 //small class
 class RunnerConfig {
@@ -247,6 +248,16 @@ void createScaledData(const std::vector<TH1*>& _vector,double _scale,TH1D* _data
 
 }
 
+std::string stripRootString(const std::string& _filename){
+  
+  size_t pos = _filename.find(".root");
+  if(pos!=std::string::npos)
+    return _filename.substr(0,pos);
+  else
+    return _filename;
+
+}
+
 int main(int argc, char* argv[])
 {
   //set root message level
@@ -318,6 +329,15 @@ int main(int argc, char* argv[])
 
   linResults.SetTitle(";scale factor;f_b");
   linResults.SaveAs(conf.p_outputfile.c_str());
+  std::string coreName = stripRootString(conf.p_outputfile);
+  
+  TCanvas myCanvas(coreName.c_str(),"",800,600);
+  myCanvas.Clear();
+  myCanvas.Draw();
+  linResults.Draw("AP+");
+  myCanvas.Update();
+  myCanvas.Print(".eps");
+
   return 0; 
    
 
