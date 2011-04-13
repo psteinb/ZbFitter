@@ -20,6 +20,7 @@
 #include "TString.h"
 #include "TRegexp.h"
 #include "TGraphErrors.h"
+#include "AtlasStyle.h"
 #include "TCanvas.h"
 
 //small class
@@ -260,6 +261,11 @@ std::string stripRootString(const std::string& _filename){
 
 int main(int argc, char* argv[])
 {
+  TStyle* aStyle =  AtlasStyle();
+  aStyle->SetOptStat(220002211);
+  gROOT->SetStyle("ATLAS");
+  gROOT->ForceStyle();
+
   //set root message level
   //gErrorIgnoreLevel = 2001;
   //
