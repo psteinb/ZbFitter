@@ -232,6 +232,7 @@ void FitterInputs::TH1Bundle::createFitterDataFromTH1(TH1* _hist, FitterData& _f
 
   //ship to _fdata
   _fdata.setContentAndWeights(m_content,m_weights);
+  _fdata.setHisto(_hist);
 }
 
 void FitterInputs::TH1Bundle::setupFitterData(){

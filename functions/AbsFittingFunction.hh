@@ -5,11 +5,15 @@
 #include <cassert>
 #include <iterator>
 #include <iostream>
+#include <utility>
 #include "FitterInputs/AbsHisto.hh"
 
 
 namespace functions {
 
+  /////////////////////////////////////////
+  ///  HELER FUNCTORS 
+  /////////////////////////////////////////
 
   struct compDataType : std::binary_function<FitterInputs::FitterData,FitterInputs::FitterData,bool>
   {
@@ -38,7 +42,7 @@ namespace functions {
   };  
 
   /**
-   * class AbsFittingFunction
+   * CLASS AbsFittingFunction
    * 
    */
 
@@ -46,6 +50,8 @@ namespace functions {
   {
     
     std::vector<double> m_parameters;
+    std::vector<double> m_parametersUp;
+    std::vector<double> m_parametersDown;
     int m_nParameters;
     std::vector<FitterInputs::FitterData> m_input;
 
@@ -61,6 +67,8 @@ namespace functions {
   public:
     AbsFittingFunction():
       m_parameters(),
+      m_parametersUp(),
+      m_parametersDown(),
       m_nParameters(3),
       m_input(),
       m_data(),
@@ -80,13 +88,36 @@ namespace functions {
       //std::assert( _params[(m_nParameters-1)] > 0);
       //copy parameters to vector
       m_parameters.resize(m_nParameters,0);
+      m_parametersUp.resize(m_nParameters,0);
+      m_parametersDown.resize(m_nParameters,0);
       std::copy(_params,_params+int(m_nParameters),m_parameters.begin());
+
+    };
+
+    virtual void setParametersAndErrors(const double* _params, const double* _up, const double* _down){
+
+      //shooting into the blind
+      //std::assert( _params[(m_nParameters-1)] > 0);
+      //copy parameters to vector
+      m_parameters.resize(m_nParameters,0);
+      std::copy(_params,_params+int(m_nParameters),m_parameters.begin());
+
+      m_parametersUp.resize(m_nParameters,0);
+      std::copy(_up,_up+int(m_nParameters),m_parametersUp.begin());
+
+      m_parametersDown.resize(m_nParameters,0);
+      std::copy(_down,_down+int(m_nParameters),m_parametersDown.begin());
 
     };
   
     virtual int getNumberOfParameters() const {return m_nParameters;};
     
     virtual double getParameterValue(const short& _idx) const {return m_parameters.at(_idx);};
+    virtual void getParameterValueWithError(const short& _idx, double& _value, double& _valueUp, double& _valueDown) const {
+      _value = m_parameters.at(_idx);
+      _valueUp = m_parametersUp.at(_idx);
+      _valueDown = m_parametersDown.at(_idx);
+    };
 
     virtual void print(){
       std::ostream_iterator<double> dblOutIt (std::cout,", ");

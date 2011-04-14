@@ -1,9 +1,9 @@
 RunFitter running on
 [-d] data path/file = ./extractedSV0.root
 [-o] output file name =
-/home/psteinb/development/sandbox/fitter/results/ensemble/results.50k.eps
+/amnt/remote/pkthafc.home/psteinb/development/sandbox/fitter/results/ensemble/results.50k.eps
 [-c] config file name =
-/home/psteinb/development/sandbox/fitter/functions/SimpleMaxLLH.env
+/amnt/remote/pkthafc.home/psteinb/development/sandbox/fitter/functions/SimpleMaxLLH.env
 [-m] message level = 3
 [-t] N(threads) = 1
 [-E] fitEngine = Minuit2
@@ -5017,4 +5017,4 @@ Info in <Minuit2>: Minuit2Minimizer::Minimize : Minimization did NOT converge, E
 Info in <Minuit2>: Minuit2Minimizer::Minimize : Minimization did NOT converge, Edm is above max
 Info in <Minuit2>: Minuit2Minimizer::Minimize : Minimization did NOT converge, Edm is above max
 Info in <Minuit2>: Minuit2Minimizer::Minimize : Minimization did NOT converge, Edm is above max
-Info in <TCanvas::Print>: eps file /home/psteinb/development/sandbox/fitter/results/ensemble/results.50k.eps has been created
+Info in <TCanvas::Print>: eps file /amnt/remote/pkthafc.home/psteinb/development/sandbox/fitter/results/ensemble/results.50k.eps has been created

@@ -15,9 +15,10 @@
 #include "core/FitCore.hh"
 #include "FitterInputs/TH1Bundle.hh"
 #include "FitterResults/HistoResult.hh"
+#include "FitterResults/LLHHisto.hh"
 #include "FitterResults/TermResult.hh"
 #include "functions/SimpleMaxLLH.hh"
-
+#include "AtlasStyle.h"
 //small class
 class RunnerConfig {
 
@@ -203,6 +204,12 @@ void RunnerConfig::setOpt(int inArgc, char** inArgv){
 
 int main(int argc, char* argv[])
 {
+  TStyle* aStyle =  AtlasStyle();
+  aStyle->SetOptStat(220002211);
+  gROOT->SetStyle("ATLAS");
+  gROOT->ForceStyle();
+
+
   //set root message level
   //gErrorIgnoreLevel = 2001;
   //
@@ -222,7 +229,7 @@ int main(int argc, char* argv[])
   functions::SimpleMaxLLH fcn;
   
   // ----- Results ------
-  FitterResults::AbsResult* hresult = new FitterResults::HistoResult(0,conf.p_msgLevel,"fitResult.root");
+  FitterResults::HistoResult* hresult = new FitterResults::HistoResult(0,conf.p_msgLevel,"fitResult.root");
   FitterResults::AbsResult* tresult = new FitterResults::TermResult(0,conf.p_msgLevel);
 
   // ----- FitterCore ------
@@ -230,13 +237,13 @@ int main(int argc, char* argv[])
   fitter.configureFromFile(conf.p_configFile);
   fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
   fitter.configureKeyWithValue("Mode",conf.p_fitMode);
-  
   fitter.setupMachinery();
 
   if(conf.p_msgLevel>2)
     fitter.fit(true);
   else
     fitter.fit(false);
+
 
   fitter.printTo(tresult);
   return 0; 

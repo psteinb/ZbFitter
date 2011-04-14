@@ -8,6 +8,7 @@
 #include <string>
 #include <cmath>
 #include <numeric>
+#include "TH1D.h"
 
 
 namespace FitterInputs {
@@ -29,6 +30,7 @@ class FitterData
   double m_sum;
   double m_sumError;
   std::vector<double> m_weights;
+  TH1D* m_histo;
 
   void calcSumAndUncertainty(){
     m_sum = std::accumulate(m_values.begin(), m_values.end(),0,std::plus<double>());
@@ -43,9 +45,14 @@ public:
     m_values(), 
     m_sum(0.),
     m_sumError(0.),
-    m_weights(){};
+    m_weights(),
+    m_histo(0)
+  {};
 
-  virtual ~FitterData(){};
+  virtual ~FitterData(){
+    // delete m_histo;
+    // m_histo = 0;
+  };
 
   void setContent(const std::vector<double>& _values){
     if(_values.size()){
@@ -57,6 +64,7 @@ public:
       catch(std::exception& thisExc){
         std::cerr << __FILE__ << "("<< __LINE__ <<")\t Could not calculate total sum and uncertainty\t> "<< thisExc.what() <<" <\n";
       }
+
     }
     else
       std::cerr << __FILE__ << "("<< __LINE__ <<")\t NOTHING TO COPY\n";
@@ -109,6 +117,14 @@ public:
   double getSum() const {return m_sum;};
   double getSumError() const {return m_sumError;};
   double getSumAndError(double& _sum,double& _err) const {_sum=m_sum;_err=m_sumError;};
+
+  const TH1D* getHisto() const {return m_histo;};
+  void setHisto(TH1* _histo) {
+    std::string histo = m_name;
+    histo += "_histo";
+    m_histo = dynamic_cast<TH1D*>(_histo->Clone(histo.c_str()));
+    m_histo->SetDirectory(0);
+  };
 };
 
 };

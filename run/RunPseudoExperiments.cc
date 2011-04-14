@@ -23,6 +23,7 @@
 #include "TCanvas.h"
 #include "AtlasStyle.h"
 #include "TRandom3.h"
+#include "TMath.h"
 
 //small class
 class RunnerConfig {
@@ -294,7 +295,9 @@ void createScaledData(const std::vector<TH1*>& _vector,
 
 int main(int argc, char* argv[])
 {
-
+  TStyle* aStyle =  AtlasStyle();
+  gROOT->SetStyle("ATLAS");
+  gROOT->ForceStyle();
 
   //set root message level
   //gErrorIgnoreLevel = 2001;
@@ -322,7 +325,7 @@ int main(int argc, char* argv[])
   functions::SimpleMaxLLH fcn;
   
   // ----- Results ------
-  FitterResults::HistoResult* result;
+  FitterResults::HistoResult* result = new FitterResults::HistoResult(0,conf.p_msgLevel,"pseudo.root");
 
   // ----- FitterCore ------
   TH1D pull_fb("fb",";pull fb;N",50,-5.,5.);
@@ -331,12 +334,26 @@ int main(int argc, char* argv[])
   
 
   std::vector<double> fitValues(m_templates.size(),0.);
-  std::vector<double> fitErrors(m_templates.size(),0.);
-  std::vector<double> metaValues(m_templates.size(),0.);
-  std::vector<double> metaErrors(m_templates.size(),0.);
+  std::vector<double> fitErrorsUp(m_templates.size(),0.);
+  std::vector<double> fitErrorsDown(m_templates.size(),0.);
 
+  std::vector<double> metaValues(m_templates.size(),0.);
+  std::vector<double> metaErrorsUp(m_templates.size(),0.);
+  std::vector<double> metaErrorsDown(m_templates.size(),0.);
+
+
+  double bPull=0;
+  double cPull=0;
+  double lPull=0;
+
+  double Up=0;
+  double Down=0;
+  bool status = false;
+  short goodMinosStatus = 0;
   for (int i = 0; i < (conf.p_nIter); ++i)
   {
+    status = false;
+    goodMinosStatus = 0;
     if(i % 50 == 0)
       std::cout << " iteration " << i << "/" << conf.p_nIter << std::endl;
 
@@ -347,8 +364,8 @@ int main(int argc, char* argv[])
     fitter.configureKeyWithValue("Mode",conf.p_fitMode);
     fitter.setupMachinery();
 
-    //run the fitter
-    if(conf.p_msgLevel<3)
+    //run the fitter on data from the input file
+    if(conf.p_msgLevel>3)
       fitter.fit(true);
     else
       fitter.fit(false);
@@ -357,32 +374,28 @@ int main(int argc, char* argv[])
     for (int i = 0; i < m_templates.size(); ++i)
     {
      metaValues[i] = fitter.getMinimizer()->X()[i];
-     metaErrors[i] = fitter.getMinimizer()->Errors()[i];
+     if(!fitter.getMinimizer()->Status()){
+       status = fitter.getMinosError(i,Down,Up);
+       goodMinosStatus += (short)status;
+     }
+     else
+       status = false;
+
+     if(status){
+       metaErrorsUp[i] = Up;
+       metaErrorsDown[i] = Down;
+     }
+     else{
+       metaErrorsUp[i] = fitter.getMinimizer()->Errors()[i];
+       metaErrorsDown[i] = 0.;
+     }
     }
 
-    ///////////////////////////////////////////
-    // Fill Plots
-    //
-
-    if(fitErrors[0]!=0.)
-      pull_fb.Fill((metaValues[0]-fitValues[0])/(fitErrors[0]));
-
-    if(fitErrors[1]!=0.)
-      pull_fc.Fill((metaValues[1]-fitValues[1])/(fitErrors[1]));
-
-    if(fitErrors[2]!=0.)
-      pull_fl.Fill((metaValues[2]-fitValues[2])/(fitErrors[2]));
-
-    ///////////////////////////////////////////
-    // prepare next iteration
-    //
-
-    //clear input
-    //input->clear();
     m_data->Reset("MICE");
     m_data->ResetStats();
 
-    //scale b content and add all histos
+    //scale b content and
+    // add all MC histos according to the just fitted fractions to give pseudo data
     createScaledData(m_templates,metaValues,m_data,myRand3.Poisson(dataIntegral));
 
     //reset the input
@@ -390,14 +403,79 @@ int main(int argc, char* argv[])
     input->setDataHisto(m_data);
     input->init();
 
+    //fit the pseudo data now
+    if(conf.p_msgLevel>3)
+      fitter.fit(true);
+    else
+      fitter.fit(false);
 
-    //clear or save results
-    fitValues = metaValues;
-    fitErrors = metaErrors;
-    metaValues.clear();
-    metaErrors.clear();
-    metaValues.resize(m_templates.size());
-    metaErrors.resize(m_templates.size());
+
+    //collect the results of the second fit
+    for (int i = 0; i < m_templates.size(); ++i)
+    {
+     fitValues[i] = fitter.getMinimizer()->X()[i];
+     if(!fitter.getMinimizer()->Status()){
+       status = fitter.getMinosError(i,Down,Up);
+       goodMinosStatus += (short)status;
+     }
+     else
+       status =false;
+
+     if(status){
+       fitErrorsUp[i] = Up;
+       fitErrorsDown[i] = Down;
+     }
+     else{
+       fitErrorsUp[i] = fitter.getMinimizer()->Errors()[i];
+       fitErrorsDown[i] = 0.;
+     }
+    }
+    ///////////////////////////////////////////
+    // Fill Plots
+    //
+    if(goodMinosStatus!=(2*fitter.getFunction()->getNumberOfParameters())){
+      bPull = (metaValues[0]-fitValues[0])/TMath::Sqrt((fitErrorsUp[0]*fitErrorsUp[0])+(metaErrorsUp[0]*metaErrorsUp[0]));
+      cPull = (metaValues[1]-fitValues[1])/TMath::Sqrt((fitErrorsUp[1]*fitErrorsUp[1])+(metaErrorsUp[1]*metaErrorsUp[1]));
+      lPull = (metaValues[2]-fitValues[2])/TMath::Sqrt((fitErrorsUp[2]*fitErrorsUp[2])+(metaErrorsUp[2]*metaErrorsUp[2]));
+    }
+    else{
+    if(fitValues[0]>metaValues[0])
+      bPull = (metaValues[0]-fitValues[0])/TMath::Sqrt((fitErrorsDown[0]*fitErrorsDown[0])+(metaErrorsDown[0]*metaErrorsDown[0]));
+    else
+      bPull = (metaValues[0]-fitValues[0])/TMath::Sqrt((fitErrorsUp[0]*fitErrorsUp[0])+(metaErrorsUp[0]*metaErrorsUp[0]));
+
+    if(fitValues[1]>metaValues[1])
+      cPull = (metaValues[1]-fitValues[1])/TMath::Sqrt((fitErrorsDown[1]*fitErrorsDown[1])+(metaErrorsDown[1]*metaErrorsDown[1]));
+    else
+      cPull = (metaValues[1]-fitValues[1])/TMath::Sqrt((fitErrorsUp[1]*fitErrorsUp[1])+(metaErrorsUp[1]*metaErrorsUp[1]));
+
+    if(fitValues[2]>metaValues[2])
+      lPull = (metaValues[2]-fitValues[2])/TMath::Sqrt((fitErrorsDown[2]*fitErrorsDown[2])+(metaErrorsDown[2]*metaErrorsDown[2]));
+    else
+      lPull = (metaValues[2]-fitValues[2])/TMath::Sqrt((fitErrorsUp[2]*fitErrorsUp[2])+(metaErrorsUp[2]*metaErrorsUp[2]));
+    }
+
+    pull_fb.Fill(bPull);
+
+    pull_fc.Fill(cPull);
+
+    pull_fl.Fill(lPull);
+
+
+    ///////////////////////////////////////////
+    // panic print
+    //
+    
+    if(TMath::Abs(bPull)>2.5 || TMath::Abs(cPull)>2.5 || TMath::Abs(cPull)>2.5){
+      std::ostringstream Name;
+      Name << "pseudoExperiment_";
+      Name << i << ".root";
+      result->setFileName(Name.str().c_str());
+      if(conf.p_msgLevel>4)
+        fitter.printTo(result);
+    }
+
+
     
   }
 

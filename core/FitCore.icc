@@ -27,22 +27,18 @@ void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
 
   m_minimizer->SetVariable(0,
                            m_environment.GetValue("Parameter1.Name","fb"), 
-                           m_environment.GetValue("Parameter1.Start",0.1),
-                           m_environment.GetValue("Parameter1.Step",0.1));
+                           m_environment.GetValue("Parameter1.Start",0.3),
+                           m_environment.GetValue("Parameter1.Step",0.05));
 
   m_minimizer->SetVariable(1,
                            m_environment.GetValue("Parameter2.Name","fc"), 
-                           m_environment.GetValue("Parameter2.Start",0.1),
-                           m_environment.GetValue("Parameter2.Step",0.1));
+                           m_environment.GetValue("Parameter2.Start",0.3),
+                           m_environment.GetValue("Parameter2.Step",0.05));
 
   m_minimizer->SetVariable(2,
                            m_environment.GetValue("Parameter3.Name","fl"), 
-                           m_environment.GetValue("Parameter3.Start",0.1),
-                           m_environment.GetValue("Parameter3.Step",0.1));
-  
-
-
-
+                           m_environment.GetValue("Parameter3.Start",0.3),
+                           m_environment.GetValue("Parameter3.Step",0.05));
   
 }
 
@@ -55,7 +51,7 @@ void core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
 
   if(_verbose){
     m_fcn.print();
-    m_minimizer->SetPrintLevel(1001);
+    m_minimizer->SetPrintLevel(2002);
   }
   /////////////////////////////////////////
   /// provide the Likelihood function
@@ -90,7 +86,18 @@ void core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   if(_verbose){
   std::cout << "FitCore::fit \t  CpuTime = \t"<< std::setw(10) << std::setprecision(6)<< watch.CpuTime() << "\n";
   std::cout << "FitCore::fit \t  RealTime = \t"<< std::setw(10) << std::setprecision(4)<< watch.RealTime() << "\n";
+  double Up =1;
+  double Down =-1;
+  int status = -1;
+  bool minos = m_minimizer->GetMinosError(0,Down,Up,status);
+  
+  std::cout << ((minos) ? "DID " : "DIDN'T " )<< "PERFORM MINOS\t: up = "<< Up 
+            << ", down = " << Down << "\t| " << status << std::endl;
+  
   }
+  
+  
+
 }
 
 

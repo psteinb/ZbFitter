@@ -150,6 +150,15 @@ namespace core {
         return false;
     }
 
+    std::string getConfigured (const std::string& _name ) const
+    {
+      std::map<std::string,std::string>::const_iterator cfgItr = m_config.find(_name);
+      if(cfgItr!=m_config.end())
+        return *(cfgItr);
+      else
+        return "";
+    }
+
     /**
      * set the configuration directly
      * @return bool
@@ -198,6 +207,7 @@ namespace core {
     }
 
     ROOT::Math::Minimizer* getMinimizer(){return m_minimizer;}
+    const Fcn* getFunction() const {return &m_fcn;}
 
     int getIntFromString(const std::string& _text){
       int value =0;
@@ -221,6 +231,10 @@ namespace core {
         return value;
     }
 
+
+    bool getMinosError(const int& _idx, double& _Down, double& _Up){
+      return m_minimizer->GetMinosError(_idx,_Down,_Up);
+    }
   };
 }; // end of package namespace
 
