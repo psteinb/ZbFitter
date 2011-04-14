@@ -65,7 +65,7 @@ public:
     return text.str();
   }
 
-  std::string getParameterResult(const int&);
+  std::string getParameterResult(const int&,double);
   
 
 

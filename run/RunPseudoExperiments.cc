@@ -336,24 +336,22 @@ int main(int argc, char* argv[])
   std::vector<double> fitValues(m_templates.size(),0.);
   std::vector<double> fitErrorsUp(m_templates.size(),0.);
   std::vector<double> fitErrorsDown(m_templates.size(),0.);
+  std::vector<int>    fitErrorsStatus(m_templates.size(),0.);
 
   std::vector<double> metaValues(m_templates.size(),0.);
   std::vector<double> metaErrorsUp(m_templates.size(),0.);
   std::vector<double> metaErrorsDown(m_templates.size(),0.);
+  std::vector<int>    metaErrorsStatus(m_templates.size(),0.);
 
 
   double bPull=0;
   double cPull=0;
   double lPull=0;
 
-  double Up=0;
-  double Down=0;
-  bool status = false;
-  short goodMinosStatus = 0;
   for (int i = 0; i < (conf.p_nIter); ++i)
   {
-    status = false;
-    goodMinosStatus = 0;
+    
+    
     if(i % 50 == 0)
       std::cout << " iteration " << i << "/" << conf.p_nIter << std::endl;
 
@@ -371,24 +369,10 @@ int main(int argc, char* argv[])
       fitter.fit(false);
 
     //collect the results
+    fitter.getMinosErrorSet(metaErrorsStatus,metaErrorsDown,metaErrorsUp);
     for (int i = 0; i < m_templates.size(); ++i)
     {
      metaValues[i] = fitter.getMinimizer()->X()[i];
-     if(!fitter.getMinimizer()->Status()){
-       status = fitter.getMinosError(i,Down,Up);
-       goodMinosStatus += (short)status;
-     }
-     else
-       status = false;
-
-     if(status){
-       metaErrorsUp[i] = Up;
-       metaErrorsDown[i] = Down;
-     }
-     else{
-       metaErrorsUp[i] = fitter.getMinimizer()->Errors()[i];
-       metaErrorsDown[i] = 0.;
-     }
     }
 
     m_data->Reset("MICE");
@@ -411,34 +395,21 @@ int main(int argc, char* argv[])
 
 
     //collect the results of the second fit
+    fitter.getMinosErrorSet(fitErrorsStatus,fitErrorsDown,fitErrorsUp);
     for (int i = 0; i < m_templates.size(); ++i)
     {
      fitValues[i] = fitter.getMinimizer()->X()[i];
-     if(!fitter.getMinimizer()->Status()){
-       status = fitter.getMinosError(i,Down,Up);
-       goodMinosStatus += (short)status;
-     }
-     else
-       status =false;
-
-     if(status){
-       fitErrorsUp[i] = Up;
-       fitErrorsDown[i] = Down;
-     }
-     else{
-       fitErrorsUp[i] = fitter.getMinimizer()->Errors()[i];
-       fitErrorsDown[i] = 0.;
-     }
     }
+
     ///////////////////////////////////////////
     // Fill Plots
     //
-    if(goodMinosStatus!=(2*fitter.getFunction()->getNumberOfParameters())){
-      bPull = (metaValues[0]-fitValues[0])/TMath::Sqrt((fitErrorsUp[0]*fitErrorsUp[0])+(metaErrorsUp[0]*metaErrorsUp[0]));
-      cPull = (metaValues[1]-fitValues[1])/TMath::Sqrt((fitErrorsUp[1]*fitErrorsUp[1])+(metaErrorsUp[1]*metaErrorsUp[1]));
-      lPull = (metaValues[2]-fitValues[2])/TMath::Sqrt((fitErrorsUp[2]*fitErrorsUp[2])+(metaErrorsUp[2]*metaErrorsUp[2]));
-    }
-    else{
+    // if(goodMinosStatus!=(2*fitter.getFunction()->getNumberOfParameters())){
+    //   bPull = (metaValues[0]-fitValues[0])/TMath::Sqrt((fitErrorsUp[0]*fitErrorsUp[0])+(metaErrorsUp[0]*metaErrorsUp[0]));
+    //   cPull = (metaValues[1]-fitValues[1])/TMath::Sqrt((fitErrorsUp[1]*fitErrorsUp[1])+(metaErrorsUp[1]*metaErrorsUp[1]));
+    //   lPull = (metaValues[2]-fitValues[2])/TMath::Sqrt((fitErrorsUp[2]*fitErrorsUp[2])+(metaErrorsUp[2]*metaErrorsUp[2]));
+    // }
+    // else{
     if(fitValues[0]>metaValues[0])
       bPull = (metaValues[0]-fitValues[0])/TMath::Sqrt((fitErrorsDown[0]*fitErrorsDown[0])+(metaErrorsDown[0]*metaErrorsDown[0]));
     else
@@ -453,7 +424,7 @@ int main(int argc, char* argv[])
       lPull = (metaValues[2]-fitValues[2])/TMath::Sqrt((fitErrorsDown[2]*fitErrorsDown[2])+(metaErrorsDown[2]*metaErrorsDown[2]));
     else
       lPull = (metaValues[2]-fitValues[2])/TMath::Sqrt((fitErrorsUp[2]*fitErrorsUp[2])+(metaErrorsUp[2]*metaErrorsUp[2]));
-    }
+    //}
 
     pull_fb.Fill(bPull);
 

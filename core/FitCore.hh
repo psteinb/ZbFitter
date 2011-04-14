@@ -56,8 +56,12 @@ namespace core {
     //config file
     std::string m_configFile;
     TEnv        m_environment;
-    /**
-     */
+
+    //minos errors
+    std::vector<int>    m_minosStatus		;
+    std::vector<double> m_minosUp		;
+    std::vector<double> m_minosDown		;
+
     void printConfig ( )
     {
       std::map<std::string,std::string>::const_iterator cfgItr = m_config.begin();
@@ -73,6 +77,7 @@ namespace core {
       m_fcn.setupFromInput(m_resources);
     };
 
+    void runMinos();
 
   public:
 
@@ -87,7 +92,10 @@ namespace core {
       m_config(),
       m_minimizer(0),
       m_configFile(""),
-      m_environment()
+      m_environment(),
+      m_minosStatus(),
+      m_minosUp(),
+      m_minosDown()
     {};
     /**
      * Empty Destructor
@@ -232,9 +240,28 @@ namespace core {
     }
 
 
-    bool getMinosError(const int& _idx, double& _Down, double& _Up){
-      return m_minimizer->GetMinosError(_idx,_Down,_Up);
+    int getMinosError(const int& _idx, double& _Down, double& _Up){
+      _Down = m_minosDown.at(_idx);
+      _Up   = m_minosUp.at(_idx);
+      return m_minosStatus.at(_idx);
     }
+    
+    void getMinosErrorSet(std::vector<int>& _Status, 
+                          std::vector<double>& _Down, 
+                          std::vector<double>& _Up){
+
+      _Down.clear();_Down.reserve(m_minosDown.size());
+      _Up.clear();_Up.reserve(m_minosUp.size());
+      _Status.clear();_Status.reserve(m_minosStatus.size());
+
+      _Down.assign(m_minosDown.begin(),m_minosDown.end());
+      _Up.assign(m_minosUp.begin(),m_minosUp.end());
+      _Status.assign(m_minosStatus.begin(),m_minosStatus.end());
+      
+
+
+    }
+
   };
 }; // end of package namespace
 

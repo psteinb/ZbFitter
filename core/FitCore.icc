@@ -86,17 +86,9 @@ void core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   if(_verbose){
   std::cout << "FitCore::fit \t  CpuTime = \t"<< std::setw(10) << std::setprecision(6)<< watch.CpuTime() << "\n";
   std::cout << "FitCore::fit \t  RealTime = \t"<< std::setw(10) << std::setprecision(4)<< watch.RealTime() << "\n";
-  double Up =1;
-  double Down =-1;
-  int status = -1;
-  bool minos = m_minimizer->GetMinosError(0,Down,Up,status);
-  
-  std::cout << ((minos) ? "DID " : "DIDN'T " )<< "PERFORM MINOS\t: up = "<< Up 
-            << ", down = " << Down << "\t| " << status << std::endl;
-  
   }
   
-  
+  this->runMinos();
 
 }
 
@@ -111,6 +103,32 @@ void core::FitCore<Fcn,Scr,Res>::printTo(Res* _result=0){
   }
   else
     throw std::runtime_error("FitCore::printTo AbsResult pointer invalid");
+}
+
+template <class Fcn, class Scr, class Res>
+void core::FitCore<Fcn,Scr,Res>::runMinos(){
+
+  m_minosStatus   .resize(m_fcn.getNumberOfParameters(),0);
+  m_minosUp       .resize(m_fcn.getNumberOfParameters(),0);
+  m_minosDown     .resize(m_fcn.getNumberOfParameters(),0);
+  bool minosStatus = false;
+  double dUp = 0;
+  double dDown = 0;
+  int iStatus = 0;
+
+  for (int i = 0; i < m_fcn.getNumberOfParameters(); ++i)
+  {
+    minosStatus = m_minimizer->GetMinosError(i,dDown,dUp,iStatus);
+    m_minosDown[i] = dDown;
+    m_minosUp[i] = dUp;
+    
+    if(!minosStatus){
+      m_minosStatus[i] = (-1)*iStatus;
+      std::cout << "MINOS\tFAILED TO GET ERRORS FOR: parameter " << i << "\t["<<m_minosStatus[i] <<"]\n";}
+    else
+      m_minosStatus[i] = iStatus;
+  }
+
 }
 //  
 // Methods

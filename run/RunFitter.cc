@@ -238,14 +238,26 @@ int main(int argc, char* argv[])
   fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
   fitter.configureKeyWithValue("Mode",conf.p_fitMode);
   fitter.setupMachinery();
+  std::vector<double> Up;
+  std::vector<double> Down;
+  std::vector<int> Status;
 
-  if(conf.p_msgLevel>2)
+  
+
+  if(conf.p_msgLevel>2){
     fitter.fit(true);
+  }
   else
     fitter.fit(false);
 
+  
+  
 
   fitter.printTo(tresult);
+    fitter.getMinosErrorSet(Status,Down,Up);
+  std::cout << "b:\t(up) "<< Up[0] << "\t(down) " << Down[0] << std::endl;
+  std::cout << "c:\t(up) "<< Up[1] << "\t(down) " << Down[1] << std::endl;
+  std::cout << "l:\t(up) "<< Up[2] << "\t(down) " << Down[2] << std::endl;
   return 0; 
    
 

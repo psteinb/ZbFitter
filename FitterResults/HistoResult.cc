@@ -80,9 +80,9 @@ void FitterResults::HistoResult::print(){
   myC.cd(2);
   TPaveText mtext(0,0,1,1,"ARC");
 
-  mtext.AddText(getParameterResult(0).c_str());
-  mtext.AddText(getParameterResult(1).c_str());
-  mtext.AddText(getParameterResult(2).c_str());
+  mtext.AddText(getParameterResult(0,fitterT0->Integral()).c_str());
+  mtext.AddText(getParameterResult(1,fitterT1->Integral()).c_str());
+  mtext.AddText(getParameterResult(2,fitterT2->Integral()).c_str());
   mtext.Draw();
 
   myC.Update();
@@ -92,7 +92,7 @@ void FitterResults::HistoResult::print(){
   newFile->Close();
 }
 
-std::string FitterResults::HistoResult::getParameterResult(const int& _idx){
+std::string FitterResults::HistoResult::getParameterResult(const int& _idx, double _norm=1.){
   std::ostringstream _text;
   if(_idx>=getFunction()->getNumberOfParameters()){
     _text << ">> variable unknown <<";
@@ -100,15 +100,15 @@ std::string FitterResults::HistoResult::getParameterResult(const int& _idx){
   }
   else{
     _text << getMinimizer()->VariableName(_idx) << " :\t(";
-    _text << getMinimizer()->X()[_idx];
+    _text << _norm*getMinimizer()->X()[_idx];
     double Up=0;
     double Down=0;
 
     bool minosStatus = getMinimizer()->GetMinosError(_idx,Up,Down);
     if(!minosStatus)
-      _text << "\t+/-\t" << getMinimizer()->Errors()[_idx] << ")";
+      _text << "\t+/-\t" << _norm*getMinimizer()->Errors()[_idx] << ")";
     else{
-      _text << "\t+ " << Up << "\t- "<<Down << ")";
+      _text << "\t+ " << _norm*Up << "\t- "<<_norm*Down << ")";
     }
   }
     

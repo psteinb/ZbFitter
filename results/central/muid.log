@@ -2,13 +2,13 @@
 RunFitter running on
 [-d] data path/file = ./extractedSV0.root
 [-o] output file name =
-none given
+migrad.muid.root
 [-c] config file name =
 /home/psteinb/development/ZbFitter/functions/SimpleMaxLLH.env
 [-m] message level = 3
 [-t] N(threads) = 1
 [-t] fitEngine = Minuit2
-[-t] fitMode = MIGRAD
+[-t] fitMode = Migrad
 [-D] dataTitle = data_muid
 [-D] tempTitle = z_muid_trueB,z_muid_trueC,z_muid_trueL
 TH1Bundle::loadTemplatesFromOneFile	loaded z_muid_trueB from ./extractedSV0.root
@@ -73,23 +73,38 @@ Nfcn  = 138
 fb	  = 0.11721	 +/-  0.0511626
 fc	  = 0.449308	 +/-  0.247434
 fl	  = 0.274571	 +/-  0.399531
-Info in <TGraph::SaveAs>: ROOT file fitResult.root has been created
+Minos: Lower error for parameter 0  :  -0.0463848
+Minos: Upper error for parameter 0  :  0.0563997
+Minos: Lower error for parameter 1  :  -0.246293
+Minos: Upper error for parameter 1  :  0.253599
+Minos: Lower error for parameter 2  :  -0.387502
+Minos: Upper error for parameter 2  :  0.41891
+Info in <TCanvas::Print>: eps file ./fitResult.eps has been created
 FitCore::fit 	  CpuTime = 	         0
-FitCore::fit 	  RealTime = 	  0.002633
+FitCore::fit 	  RealTime = 	  0.002632
+Minos: Lower error for parameter 0  :  -0.04638
+Minos: Upper error for parameter 0  :  0.0564
+Minos: Lower error for parameter 1  :  -0.2463
+Minos: Upper error for parameter 1  :  0.2536
+Minos: Lower error for parameter 2  :  -0.3875
+Minos: Upper error for parameter 2  :  0.4189
 fb:	28.6	+/-	12.48
 fc:	34.6	+/-	19.05
 fl:	8.237	+/-	11.99
+b:	(up) 0.0564	(down) -0.04638
+c:	(up) 0.2536	(down) -0.2463
+l:	(up) 0.4189	(down) -0.3875
 \n>>MINOS
 RunFitter running on
 [-d] data path/file = ./extractedSV0.root
 [-o] output file name =
-none given
+minos.muid.root
 [-c] config file name =
 /home/psteinb/development/ZbFitter/functions/SimpleMaxLLH.env
 [-m] message level = 3
 [-t] N(threads) = 1
 [-t] fitEngine = Minuit2
-[-t] fitMode = MINOS
+[-t] fitMode = Migrad
 [-D] dataTitle = data_muid
 [-D] tempTitle = z_muid_trueB,z_muid_trueC,z_muid_trueL
 TH1Bundle::loadTemplatesFromOneFile	loaded z_muid_trueB from ./extractedSV0.root
@@ -154,24 +169,39 @@ Nfcn  = 138
 fb	  = 0.11721	 +/-  0.0511626
 fc	  = 0.449308	 +/-  0.247434
 fl	  = 0.274571	 +/-  0.399531
-Info in <TGraph::SaveAs>: ROOT file fitResult.root has been created
+Minos: Lower error for parameter 0  :  -0.0463848
+Minos: Upper error for parameter 0  :  0.0563997
+Minos: Lower error for parameter 1  :  -0.246293
+Minos: Upper error for parameter 1  :  0.253599
+Minos: Lower error for parameter 2  :  -0.387502
+Minos: Upper error for parameter 2  :  0.41891
+Info in <TCanvas::Print>: eps file ./fitResult.eps has been created
 FitCore::fit 	  CpuTime = 	         0
-FitCore::fit 	  RealTime = 	   0.00259
+FitCore::fit 	  RealTime = 	  0.002715
+Minos: Lower error for parameter 0  :  -0.04638
+Minos: Upper error for parameter 0  :  0.0564
+Minos: Lower error for parameter 1  :  -0.2463
+Minos: Upper error for parameter 1  :  0.2536
+Minos: Lower error for parameter 2  :  -0.3875
+Minos: Upper error for parameter 2  :  0.4189
 fb:	28.6	+/-	12.48
 fc:	34.6	+/-	19.05
 fl:	8.237	+/-	11.99
+b:	(up) 0.0564	(down) -0.04638
+c:	(up) 0.2536	(down) -0.2463
+l:	(up) 0.4189	(down) -0.3875
 \n>>MINOS w/o background
 RunFitter running on
 [-d] data path/file = ./extractedSV0.root
 [-o] output file name =
-none given
+minos.muidttbar.root
 [-c] config file name =
 /home/psteinb/development/ZbFitter/functions/SimpleMaxLLH.env
 [-m] message level = 3
 [-t] N(threads) = 1
 [-t] fitEngine = Minuit2
-[-t] fitMode = MINOS
-[-D] dataTitle = data_staco_minusttbar
+[-t] fitMode = Migrad
+[-D] dataTitle = data_muid_minusttbar
 [-D] tempTitle = z_muid_trueB,z_muid_trueC,z_muid_trueL
 Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
 TH1Bundle::loadTemplatesFromOneFile	loaded z_muid_trueB from ./extractedSV0.root
@@ -180,69 +210,76 @@ TH1Bundle::loadTemplatesFromOneFile	loaded z_muid_trueL from ./extractedSV0.root
 Parameters
 
 Minuit2Minimizer: Minimize with max iterations 1000000 edmval 0.01 strategy 1
-Number of iterations 13
+Number of iterations 11
 ----------> Iteration 0
-            FVAL = -75.6222191698 Edm = 137.68515997 Nfcn = 13
+            FVAL = -80.4717526362 Edm = 148.357484 Nfcn = 13
             Error matrix change = 1
             Parameters :  p0 = 0.01 p1 = 0.01 p2 = 0.01
 ----------> Iteration 1
-            FVAL = -209.510440807 Edm = 9.2868503456 Nfcn = 26
-            Error matrix change = 0.566765
-            Parameters :  p0 = 0.0237786 p1 = 0.0452541 p2 = 0.0631619
+            FVAL = -225.470816115 Edm = 10.2766947552 Nfcn = 26
+            Error matrix change = 0.566966
+            Parameters :  p0 = 0.0237058 p1 = 0.0455664 p2 = 0.0635388
 ----------> Iteration 2
-            FVAL = -321.483336745 Edm = 0.00123535350425 Nfcn = 46
-            Error matrix change = 0.732062
-            Parameters :  p0 = 0.114143 p1 = 0.265088 p2 = 0.372234
+            FVAL = -353.989650221 Edm = 0.00123781485699 Nfcn = 46
+            Error matrix change = 0.734554
+            Parameters :  p0 = 0.121438 p1 = 0.283679 p2 = 0.397817
 ----------> Iteration 3
-            FVAL = -321.559492419 Edm = 0.00054848690339 Nfcn = 55
-            Error matrix change = 0.775236
-            Parameters :  p0 = 0.117875 p1 = 0.275038 p2 = 0.385813
+            FVAL = -354.114220454 Edm = 0.000147992543801 Nfcn = 55
+            Error matrix change = 0.780366
+            Parameters :  p0 = 0.126506 p1 = 0.296481 p2 = 0.415423
 ----------> Iteration 4
-            FVAL = -321.589645332 Edm = 0.0267649505847 Nfcn = 66
-            Error matrix change = 0.693856
-            Parameters :  p0 = 0.118509 p1 = 0.285591 p2 = 0.396469
+            FVAL = -354.11531931 Edm = 0.000867391607198 Nfcn = 64
+            Error matrix change = 0.482975
+            Parameters :  p0 = 0.126906 p1 = 0.297989 p2 = 0.417125
 ----------> Iteration 5
-            FVAL = -322.267764905 Edm = 0.000426216019613 Nfcn = 77
-            Error matrix change = 0.69765
-            Parameters :  p0 = 0.0793489 p1 = 0.372346 p2 = 0.433994
+            FVAL = -354.379020755 Edm = 0.000172846996396 Nfcn = 77
+            Error matrix change = 0.648867
+            Parameters :  p0 = 0.101239 p1 = 0.373765 p2 = 0.416443
 ----------> Iteration 6
-            FVAL = -322.268383368 Edm = 0.000158224781302 Nfcn = 85
-            Error matrix change = 0.383374
-            Parameters :  p0 = 0.0800545 p1 = 0.372148 p2 = 0.434479
+            FVAL = -354.379307246 Edm = 7.1002339525e-05 Nfcn = 85
+            Error matrix change = 0.386359
+            Parameters :  p0 = 0.101897 p1 = 0.372838 p2 = 0.417014
 ----------> Iteration 7
-            FVAL = -322.269694176 Edm = 0.00128222927672 Nfcn = 94
-            Error matrix change = 0.324167
-            Parameters :  p0 = 0.0788883 p1 = 0.376786 p2 = 0.43634
+            FVAL = -354.382052887 Edm = 0.00264727987924 Nfcn = 96
+            Error matrix change = 0.398394
+            Parameters :  p0 = 0.100493 p1 = 0.381237 p2 = 0.415974
 ----------> Iteration 8
-            FVAL = -322.452489021 Edm = 0.00269314476666 Nfcn = 107
-            Error matrix change = 0.62994
-            Parameters :  p0 = 0.0790545 p1 = 0.406834 p2 = 0.354426
+            FVAL = -354.514452012 Edm = 0.000299038284311 Nfcn = 107
+            Error matrix change = 0.613241
+            Parameters :  p0 = 0.0998594 p1 = 0.438166 p2 = 0.270534
 ----------> Iteration 9
-            FVAL = -322.581863312 Edm = 0.00151369353234 Nfcn = 114
-            Error matrix change = 0.341222
-            Parameters :  p0 = 0.0740959 p1 = 0.477774 p2 = 0.213481
+            FVAL = -354.514766192 Edm = 9.27773237501e-07 Nfcn = 114
+            Error matrix change = 0.320051
+            Parameters :  p0 = 0.099164 p1 = 0.440324 p2 = 0.271882
 ----------> Iteration 10
-            FVAL = -322.58323699 Edm = 4.94914249269e-06 Nfcn = 121
-            Error matrix change = 0.185667
-            Parameters :  p0 = 0.0735119 p1 = 0.479802 p2 = 0.21966
-----------> Iteration 11
-            FVAL = -322.583241803 Edm = 2.48705291902e-09 Nfcn = 128
-            Error matrix change = 0.102787
-            Parameters :  p0 = 0.0735225 p1 = 0.480095 p2 = 0.218877
-----------> Iteration 12
-            FVAL = -322.583241803 Edm = 2.86078620726e-09 Nfcn = 150
+            FVAL = -354.514766192 Edm = 8.76972660263e-07 Nfcn = 134
             Error matrix change = 0
-            Parameters :  p0 = 0.0735225 p1 = 0.480095 p2 = 0.218877
+            Parameters :  p0 = 0.099164 p1 = 0.440324 p2 = 0.271882
 Minuit2Minimizer : Valid minimum - status = 0
-FVAL  = -322.583241803462613
-Edm   = 2.86078620725972462e-09
-Nfcn  = 150
-fb	  = 0.0735225	 +/-  0.042665
-fc	  = 0.480095	 +/-  0.225999
-fl	  = 0.218877	 +/-  0.380274
-Info in <TGraph::SaveAs>: ROOT file fitResult.root has been created
+FVAL  = -354.514766192468983
+Edm   = 8.76972660262739944e-07
+Nfcn  = 134
+fb	  = 0.099164	 +/-  0.0477911
+fc	  = 0.440324	 +/-  0.237214
+fl	  = 0.271882	 +/-  0.389807
+Minos: Lower error for parameter 0  :  -0.0429173
+Minos: Upper error for parameter 0  :  0.0530614
+Minos: Lower error for parameter 1  :  -0.235637
+Minos: Upper error for parameter 1  :  0.243467
+Minos: Lower error for parameter 2  :  -0.377886
+Minos: Upper error for parameter 2  :  0.408567
+Info in <TCanvas::Print>: eps file ./fitResult.eps has been created
 FitCore::fit 	  CpuTime = 	         0
-FitCore::fit 	  RealTime = 	   0.00264
-fb:	17.94	+/-	10.41
-fc:	36.97	+/-	17.4
-fl:	6.566	+/-	11.41
+FitCore::fit 	  RealTime = 	  0.002541
+Minos: Lower error for parameter 0  :  -0.04292
+Minos: Upper error for parameter 0  :  0.05306
+Minos: Lower error for parameter 1  :  -0.2356
+Minos: Upper error for parameter 1  :  0.2435
+Minos: Lower error for parameter 2  :  -0.3779
+Minos: Upper error for parameter 2  :  0.4086
+fb:	24.2	+/-	11.66
+fc:	33.9	+/-	18.27
+fl:	8.156	+/-	11.69
+b:	(up) 0.05306	(down) -0.04292
+c:	(up) 0.2435	(down) -0.2356
+l:	(up) 0.4086	(down) -0.3779
