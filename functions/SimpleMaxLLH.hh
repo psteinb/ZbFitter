@@ -44,16 +44,7 @@ namespace functions {
     }
   
 
-    inline double getTotalMCFractionPerBin(const short& _bin){
-      double value =0;
-      
-      for (short i=0; i < this->getNumberOfParameters(); ++i)
-      {
-        value+=((getParameterValue(i))*(m_templates.at(i).getContent()->at(_bin)));
-      }
-      
-      return value;
-    };
+    double getTotalMCFractionPerBin(const short& _bin);
 
 
 
