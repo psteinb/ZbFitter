@@ -59,6 +59,7 @@ namespace FitterInputs {
     std::vector<TH1*> m_templates;
     std::vector<TFile*> m_files;
 
+
     //open file at _fileName and add the TFile object to m_files
     TFile* openFile(const std::string& _fileNames = "");
 
@@ -86,7 +87,7 @@ namespace FitterInputs {
     /**
      * Empty Constructor
      */
-    TH1Bundle ( );
+    TH1Bundle (  );
 
     /**
      * Empty Destructor
@@ -101,7 +102,7 @@ namespace FitterInputs {
      * @param  _histoNames single plot 
      * from files
      */
-    void loadData (const std::string& _fileName = "", const std::string& _histoNames = "" ) ;
+    void loadData (const std::string& _fileName = "", const std::string& _histoNames = "", const short& _rebin=1 ) ;
     void setDataHisto (TH1* _iHisto=0) {
       if(_iHisto){
         //delete this->m_data;
@@ -120,7 +121,7 @@ namespace FitterInputs {
      * @param  _fileNames (comma-separated) file(s) name(s)
      * @param  _histoNames comma-separated list of histo names to load from _fileNames
      */
-    void loadTemplates (const std::string& _fileNames = "", const std::string& _histoNames = "" ) ;
+    void loadTemplates (const std::string& _fileNames = "", const std::string& _histoNames = "", const short& _rebin=1 ) ;
     void addTemplateHisto(TH1* _iHisto=0){
       if(_iHisto)
       {

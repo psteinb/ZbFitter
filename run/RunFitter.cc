@@ -40,7 +40,8 @@ public:
   int         p_msgLevel;
   int         p_threads;
   bool        p_giveHelp;
-  
+  int         p_rebin;
+
   RunnerConfig();
   RunnerConfig(int , char**);
   void printHelp();
@@ -62,7 +63,8 @@ RunnerConfig::RunnerConfig():
   p_tempTitle("mcb,mcc,mcl"),
   p_msgLevel(3),
   p_threads(1),
-  p_giveHelp(false)
+  p_giveHelp(false),
+  p_rebin(1)
 {}
 
 //constructor with initialisation
@@ -77,7 +79,8 @@ RunnerConfig::RunnerConfig(int inArgc, char** inArgv):
   p_tempTitle("mcb,mcc,mcl"),
   p_msgLevel(3),
   p_threads(1),
-  p_giveHelp(false)
+  p_giveHelp(false),
+  p_rebin(1)
 {
 
   parse();
@@ -88,7 +91,7 @@ void RunnerConfig::parse(){
 
 
   int opt = 0;
-  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:E:M:D:T:h" ))!=-1 ){
+  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:r:E:M:D:T:h" ))!=-1 ){
     std::istringstream instream;
     std::ostringstream outstream;
     size_t found;
@@ -126,6 +129,18 @@ void RunnerConfig::parse(){
       }
 
       break;
+    case 'r':
+      instream.str(optarg);
+      if( !(instream >> meta) ){
+        std::cerr << "RunFitter \t invalid argument format for [-r]" << std::endl;
+        p_rebin = 1;
+      }
+      else{
+        p_rebin = meta;
+      }
+
+      break;
+
     case 't':
       instream.str(optarg);
       if( !(instream >> meta) ){
@@ -164,6 +179,7 @@ void RunnerConfig::printHelp(){
   std::cout << "\t -c <bar.env> set TEnv style config file" << std::endl;
   std::cout << "\t -m set message level (0=VERBOSE,..,2=INFO,..,5=ERROR)" << std::endl;
   std::cout << "\t -t <num> number of threads to use " << std::endl;
+  std::cout << "\t -r <Count> Rebin Count to call on input histos " << std::endl;
   std::cout << "\t -E <TMinuitEngine> define fit engine" << std::endl;
   std::cout << "\t -M <TMinuitMode> define fit mode" << std::endl;
   std::cout << "\t -D <ObjectName> define data object to retrieve from root file" << std::endl;
@@ -183,8 +199,9 @@ void RunnerConfig::printConf(){
   std::cout << "[-c] config file name =\n"    << ((!p_configFile.empty()) ? p_configFile.c_str() : "none given") << std::endl;
   std::cout << "[-m] message level = "<< p_msgLevel << std::endl;
   std::cout << "[-t] N(threads) = "<< p_threads << std::endl;
-  std::cout << "[-t] fitEngine = "<< p_fitEngine << std::endl;
-  std::cout << "[-t] fitMode = "<< p_fitMode << std::endl;
+  std::cout << "[-E] fitEngine = "<< p_fitEngine << std::endl;
+  std::cout << "[-M] fitMode = "<< p_fitMode << std::endl;
+  std::cout << "[-r] rebin = "<< p_rebin << std::endl;
   std::cout << "[-D] dataTitle = "<< p_dataTitle << std::endl;
   std::cout << "[-D] tempTitle = "<< p_tempTitle << std::endl;
   
@@ -222,8 +239,8 @@ int main(int argc, char* argv[])
 
   // ----- INPUT ----- 
   FitterInputs::TH1Bundle* input = new FitterInputs::TH1Bundle();
-  input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str());
-  input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str());
+  input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str(),conf.p_rebin);
+  input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str(),conf.p_rebin);
 
   // ----- Templates ----- 
   functions::SimpleMaxLLH fcn;

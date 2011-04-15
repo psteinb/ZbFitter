@@ -42,7 +42,7 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
   
   //I set this by hand for testing, the following is the Lumi normalisation factor
   // for NNLO Z+jets at 7TeV for 35.484pb-1 of data 
-  double LumiNorm = 0.1982;
+
   
   //total number of events found in data
   double sumData = std::accumulate(m_data.getContent()->begin(), 
@@ -55,7 +55,7 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
   double sumTemp = 0.;
   for (short tidx = 0; tidx < m_data.getContent()->size(); ++tidx)
   {
-    sumTemp += (LumiNorm*this->getTotalMCFractionPerBin(tidx));
+    sumTemp += (this->getTotalMCFractionPerBin(tidx));
   }
 
   //the likelihood function
@@ -71,7 +71,6 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
   {
     
     mcPredictionPerBin = this->getTotalMCFractionPerBin(bin);
-    mcPredictionPerBin *= LumiNorm;
     
     if(!mcPredictionPerBin)
       continue;

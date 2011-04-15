@@ -50,7 +50,7 @@ TFile* FitterInputs::TH1Bundle::openFile(const std::string& _fileName){
   
 }
 
-void FitterInputs::TH1Bundle::loadData (const std::string& _fileName, const std::string& _histoNames ){
+void FitterInputs::TH1Bundle::loadData (const std::string& _fileName, const std::string& _histoNames, const short& _rebin ){
   
   if(_fileName.empty() || _histoNames.empty()){
     std::ostringstream error;
@@ -70,9 +70,14 @@ void FitterInputs::TH1Bundle::loadData (const std::string& _fileName, const std:
     error<< __FILE__ << ":"<< __LINE__ << "\t histo named "<< _histoNames.c_str() <<" not found in " << _fileName.c_str() <<")\n";
     throw std::runtime_error(error.str());
   }
+  
+  if(_rebin!=1){
+    m_data->Rebin(_rebin);
+  }
 }
 
 void FitterInputs::TH1Bundle::loadTemplatesFromOneFile (const std::string& _fileNames, const std::string& _histoNames ){
+
 
   TFile* fileObject = openFile(_fileNames);
   if(!fileObject || _fileNames.empty())
@@ -101,6 +106,8 @@ void FitterInputs::TH1Bundle::loadTemplatesFromOneFile (const std::string& _file
     metaObject->Sumw2();
 
     if(metaObject){
+
+
       m_templates.push_back(metaObject);
       std::cout << "TH1Bundle::loadTemplatesFromOneFile\t" << "loaded " << m_templates.back()->GetName() << " from " << _fileNames << std::endl;
     }
@@ -108,7 +115,9 @@ void FitterInputs::TH1Bundle::loadTemplatesFromOneFile (const std::string& _file
       std::cerr << __FILE__ << ":"<< __LINE__ << "\t couldn't load " << aHistName.Data() << " from " << _fileNames << std::endl;
       
   }
+
   
+
   delete Histo;Histo=0;
 }
 
@@ -142,7 +151,7 @@ void FitterInputs::TH1Bundle::loadTemplatesFromMultipleFiles (const std::string&
   delete Histo;Histo=0;
 }
 
-void FitterInputs::TH1Bundle::loadTemplates (const std::string& _fileNames , const std::string& _histoNames  ){
+void FitterInputs::TH1Bundle::loadTemplates (const std::string& _fileNames , const std::string& _histoNames , const short& _rebin ){
   
   if(_fileNames.empty() || _histoNames.empty()){
     std::ostringstream error;
@@ -159,6 +168,14 @@ void FitterInputs::TH1Bundle::loadTemplates (const std::string& _fileNames , con
   {
     loadTemplatesFromOneFile(_fileNames,_histoNames);
   }
+
+  if(_rebin!=1){
+    for (int i = 0; i < m_templates.size(); ++i)
+    {
+      m_templates.at(i)->Rebin(_rebin);
+    }
+  }
+    
 }
 
 void FitterInputs::TH1Bundle::pushBinContentsToVector(TH1* _hist, std::vector<double>& _target){
