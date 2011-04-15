@@ -13,7 +13,7 @@
 #include "unistd.h"
 
 #include "core/FitCore.hh"
-#include "FitterInputs/TH1Bundle.hh"
+#include "FitterInputs/NormedTH1.hh"
 #include "FitterResults/HistoResult.hh"
 #include "FitterResults/LLHHisto.hh"
 #include "FitterResults/TermResult.hh"
@@ -55,7 +55,7 @@ public:
 RunnerConfig::RunnerConfig():
   m_argc(0),m_argv(0),
   p_datadir("/some/path/"),
-  p_outputfile(""),
+  p_outputfile("fitResult.root"),
   p_configFile(""),
   p_fitEngine("Minuit2"),
   p_fitMode  ("Scan"),
@@ -71,7 +71,7 @@ RunnerConfig::RunnerConfig():
 RunnerConfig::RunnerConfig(int inArgc, char** inArgv):
   m_argc(inArgc),m_argv(inArgv),
   p_datadir("/some/path/"),
-  p_outputfile(""),
+  p_outputfile("fitResult.root"),
   p_configFile(""),
   p_fitEngine("Minuit2"),
   p_fitMode  ("Scan"),
@@ -203,7 +203,7 @@ void RunnerConfig::printConf(){
   std::cout << "[-M] fitMode = "<< p_fitMode << std::endl;
   std::cout << "[-r] rebin = "<< p_rebin << std::endl;
   std::cout << "[-D] dataTitle = "<< p_dataTitle << std::endl;
-  std::cout << "[-D] tempTitle = "<< p_tempTitle << std::endl;
+  std::cout << "[-T] tempTitle = "<< p_tempTitle << std::endl;
   
 }
 
@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
       conf.printConf();
 
   // ----- INPUT ----- 
-  FitterInputs::TH1Bundle* input = new FitterInputs::TH1Bundle();
+  FitterInputs::NormedTH1* input = new FitterInputs::NormedTH1();
   input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str(),conf.p_rebin);
   input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str(),conf.p_rebin);
 
@@ -246,11 +246,11 @@ int main(int argc, char* argv[])
   functions::SimpleMaxLLH fcn;
   
   // ----- Results ------
-  FitterResults::HistoResult* hresult = new FitterResults::HistoResult(0,conf.p_msgLevel,"fitResult.root");
-  FitterResults::AbsResult* tresult = new FitterResults::TermResult(0,conf.p_msgLevel);
+  FitterResults::HistoResult* hresult = new FitterResults::HistoResult(0,conf.p_msgLevel,conf.p_outputfile);
+  FitterResults::TermResult* tresult = new FitterResults::TermResult(0,conf.p_msgLevel);
 
   // ----- FitterCore ------
-  core::FitCore<functions::SimpleMaxLLH,FitterInputs::TH1Bundle,FitterResults::AbsResult> fitter(input, hresult);
+  core::FitCore<functions::SimpleMaxLLH,FitterInputs::NormedTH1,FitterResults::AbsResult> fitter(input, hresult);
   fitter.configureFromFile(conf.p_configFile);
   fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
   fitter.configureKeyWithValue("Mode",conf.p_fitMode);
@@ -271,7 +271,8 @@ int main(int argc, char* argv[])
   
 
   fitter.printTo(tresult);
-    fitter.getMinosErrorSet(Status,Down,Up);
+  fitter.getMinosErrorSet(Status,Down,Up);
+
   std::cout << "b:\t(up) "<< Up[0] << "\t(down) " << Down[0] << std::endl;
   std::cout << "c:\t(up) "<< Up[1] << "\t(down) " << Down[1] << std::endl;
   std::cout << "l:\t(up) "<< Up[2] << "\t(down) " << Down[2] << std::endl;

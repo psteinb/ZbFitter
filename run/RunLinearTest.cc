@@ -43,6 +43,7 @@ public:
 
   int         p_msgLevel;
   int         p_threads;
+  int         p_rebin;
   bool        p_giveHelp;
   double      p_stepsize;
   
@@ -67,6 +68,7 @@ RunnerConfig::RunnerConfig():
   p_tempTitle("mcb,mcc,mcl"),
   p_msgLevel(3),
   p_threads(1),
+  p_rebin(1),
   p_giveHelp(false),
   p_stepsize(.2)
 {}
@@ -83,6 +85,7 @@ RunnerConfig::RunnerConfig(int inArgc, char** inArgv):
   p_tempTitle("mcb,mcc,mcl"),
   p_msgLevel(3),
   p_threads(1),
+  p_rebin(1),
   p_giveHelp(false),
   p_stepsize(.2)
 {
@@ -95,7 +98,7 @@ void RunnerConfig::parse(){
 
 
   int opt = 0;
-  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:E:M:D:T:s:h" ))!=-1 ){
+  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:r:E:M:D:T:s:h" ))!=-1 ){
     std::istringstream instream;
     std::ostringstream outstream;
     size_t found;
@@ -131,6 +134,17 @@ void RunnerConfig::parse(){
       }
       else{
         p_msgLevel = meta;
+      }
+
+      break;
+    case 'r':
+      instream.str(optarg);
+      if( !(instream >> meta) ){
+        std::cerr << "RunFitter \t invalid argument format for [-r]" << std::endl;
+        p_rebin = 1;
+      }
+      else{
+        p_rebin = meta;
       }
 
       break;
@@ -172,6 +186,7 @@ void RunnerConfig::printHelp(){
   std::cout << "\t -c <bar.env> set TEnv style config file" << std::endl;
   std::cout << "\t -m set message level (0=VERBOSE,..,2=INFO,..,5=ERROR)" << std::endl;
   std::cout << "\t -t <num> number of threads to use " << std::endl;
+  std::cout << "\t -r <Count> Rebin Count to call on input histos " << std::endl;
   std::cout << "\t -E <TMinuitEngine> define fit engine" << std::endl;
   std::cout << "\t -M <TMinuitMode> define fit mode" << std::endl;
   std::cout << "\t -D <ObjectName> define data object to retrieve from root file" << std::endl;
@@ -192,8 +207,9 @@ void RunnerConfig::printConf(){
   std::cout << "[-c] config file name =\n"    << ((!p_configFile.empty()) ? p_configFile.c_str() : "none given") << std::endl;
   std::cout << "[-m] message level = "<< p_msgLevel << std::endl;
   std::cout << "[-t] N(threads) = "<< p_threads << std::endl;
-  std::cout << "[-t] fitEngine = "<< p_fitEngine << std::endl;
-  std::cout << "[-t] fitMode = "<< p_fitMode << std::endl;
+  std::cout << "[-E] fitEngine = "<< p_fitEngine << std::endl;
+  std::cout << "[-M] fitMode = "<< p_fitMode << std::endl;
+  std::cout << "[-r] rebin = "<< p_rebin << std::endl;
   std::cout << "[-D] dataTitle = "<< p_dataTitle << std::endl;
   std::cout << "[-T] tempTitle = "<< p_tempTitle << std::endl;
   std::cout << "[-s] stepSize = "<< p_stepsize << std::endl;
@@ -278,8 +294,8 @@ int main(int argc, char* argv[])
 
   // ----- INPUT ----- 
   FitterInputs::TH1Bundle* input = new FitterInputs::TH1Bundle();
-  input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str());
-  input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str());
+  input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str(),conf.p_rebin);
+  input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str(),conf.p_rebin);
   
   std::vector<TH1*> m_templates;
   input->getTemplatesDeepCopy(m_templates);
@@ -295,6 +311,7 @@ int main(int argc, char* argv[])
 
   int steps = 1./conf.p_stepsize;
   TGraphErrors linResults(steps);
+  TGraph Line(2);
   double fitValue = 0;
   double fitUncertainty = 0;
   double scale = 0.;
@@ -330,10 +347,10 @@ int main(int argc, char* argv[])
     fitUncertainty = fitter.getMinimizer()->Errors()[0];
 
     linResults.SetPoint(i-1,scale,fitValue );
-    linResults.SetPointError(i-1,0,fitUncertainty);
+    linResults.SetPointError(i-1,(conf.p_stepsize)/2,fitUncertainty);
   }
 
-  linResults.SetTitle(";scale factor;f_b");
+  linResults.SetTitle(";scale factor;f_{b,fitted}");
   linResults.SaveAs(conf.p_outputfile.c_str());
   std::string coreName = stripRootString(conf.p_outputfile);
   
@@ -341,6 +358,11 @@ int main(int argc, char* argv[])
   myCanvas.Clear();
   myCanvas.Draw();
   linResults.Draw("AP+");
+  linResults.GetXaxis()->SetRangeUser(0.,(1.+conf.p_stepsize));
+  Line.SetPoint(0,0,0);
+  Line.SetPoint(1,1+conf.p_stepsize,1+conf.p_stepsize);
+  Line.SetLineColor(kGray);
+  Line.Draw("L");
   myCanvas.Update();
   myCanvas.Print(".eps");
 

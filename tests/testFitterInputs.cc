@@ -168,4 +168,20 @@ BOOST_AUTO_TEST_CASE( fullLoadDeepCopyCleanDestroy )
   BOOST_CHECK( temps.at(0)->GetEntries() == beforeClear );
 }
 
+BOOST_AUTO_TEST_CASE( fullLoadDeepCopyRebin )
+{
+  FitterInputs::TH1Bundle* m_BUNDLE = new FitterInputs::TH1Bundle;
+
+  m_BUNDLE->loadTemplates("./ToFit_bcl_111.root","mcb,mcc,mcl",2);
+  std::vector<TH1*> temps;temps.clear();
+  m_BUNDLE->getTemplatesDeepCopy(temps);
+
+  BOOST_CHECK(  temps[0]->GetNbinsX() == 10 );
+  
+  delete m_BUNDLE;
+  m_BUNDLE = 0;
+
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

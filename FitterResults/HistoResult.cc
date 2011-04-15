@@ -38,8 +38,11 @@ void FitterResults::HistoResult::print(){
   const double *xs = getMinimizer()->X();
   const double *xErrors = getMinimizer()->Errors();
   
+  double mcBFrac = fitterT0->Integral("width");
+  double mcCFrac = fitterT1->Integral("width");
+  double mcLFrac = fitterT2->Integral("width");
+  double totData = fitterData->Integral("width");
 
-  std::string mode = getMinimizer()->Options().MinimizerAlgorithm();
   fitterT0->Scale(xs[0]);fitterT0->SetFillColor(kRed);
   fitterT1->Scale(xs[1]);fitterT1->SetFillColor(kViolet);
   fitterT2->Scale(xs[2]);fitterT2->SetFillColor(kAzure); 
@@ -63,8 +66,9 @@ void FitterResults::HistoResult::print(){
   myC.Draw();
   myC.Divide(2,1);
   myC.cd(1);
-  newStack.Draw("BAR");
   newStack.SetMaximum(1.5*newStack.GetMaximum());
+  newStack.Draw("BAR");
+  
   fitterData->SetMarkerSize(1.5*fitterData->GetMarkerSize());
   fitterData->SetMarkerStyle(8);
   fitterData->Draw("e1same");
@@ -80,9 +84,9 @@ void FitterResults::HistoResult::print(){
   myC.cd(2);
   TPaveText mtext(0,0,1,1,"ARC");
 
-  mtext.AddText(getParameterResult(0,fitterT0->Integral()).c_str());
-  mtext.AddText(getParameterResult(1,fitterT1->Integral()).c_str());
-  mtext.AddText(getParameterResult(2,fitterT2->Integral()).c_str());
+  mtext.AddText(getParameterResult(0,1).c_str());
+  mtext.AddText(getParameterResult(1,1).c_str());
+  mtext.AddText(getParameterResult(2,1).c_str());
   mtext.Draw();
 
   myC.Update();
@@ -94,21 +98,33 @@ void FitterResults::HistoResult::print(){
 
 std::string FitterResults::HistoResult::getParameterResult(const int& _idx, double _norm=1.){
   std::ostringstream _text;
+  double centralValue = 0.;
   if(_idx>=getFunction()->getNumberOfParameters()){
     _text << ">> variable unknown <<";
 
   }
   else{
-    _text << getMinimizer()->VariableName(_idx) << " :\t(";
-    _text << _norm*getMinimizer()->X()[_idx];
+    centralValue = _norm*getMinimizer()->X()[_idx];
+    _text << getMinimizer()->VariableName(_idx) << " : (";
+    _text << centralValue;
+
     double Up=0;
     double Down=0;
+    double rUp=0;
+    double rDown=0;
 
-    bool minosStatus = getMinimizer()->GetMinosError(_idx,Up,Down);
-    if(!minosStatus)
-      _text << "\t+/-\t" << _norm*getMinimizer()->Errors()[_idx] << ")";
+    double Error=getMinimizer()->Errors()[_idx];
+    double relError = Error/centralValue;
+
+    bool minosStatus = getMinimizer()->GetMinosError(_idx,Down,Up);
+    if(!minosStatus){
+      _text << " +/- " << centralValue*relError << ")";
+    }
     else{
-      _text << "\t+ " << _norm*Up << "\t- "<<_norm*Down << ")";
+      rUp = Up/centralValue;
+      rDown = Down/centralValue;
+
+      _text << "^{" << centralValue*rUp << "}_{"<< centralValue*rDown << "})";
     }
   }
     

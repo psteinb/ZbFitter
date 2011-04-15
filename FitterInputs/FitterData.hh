@@ -18,7 +18,8 @@ namespace FitterInputs {
     eTempl = 1,
     eTemplSys = 2,
     eTemplUp = 3,
-    eTemplDown = 4
+    eTemplDown = 4,
+    eTotalMC = 5
   };
 
 class FitterData

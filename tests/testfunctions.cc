@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <vector>
 #include <iostream>
+#include "TH1D.h"
 
 
 class ObjFixture
@@ -49,7 +50,6 @@ BOOST_AUTO_TEST_CASE( loadInputUp )
   BOOST_CHECK(m_llh.up()==0.5);
 }
 
-
 BOOST_AUTO_TEST_CASE( loadInputToLLH )
 {
   std::vector<FitterInputs::FitterData> input;input.clear();
@@ -57,6 +57,20 @@ BOOST_AUTO_TEST_CASE( loadInputToLLH )
   m_llh.setupFromInput(&m_input);
   BOOST_CHECK(m_llh.up()!=0);
 }
+
+BOOST_AUTO_TEST_CASE( loadInputToLLHRebin )
+{
+
+  FitterInputs::TH1Bundle aInput;
+  functions::SimpleMaxLLH aLlh;
+  aInput.loadData("./ToFit_bcl_111.root","data",2);
+  aInput.loadTemplates("./ToFit_bcl_111.root","mcb,mcc,mcl",2);
+  aLlh.setupFromInput(&aInput);
+  
+  BOOST_CHECK(aLlh.getTemplate(0)->getHisto()->GetNbinsX() == 10);
+
+}
+
 
 BOOST_AUTO_TEST_CASE( loadInputToLLHAndCalc )
 {
@@ -67,7 +81,6 @@ BOOST_AUTO_TEST_CASE( loadInputToLLHAndCalc )
   BOOST_CHECK(m_llh(parameters)!=0);
   std::cout << "\t >> maxLLH: "<< m_llh(parameters) << std::endl;
 }
-
 
 BOOST_AUTO_TEST_CASE( loadInputToLLHAndCalc2 )
 {

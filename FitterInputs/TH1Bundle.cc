@@ -61,6 +61,9 @@ void FitterInputs::TH1Bundle::loadData (const std::string& _fileName, const std:
   if(openFile(_fileName)){
     m_data = dynamic_cast<TH1*>(openFile(_fileName)->Get(_histoNames.c_str()));
     m_data->Sumw2();
+    if(_rebin!=1){
+      m_data->Rebin(_rebin);
+    }
   }
   else
     throw std::runtime_error("file not found");
@@ -71,12 +74,10 @@ void FitterInputs::TH1Bundle::loadData (const std::string& _fileName, const std:
     throw std::runtime_error(error.str());
   }
   
-  if(_rebin!=1){
-    m_data->Rebin(_rebin);
-  }
+  
 }
 
-void FitterInputs::TH1Bundle::loadTemplatesFromOneFile (const std::string& _fileNames, const std::string& _histoNames ){
+void FitterInputs::TH1Bundle::loadTemplatesFromOneFile (const std::string& _fileNames, const std::string& _histoNames , const short& _rebin){
 
 
   TFile* fileObject = openFile(_fileNames);
@@ -104,10 +105,10 @@ void FitterInputs::TH1Bundle::loadTemplatesFromOneFile (const std::string& _file
     aHistName = dynamic_cast<TObjString*>(Histo->At(i))->GetString();
     metaObject = dynamic_cast<TH1*>(fileObject->Get(aHistName.Data()));
     metaObject->Sumw2();
+    if(_rebin!=1)
+      this->safeRebin(metaObject,_rebin);
 
     if(metaObject){
-
-
       m_templates.push_back(metaObject);
       std::cout << "TH1Bundle::loadTemplatesFromOneFile\t" << "loaded " << m_templates.back()->GetName() << " from " << _fileNames << std::endl;
     }
@@ -121,7 +122,7 @@ void FitterInputs::TH1Bundle::loadTemplatesFromOneFile (const std::string& _file
   delete Histo;Histo=0;
 }
 
-void FitterInputs::TH1Bundle::loadTemplatesFromMultipleFiles (const std::string& _fileNames, const std::string& _histoNames){
+void FitterInputs::TH1Bundle::loadTemplatesFromMultipleFiles (const std::string& _fileNames, const std::string& _histoNames, const short& _rebin){
   
   if(_fileNames.empty())
   {
@@ -144,7 +145,7 @@ void FitterInputs::TH1Bundle::loadTemplatesFromMultipleFiles (const std::string&
   {
     aFileName = dynamic_cast<TObjString*>(Files->At(i))->GetString();
     aHistName = dynamic_cast<TObjString*>(Histo->At(i))->GetString();
-    loadTemplatesFromOneFile(aFileName.Data(),aHistName.Data());
+    loadTemplatesFromOneFile(aFileName.Data(),aHistName.Data(),_rebin);
   }
 
   delete Files;Files=0;
@@ -162,19 +163,13 @@ void FitterInputs::TH1Bundle::loadTemplates (const std::string& _fileNames , con
   TString FileNames(_fileNames.c_str());
 
   if(FileNames.CountChar(',')){
-    loadTemplatesFromMultipleFiles(_fileNames,_histoNames);
+    loadTemplatesFromMultipleFiles(_fileNames,_histoNames,_rebin);
   }
   else
   {
-    loadTemplatesFromOneFile(_fileNames,_histoNames);
+    loadTemplatesFromOneFile(_fileNames,_histoNames,_rebin);
   }
 
-  if(_rebin!=1){
-    for (int i = 0; i < m_templates.size(); ++i)
-    {
-      m_templates.at(i)->Rebin(_rebin);
-    }
-  }
     
 }
 
@@ -269,6 +264,25 @@ void FitterInputs::TH1Bundle::setupFitterData(){
     createFitterDataFromTH1((*tempItr),metaData);
     m_values.push_back(metaData);  
   }
+
+}
+
+void FitterInputs::TH1Bundle::safeRebin(TH1* _histo, const short& _rebin){
+  
+  if(!_histo){
+    std::cerr<< __FILE__ << ":"<< __LINE__ << "\tinline histo with invalid pointer\n";
+  }
+  
+  if(_rebin == 1 )
+    return;
+
+  double preIntegral = _histo->Integral("width");
+  
+  _histo->Rebin(_rebin);
+
+  double postIntegral = _histo->Integral("width");
+
+  _histo->Scale(preIntegral/postIntegral);
 
 }
 

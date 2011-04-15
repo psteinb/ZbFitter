@@ -64,10 +64,10 @@ namespace FitterInputs {
     TFile* openFile(const std::string& _fileNames = "");
 
     //open 1 file of name _fileNames and retrieve all TH1* objects according to _histoNames
-    void loadTemplatesFromOneFile (const std::string& _fileNames = "", const std::string& _histoNames = "" );
+    void loadTemplatesFromOneFile (const std::string& _fileNames = "", const std::string& _histoNames = "",const short& _rebin=1 );
 
     //open files of name _fileNames and retrieve all TH1* objects according to _histoNames using loadTemplatesFromOneFile
-    void loadTemplatesFromMultipleFiles (const std::string& _fileNames = "", const std::string& _histoNames = "" );
+    void loadTemplatesFromMultipleFiles (const std::string& _fileNames = "", const std::string& _histoNames = "",const short& _rebin=1 );
 
     
     void pushBinContentsToVector(TH1*, std::vector<double>&);
@@ -75,6 +75,9 @@ namespace FitterInputs {
 
     void createFitterDataFromTH1(TH1*, FitterData&);
     void setupFitterData();
+
+    //rebinning technique that keeps the normalisation constant
+    void safeRebin(TH1* _histo=0, const short& _rebin=1);
 
   protected:
                 
