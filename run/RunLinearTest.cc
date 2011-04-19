@@ -13,7 +13,7 @@
 #include "unistd.h"
 
 #include "core/FitCore.hh"
-#include "FitterInputs/TH1Bundle.hh"
+#include "FitterInputs/NormedTH1.hh"
 #include "FitterResults/HistoResult.hh"
 #include "functions/SimpleMaxLLH.hh"
 
@@ -225,19 +225,7 @@ void RunnerConfig::setOpt(int inArgc, char** inArgv){
 
 }
 
-// TH1* findHisto(const std::vector<TH1*>& _vector, const std::string& _search=""){
-  
-//   TH1* value =0;
-//   TString name;
-//   for (int i = 0; i < _vector.size(); ++i)
-//   {
-//     name = _vector.at(i)->GetName();
-//     if(name.Contains(_search.c_str()))
-//       value = 
-//   }
-  
 
-// }
 
 void createScaledData(const std::vector<TH1*>& _vector,double _scale,TH1D* _data){
 
@@ -245,15 +233,16 @@ void createScaledData(const std::vector<TH1*>& _vector,double _scale,TH1D* _data
     std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer vector empty or data histo nil\n";
     return;}
 
-  std::cout << ">>> old content " << _data->GetEntries() << "\n";
+  std::cout << ">>> old content " << _data->GetEntries() << ", "<< _data->GetNbinsX() <<"\n";
   TString name;
   for (int i = 0; i < _vector.size(); ++i)
   {
     name = _vector.at(i)->GetName();
     name.ToLower();
     if(name.Contains(TRegexp(".*mcb.*")) || name.Contains(TRegexp(".*trueb.*"))){
-      std::cout << ">>> scaled " << name.Data() << " by " << _scale << " ("<<_vector.at(i)->GetEntries() << ")\n";
+      std::cout << ">>> scaled " << name.Data() << " by " << _scale << " from "<< _vector.at(i)->Integral();
       _data->Add(_vector.at(i),_scale);
+
     }
     else{
       _data->Add(_vector.at(i),1.);
@@ -261,7 +250,7 @@ void createScaledData(const std::vector<TH1*>& _vector,double _scale,TH1D* _data
     }
   }
 
-  std::cout << ">>> new content " << _data->GetEntries() << "\n";
+  std::cout << ">>> new content " << _data->GetEntries() << ", "<< _data->GetNbinsX() << "\n";
 
 }
 
@@ -273,6 +262,32 @@ std::string stripRootString(const std::string& _filename){
   else
     return _filename;
 
+}
+
+void cloneTH1VectorFromTo(const std::vector<TH1*>& _reference, std::vector<TH1*>& _target){
+  
+  _target.clear();
+  _target.resize(_reference.size(),0);
+  std::string newName;
+  for (int i = 0; i < _reference.size(); ++i)
+  {
+    newName = _reference.at(i)->GetName();
+    newName += "_cloned";
+    _target[i] = dynamic_cast<TH1*>(_reference.at(i)->Clone(newName.c_str()));
+  }
+
+}
+
+void deleteTH1InVector(std::vector<TH1*>& _vec){
+  
+
+  for (int i = 0; i < _vec.size(); ++i)
+  {
+    delete _vec[i];
+    _vec[i]=0;
+  }
+
+  _vec.clear();
 }
 
 int main(int argc, char* argv[])
@@ -293,12 +308,14 @@ int main(int argc, char* argv[])
       conf.printConf();
 
   // ----- INPUT ----- 
-  FitterInputs::TH1Bundle* input = new FitterInputs::TH1Bundle();
+  FitterInputs::NormedTH1* input = new FitterInputs::NormedTH1();
   input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str(),conf.p_rebin);
   input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str(),conf.p_rebin);
   
   std::vector<TH1*> m_templates;
+  std::vector<TH1*> m_meta;
   input->getTemplatesDeepCopy(m_templates);
+  cloneTH1VectorFromTo(m_templates,m_meta);
 
   // ----- Templates ----- 
   functions::SimpleMaxLLH fcn;
@@ -308,9 +325,12 @@ int main(int argc, char* argv[])
 
   // ----- FitterCore ------
   TH1D* m_data = dynamic_cast<TH1D*>(m_templates.front()->Clone("linearData"));
-
-  int steps = 1./conf.p_stepsize;
-  TGraphErrors linResults(steps);
+  
+  int steps = 2./conf.p_stepsize;
+  TGraph linResults(steps);
+  TGraphErrors linResults0(steps);
+  TGraphErrors linResults1(steps);
+  TGraphErrors linResults2(steps);
   TGraph Line(2);
   double fitValue = 0;
   double fitUncertainty = 0;
@@ -325,15 +345,15 @@ int main(int argc, char* argv[])
 
     //scale b content and add all histos
     scale = i*conf.p_stepsize;
-    createScaledData(m_templates,scale,m_data);
+    createScaledData(m_meta,scale,m_data);
 
-    //reset the input
-    input->setTemplateHistos(m_templates);
+    //reset the input (attention, the following 2 calls copy pointers)
+    input->setTemplateHistos(m_meta);
     input->setDataHisto(m_data);
     input->init();
 
     //init the fitter
-    core::FitCore<functions::SimpleMaxLLH,FitterInputs::TH1Bundle,FitterResults::AbsResult> fitter(input);
+    core::FitCore<functions::SimpleMaxLLH,FitterInputs::NormedTH1,FitterResults::AbsResult> fitter(input);
     fitter.configureFromFile(conf.p_configFile);
     fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
     fitter.configureKeyWithValue("Mode",conf.p_fitMode);
@@ -343,26 +363,50 @@ int main(int argc, char* argv[])
     fitter.fit(true);
 
     //plot the results
-    fitValue = fitter.getMinimizer()->X()[0];
-    fitUncertainty = fitter.getMinimizer()->Errors()[0];
+    fitValue = fitter.getMinimizer()->X()[0]/m_templates[0]->Integral();
+    fitUncertainty = fitter.getMinimizer()->Errors()[0]/fitValue;
 
+    linResults0.SetPoint(i-1,scale,fitValue );
     linResults.SetPoint(i-1,scale,fitValue );
-    linResults.SetPointError(i-1,(conf.p_stepsize)/2,fitUncertainty);
+    linResults0.SetPointError(i-1,(conf.p_stepsize)/2,fitUncertainty);
+
+    linResults1.SetPoint(i-1,scale,fitter.getMinimizer()->X()[1] );
+    linResults1.SetPointError(i-1,(conf.p_stepsize)/2,fitter.getMinimizer()->Errors()[1]);
+
+    linResults2.SetPoint(i-1,scale,fitter.getMinimizer()->X()[2] );
+    linResults2.SetPointError(i-1,(conf.p_stepsize)/2,fitter.getMinimizer()->Errors()[2]);
+
+    //clean-up and reset
+    deleteTH1InVector(m_meta);
+    cloneTH1VectorFromTo(m_templates,m_meta);
   }
 
-  linResults.SetTitle(";scale factor;f_{b,fitted}");
-  linResults.SaveAs(conf.p_outputfile.c_str());
+  linResults.SetTitle(";scale factor(f_{b});N_{b,fitted}/N_{b,unscaled}");
+  linResults0.SetTitle(";scale factor(f_{b});N_{b,fitted}");
+  linResults1.SetTitle(";scale factor(f_{b});N_{c,fitted}");
+  linResults2.SetTitle(";scale factor(f_{b});N_{l,fitted}");
+  linResults0.SaveAs(conf.p_outputfile.c_str());
   std::string coreName = stripRootString(conf.p_outputfile);
   
   TCanvas myCanvas(coreName.c_str(),"",800,600);
   myCanvas.Clear();
   myCanvas.Draw();
+  myCanvas.Divide(2,1);
+  myCanvas.cd(1);
+  linResults0.Draw("AP+");
+  linResults0.GetXaxis()->SetRangeUser(0.,(2.+conf.p_stepsize));
+
+  myCanvas.cd(2);  
+  gPad->SetGrid(1,1);
+  
   linResults.Draw("AP+");
-  linResults.GetXaxis()->SetRangeUser(0.,(1.+conf.p_stepsize));
-  Line.SetPoint(0,0,0);
-  Line.SetPoint(1,1+conf.p_stepsize,1+conf.p_stepsize);
-  Line.SetLineColor(kGray);
-  Line.Draw("L");
+  linResults.GetXaxis()->SetRangeUser(0.,(2.+conf.p_stepsize));
+  // Line.SetPoint(0,0,0);
+  // Line.SetPoint(1,2+conf.p_stepsize,2+conf.p_stepsize);
+  // Line.SetLineColor(kGray);
+  // Line.SetLineStyle(3);
+  // Line.Draw("L");
+
   myCanvas.Update();
   myCanvas.Print(".eps");
 

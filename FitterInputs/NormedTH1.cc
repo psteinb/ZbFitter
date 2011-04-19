@@ -317,17 +317,17 @@ void FitterInputs::NormedTH1::normalizeTemplateTH1s(){
   //find integral
   double totalIntegral = total->Integral();
 
-  //Scale all templates
+  //Scale all templates to give 1 in the sum
   histItr = m_templates.begin();
   for (; histItr!=histEnd; ++histItr)
   {
-    (*histItr)->Scale(1/totalIntegral,"width");
+    (*histItr)->Scale(1/totalIntegral);
   }
 
   std::cout << ">>> normalized all distributions to add up to 1 in the integral\n";
   for (int i = 0; i < m_templates.size(); ++i)
   {
-    std::cout << m_templates.at(i)->GetName() << "\t" << m_templates.at(i)->Integral("width")<<std::endl;
+    std::cout << m_templates.at(i)->GetName() << "\t" << m_templates.at(i)->Integral()<<std::endl;
   }
   
 }

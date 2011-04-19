@@ -58,11 +58,6 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
     sumTemp += (this->getTotalMCFractionPerBin(tidx));
   }
 
-  //since we operate with normalized templates, sumTemp is around 1
-  
-  sumTemp*= sumData;
-  std::cout << "nu_tot: (" << sumTemp << ") = " << sumData << std::endl;
-  
   //the likelihood function
   double logLHValue = - (sumData*(std::log(sumTemp))) + sumTemp;
   
@@ -76,7 +71,7 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
   {
     
     mcPredictionPerBin = this->getTotalMCFractionPerBin(bin);
-    mcPredictionPerBin*=(*dataItr);
+    
 
     if(!mcPredictionPerBin)
       continue;
@@ -87,7 +82,7 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
   }
   
   logLHValue += binSum;
-  std::cout << "LLH: "<< logLHValue << std::endl;
+  //std::cout << "LLH: "<< logLHValue << std::endl;
   return (logLHValue);
 }
 

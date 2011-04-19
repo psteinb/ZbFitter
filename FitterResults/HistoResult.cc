@@ -38,10 +38,10 @@ void FitterResults::HistoResult::print(){
   const double *xs = getMinimizer()->X();
   const double *xErrors = getMinimizer()->Errors();
   
-  double mcBFrac = fitterT0->Integral("width");
-  double mcCFrac = fitterT1->Integral("width");
-  double mcLFrac = fitterT2->Integral("width");
-  double totData = fitterData->Integral("width");
+  double mcBFrac = fitterT0->Integral();
+  double mcCFrac = fitterT1->Integral();
+  double mcLFrac = fitterT2->Integral();
+  double totData = fitterData->Integral();
 
   fitterT0->Scale(xs[0]);fitterT0->SetFillColor(kRed);
   fitterT1->Scale(xs[1]);fitterT1->SetFillColor(kViolet);
@@ -84,9 +84,9 @@ void FitterResults::HistoResult::print(){
   myC.cd(2);
   TPaveText mtext(0,0,1,1,"ARC");
 
-  mtext.AddText(getParameterResult(0,1).c_str());
-  mtext.AddText(getParameterResult(1,1).c_str());
-  mtext.AddText(getParameterResult(2,1).c_str());
+  mtext.AddText(getParameterResult(0,mcBFrac).c_str());
+  mtext.AddText(getParameterResult(1,mcCFrac).c_str());
+  mtext.AddText(getParameterResult(2,mcLFrac).c_str());
   mtext.Draw();
 
   myC.Update();

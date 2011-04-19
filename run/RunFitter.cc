@@ -16,7 +16,7 @@
 #include "FitterInputs/NormedTH1.hh"
 #include "FitterResults/HistoResult.hh"
 #include "FitterResults/LLHHisto.hh"
-#include "FitterResults/TermResult.hh"
+#include "FitterResults/Chi2Result.hh"
 #include "functions/SimpleMaxLLH.hh"
 #include "AtlasStyle.h"
 //small class
@@ -247,7 +247,7 @@ int main(int argc, char* argv[])
   
   // ----- Results ------
   FitterResults::HistoResult* hresult = new FitterResults::HistoResult(0,conf.p_msgLevel,conf.p_outputfile);
-  FitterResults::TermResult* tresult = new FitterResults::TermResult(0,conf.p_msgLevel);
+  FitterResults::Chi2Result* cresult = new FitterResults::Chi2Result(0,conf.p_msgLevel);
 
   // ----- FitterCore ------
   core::FitCore<functions::SimpleMaxLLH,FitterInputs::NormedTH1,FitterResults::AbsResult> fitter(input, hresult);
@@ -270,12 +270,12 @@ int main(int argc, char* argv[])
   
   
 
-  fitter.printTo(tresult);
+  fitter.printTo(cresult);
   fitter.getMinosErrorSet(Status,Down,Up);
 
-  std::cout << "b:\t(up) "<< Up[0] << "\t(down) " << Down[0] << std::endl;
-  std::cout << "c:\t(up) "<< Up[1] << "\t(down) " << Down[1] << std::endl;
-  std::cout << "l:\t(up) "<< Up[2] << "\t(down) " << Down[2] << std::endl;
+  // std::cout << "b:\t(up) "<< Up[0] << "\t(down) " << Down[0] << std::endl;
+  // std::cout << "c:\t(up) "<< Up[1] << "\t(down) " << Down[1] << std::endl;
+  // std::cout << "l:\t(up) "<< Up[2] << "\t(down) " << Down[2] << std::endl;
   return 0; 
    
 
