@@ -13,7 +13,7 @@
 #include "unistd.h"
 
 #include "core/FitCore.hh"
-#include "FitterInputs/TH1Bundle.hh"
+#include "FitterInputs/NormedTH1.hh"
 #include "FitterResults/HistoResult.hh"
 #include "functions/SimpleMaxLLH.hh"
 
@@ -46,6 +46,7 @@ public:
   int         p_msgLevel;
   int         p_threads;
   int         p_nIter;
+  int         p_rebin;
   bool        p_giveHelp;
 
   
@@ -71,7 +72,8 @@ RunnerConfig::RunnerConfig():
   p_msgLevel(3),
   p_threads(1),
   p_giveHelp(false),
-  p_nIter(10000)
+  p_nIter(10000),
+  p_rebin(1)
 {}
 
 //constructor with initialisation
@@ -87,7 +89,8 @@ RunnerConfig::RunnerConfig(int inArgc, char** inArgv):
   p_msgLevel(3),
   p_threads(1),
   p_giveHelp(false),
-  p_nIter(10000.)
+  p_nIter(10000.),
+  p_rebin(1)
 {
 
   parse();
@@ -98,7 +101,7 @@ void RunnerConfig::parse(){
 
 
   int opt = 0;
-  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:E:M:D:T:i:h" ))!=-1 ){
+  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:E:M:D:T:i:r:h" ))!=-1 ){
     std::istringstream instream;
     std::ostringstream outstream;
     size_t found;
@@ -140,7 +143,7 @@ void RunnerConfig::parse(){
     case 'i':
       instream.str(optarg);
       if( !(instream >> meta) ){
-        std::cerr << "RunFitter \t invalid argument format for [-s]" << std::endl;
+        std::cerr << "RunFitter \t invalid argument format for [-i]" << std::endl;
         p_nIter = 0;
       }
       else{
@@ -148,6 +151,18 @@ void RunnerConfig::parse(){
       }
 
       break;
+    case 'r':
+      instream.str(optarg);
+      if( !(instream >> meta) ){
+        std::cerr << "RunFitter \t invalid argument format for [-r]" << std::endl;
+        p_rebin = 0;
+      }
+      else{
+        p_rebin = meta;
+      }
+
+      break;
+
     case 'h':
       p_giveHelp = true;
       printHelp();
@@ -180,6 +195,7 @@ void RunnerConfig::printHelp(){
   std::cout << "\t -D <ObjectName> define data object to retrieve from root file" << std::endl;
   std::cout << "\t -T <ObjectName> define template (+systematics) object(s) to retrieve from root file" << std::endl;
   std::cout << "\t -i <N iterations> define number of pseudo experiments" << std::endl;
+  std::cout << "\t -r <factor> rebin all input by factor" << std::endl;
   std::cout << "\t -h print this help" << std::endl;
   std::cout << std::endl;
 
@@ -200,6 +216,7 @@ void RunnerConfig::printConf(){
   std::cout << "[-D] dataTitle = "<< p_dataTitle << std::endl;
   std::cout << "[-T] tempTitle = "<< p_tempTitle << std::endl;
   std::cout << "[-i] NumIterations = "<< p_nIter << std::endl;
+  std::cout << "[-r] 2rebin2 = "<< p_rebin << std::endl;
   
 }
 
@@ -310,9 +327,9 @@ int main(int argc, char* argv[])
       conf.printConf();
 
   // ----- INPUT ----- 
-  FitterInputs::TH1Bundle* input = new FitterInputs::TH1Bundle();
-  input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str());
-  input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str());
+  FitterInputs::NormedTH1* input = new FitterInputs::NormedTH1();
+  input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str(),conf.p_rebin);
+  input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str(),conf.p_rebin);
   
   std::vector<TH1*> m_templates;
   input->getTemplatesDeepCopy(m_templates);
@@ -356,7 +373,7 @@ int main(int argc, char* argv[])
       std::cout << " iteration " << i << "/" << conf.p_nIter << std::endl;
 
     //init the fitter
-    core::FitCore<functions::SimpleMaxLLH,FitterInputs::TH1Bundle,FitterResults::AbsResult> fitter(input);
+    core::FitCore<functions::SimpleMaxLLH,FitterInputs::NormedTH1,FitterResults::AbsResult> fitter(input);
     fitter.configureFromFile(conf.p_configFile);
     fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
     fitter.configureKeyWithValue("Mode",conf.p_fitMode);
