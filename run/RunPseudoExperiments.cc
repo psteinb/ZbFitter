@@ -418,15 +418,6 @@ int main(int argc, char* argv[])
      fitValues[i] = fitter.getMinimizer()->X()[i];
     }
 
-    ///////////////////////////////////////////
-    // Fill Plots
-    //
-    // if(goodMinosStatus!=(2*fitter.getFunction()->getNumberOfParameters())){
-    //   bPull = (metaValues[0]-fitValues[0])/TMath::Sqrt((fitErrorsUp[0]*fitErrorsUp[0])+(metaErrorsUp[0]*metaErrorsUp[0]));
-    //   cPull = (metaValues[1]-fitValues[1])/TMath::Sqrt((fitErrorsUp[1]*fitErrorsUp[1])+(metaErrorsUp[1]*metaErrorsUp[1]));
-    //   lPull = (metaValues[2]-fitValues[2])/TMath::Sqrt((fitErrorsUp[2]*fitErrorsUp[2])+(metaErrorsUp[2]*metaErrorsUp[2]));
-    // }
-    // else{
     if(fitValues[0]>metaValues[0])
       bPull = (metaValues[0]-fitValues[0])/TMath::Sqrt((fitErrorsDown[0]*fitErrorsDown[0])+(metaErrorsDown[0]*metaErrorsDown[0]));
     else
