@@ -17,6 +17,8 @@
 #include "functions/SimpleMaxLLH.hh"
 
 #include "TRandom3.h"
+#include "TMath.h"
+#include "TH1D.h"
 
 template<
   class InputT=FitterInputs::NormedTH1,
@@ -50,10 +52,10 @@ class PseudoStudy{
   double              m_dataTH1sErrors   	;
 
 
-  std::vector<double> m_fitValues(m_templates.size(),0.);
-  std::vector<double> m_fitErrorsUp(m_templates.size(),0.);
-  std::vector<double> m_fitErrorsDown(m_templates.size(),0.);
-  std::vector<int>    m_fitErrorsStatus(m_templates.size(),0.);
+  std::vector<double> m_fitValues;
+  std::vector<double> m_fitErrorsUp;
+  std::vector<double> m_fitErrorsDown;
+  std::vector<int>    m_fitErrorsStatus;
 
   //setups
   void setupInput(TH1* _data, const std::vector<TH1*> _templates){
@@ -80,14 +82,20 @@ class PseudoStudy{
     
   };
 
+  void prepareData(TH1D* _data=0){
+    _data = (TH1D*)m_templateTH1s[0]->Clone("data");
+    _data->Reset("MICE");
+    _data->ResetStats();
+  };
+  
 public:
   
   PseudoStudy(const std::vector<TH1*>& _templates,
               const std::vector<TH1*>& _data,
               const int& _thr=1,
-              const int& _iters=1000,
+              const int& _iters=1000
               ):
-    m_input(_inputFile),
+    m_input(),
     m_fitter(),
     m_result(0,2,"PseudoStudy"),
     m_fitEngine("Minuit"),       
@@ -105,23 +113,23 @@ public:
     m_templateTH1sErrors   (_templates.size(),0.),   
     m_dataTH1sIntegrals    (0.),   
     m_dataTH1sErrors       (0.),  
-    m_fitValues(),
-    m_fitErrorsUp(),
-    m_fitErrorsDown(),
-    m_fitErrorsStatus()
+    m_fitValues(_templates.size(),0.),
+    m_fitErrorsUp(_templates.size(),0.),
+    m_fitErrorsDown(_templates.size(),0.),
+    m_fitErrorsStatus(_templates.size(),0.)
   {
     //create deep copies!
     for (int i = 0; i < _templates.size(); ++i)
     {
-      std::string name = _templates.at(i).GetName();
+      std::string name = _templates.at(i)->GetName();
       name += "_pseudo";
-      m_templateTH1s[i] = (TH1*)_templates.at(i)->Clone(name.c_str());
+      m_templateTH1s[i] = dynamic_cast<TH1*>(_templates.at(i)->Clone(name.c_str()));
     }
 
     //create deep copies!
     for (int i = 0; i < _data.size(); ++i)
     {
-      std::string name = _data.at(i).GetName();
+      std::string name = _data.at(i)->GetName();
       name += "_pseudo";
       m_dataTH1s[i] = (TH1*)_data.at(i)->Clone(name.c_str());
     }
@@ -191,55 +199,54 @@ public:
     double cPull=0;
     double lPull=0;
 
-    for (int i = 0; i < (conf.p_nIter); ++i)
+    TH1D* m_data=0;
+    prepareData(m_data);
+
+    for (int i = 0; i < (m_iterations); ++i)
     {
+      
     
-    
-      if(i % 50 == 0)
-        std::cout << " iteration " << i << "/" << conf.p_nIter << std::endl;
+      if(i % 500 == 0)
+        std::cout << " iteration " << i << "/" << m_iterations << std::endl;
+
+      //scale b content and
+      // add all MC histos according to the just fitted fractions to give pseudo data
+      createScaledData(m_templateTH1s,m_templateTH1sIntegrals,m_data,m_TRand3.Poisson(m_dataTH1sIntegrals));
+
+      //feed m_input
+      setupInput(m_data,m_templateTH1s);
 
       //init the fitter
-      core::FitCore<FitterT,InputT,ResultT> fitter(&minput);
+      core::FitCore<FitterT,InputT,ResultT> fitter(&m_input);
       fitter.configureKeyWithValue("Engine",m_fitEngine);
       fitter.configureKeyWithValue("Mode",m_fitMode);
       fitter.setupMachinery();
 
-      m_data->Reset("MICE");
-      m_data->ResetStats();  
-
-      //scale b content and
-      // add all MC histos according to the just fitted fractions to give pseudo data
-      createScaledData(m_templates,m_templateTH1sIntegrals,m_data,myRand3.Poisson(dataIntegral));
-      
-
       //run the fitter on data from the input file
-      if(conf.p_msgLevel>3)
-        fitter.fit(true);
-      else
-        fitter.fit(false);
+      fitter.fit(false);
 
       //collect the results
-      fitter.getMinosErrorSet(metaErrorsStatus,metaErrorsDown,metaErrorsUp);
-      for (int i = 0; i < m_templates.size(); ++i)
+      fitter.getMinosErrorSet(m_fitErrorsStatus,m_fitErrorsDown,m_fitErrorsUp);
+      for (int i = 0; i < m_templateTH1s.size(); ++i)
       {
         m_fitValues[i] = fitter.getMinimizer()->X()[i];
       }
   
 
-      if(fitValues[0]>m_templateTH1sIntegrals[0])
-        bPull = (m_templateTH1sIntegrals[0]-fitValues[0])/TMath::Sqrt((fitErrorsDown[0]*fitErrorsDown[0])+(m_templateTH1sErrors[0]*m_templateTH1sErrors[0]));
+      if(m_fitValues[0]>m_templateTH1sIntegrals[0])
+        bPull = (m_templateTH1sIntegrals[0]-m_fitValues[0])/TMath::Sqrt((m_fitErrorsDown[0]*m_fitErrorsDown[0])+(m_templateTH1sErrors[0]*m_templateTH1sErrors[0]));
       else
-        bPull = (m_templateTH1sIntegrals[0]-fitValues[0])/TMath::Sqrt((fitErrorsUp[0]*fitErrorsUp[0])+(m_templateTH1sErrors[0]*m_templateTH1sErrors[0]));
+        bPull = (m_templateTH1sIntegrals[0]-m_fitValues[0])/TMath::Sqrt((m_fitErrorsUp[0]*m_fitErrorsUp[0])+(m_templateTH1sErrors[0]*m_templateTH1sErrors[0]));
 
-      if(fitValues[1]>m_templateTH1sIntegrals[1])
-        cPull = (m_templateTH1sIntegrals[1]-fitValues[1])/TMath::Sqrt((fitErrorsDown[1]*fitErrorsDown[1])+(m_templateTH1sErrors[1]*m_templateTH1sErrors[1]));
+      if(m_fitValues[1]>m_templateTH1sIntegrals[1])
+        cPull = (m_templateTH1sIntegrals[1]-m_fitValues[1])/TMath::Sqrt((m_fitErrorsDown[1]*m_fitErrorsDown[1])+(m_templateTH1sErrors[1]*m_templateTH1sErrors[1]));
       else
-        cPull = (m_templateTH1sIntegrals[1]-fitValues[1])/TMath::Sqrt((fitErrorsUp[1]*fitErrorsUp[1])+(m_templateTH1sErrors[1]*m_templateTH1sErrors[1]));
+        cPull = (m_templateTH1sIntegrals[1]-m_fitValues[1])/TMath::Sqrt((m_fitErrorsUp[1]*m_fitErrorsUp[1])+(m_templateTH1sErrors[1]*m_templateTH1sErrors[1]));
 
-      if(fitValues[2]>m_templateTH1sIntegrals[2])
-        lPull = (m_templateTH1sIntegrals[2]-fitValues[2])/TMath::Sqrt((fitErrorsDown[2]*fitErrorsDown[2])+(m_templateTH1sErrors[2]*m_templateTH1sErrors[2]));
+      if(m_fitValues[2]>m_templateTH1sIntegrals[2])
+        lPull = (m_templateTH1sIntegrals[2]-m_fitValues[2])/TMath::Sqrt((m_fitErrorsDown[2]*m_fitErrorsDown[2])+(m_templateTH1sErrors[2]*m_templateTH1sErrors[2]));
       else
-        lPull = (m_templateTH1sIntegrals[2]-fitValues[2])/TMath::Sqrt((fitErrorsUp[2]*fitErrorsUp[2])+(m_templateTH1sErrors[2]*m_templateTH1sErrors[2]));
+        lPull = (m_templateTH1sIntegrals[2]-m_fitValues[2])/TMath::Sqrt((m_fitErrorsUp[2]*m_fitErrorsUp[2])+(m_templateTH1sErrors[2]*m_templateTH1sErrors[2]));
       //}
 
       pull_fb.Fill(bPull);
@@ -262,7 +269,9 @@ public:
       //     fitter.printTo(result);
       // }
 
-
+      //clean-up data
+      m_data->Reset("MICE");
+      m_data->ResetStats(); 
     
     }
 
