@@ -73,7 +73,7 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
     mcPredictionPerBin = this->getTotalMCFractionPerBin(bin);
     
 
-    if(!mcPredictionPerBin)
+    if(!(mcPredictionPerBin!=0))
       continue;
 
     //the dataTerm does not depend on beta, so we may drop it

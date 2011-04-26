@@ -43,7 +43,8 @@ void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
 }
 
 template <class Fcn, class Scr, class Res>
-void core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
+int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
+  int value =0;
   /////////////////////////////////////////
   /// laod data/templates to Likelihood function
   /////////////////////////////////////////
@@ -67,7 +68,7 @@ void core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   watch.Start();
   m_minimizer->Minimize(); 
   watch.Stop();
-  
+  value = m_minimizer->Status();
 
   
   /////////////////////////////////////////
@@ -89,7 +90,7 @@ void core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   }
   
   this->runMinos();
-
+  return value;
 }
 
 
@@ -118,13 +119,18 @@ void core::FitCore<Fcn,Scr,Res>::runMinos(){
 
   for (int i = 0; i < m_fcn.getNumberOfParameters(); ++i)
   {
+    minosStatus = false;
     minosStatus = m_minimizer->GetMinosError(i,dDown,dUp,iStatus);
     m_minosDown[i] = dDown;
     m_minosUp[i] = dUp;
     
     if(!minosStatus){
       m_minosStatus[i] = (-1)*iStatus;
-      std::cout << "MINOS\tFAILED TO GET ERRORS FOR: parameter " << i << "\t["<<m_minosStatus[i] <<"]\n";}
+      std::cout << "MINOS\tFAILED TO GET ERRORS FOR: parameter " << i 
+                << "\t[minos status: "<<m_minosStatus[i] <<"],\n" 
+                << "\t\tFCN: " << m_minimizer->MinValue() 
+                << ", fitted: " << m_minimizer->X()[i]
+                << ", fittedError: " << m_minimizer->Errors()[i]<< std::endl ;}
     else
       m_minosStatus[i] = iStatus;
   }

@@ -84,9 +84,13 @@ void FitterResults::HistoResult::print(){
   myC.cd(2);
   TPaveText mtext(0,0,1,1,"ARC");
 
-  mtext.AddText(getParameterResult(0,mcBFrac).c_str());
-  mtext.AddText(getParameterResult(1,mcCFrac).c_str());
-  mtext.AddText(getParameterResult(2,mcLFrac).c_str());
+  // mtext.AddText(getParameterResult(0,mcBFrac).c_str());
+  // mtext.AddText(getParameterResult(1,mcCFrac).c_str());
+  // mtext.AddText(getParameterResult(2,mcLFrac).c_str());
+
+  mtext.AddText(getParameterResult(0,1.).c_str());
+  mtext.AddText(getParameterResult(1,1.).c_str());
+  mtext.AddText(getParameterResult(2,1.).c_str());
   mtext.Draw();
 
   myC.Update();

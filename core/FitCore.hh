@@ -133,7 +133,7 @@ namespace core {
     /**
      * @param  _verbosity
      */
-    void fit (const bool& );
+    int fit (const bool& );
     
     void printTo(Res*);
     /**

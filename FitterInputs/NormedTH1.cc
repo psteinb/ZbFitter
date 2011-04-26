@@ -324,10 +324,10 @@ void FitterInputs::NormedTH1::normalizeTemplateTH1s(){
     (*histItr)->Scale(1/totalIntegral);
   }
 
-  std::cout << ">>> normalized all distributions to add up to 1 in the integral\n";
-  for (int i = 0; i < m_templates.size(); ++i)
-  {
-    std::cout << m_templates.at(i)->GetName() << "\t" << m_templates.at(i)->Integral()<<std::endl;
-  }
+  // std::cout << ">>> normalized all distributions to add up to 1 in the integral\n";
+  // for (int i = 0; i < m_templates.size(); ++i)
+  // {
+  //   std::cout << m_templates.at(i)->GetName() << "\t" << m_templates.at(i)->Integral()<<std::endl;
+  // }
   
 }

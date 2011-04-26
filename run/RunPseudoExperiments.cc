@@ -16,6 +16,7 @@
 #include "FitterInputs/NormedTH1.hh"
 #include "FitterResults/HistoResult.hh"
 #include "functions/SimpleMaxLLH.hh"
+#include "Studies/PseudoStudy.hh"
 
 #include "TString.h"
 #include "TRegexp.h"
@@ -24,6 +25,7 @@
 #include "AtlasStyle.h"
 #include "TRandom3.h"
 #include "TMath.h"
+#include "TLine.h"
 
 //small class
 class RunnerConfig {
@@ -229,90 +231,71 @@ void RunnerConfig::setOpt(int inArgc, char** inArgv){
 
 }
 
-// // TH1* findHisto(const std::vector<TH1*>& _vector, const std::string& _search=""){
-  
-// //   TH1* value =0;
-// //   TString name;
-// //   for (int i = 0; i < _vector.size(); ++i)
-// //   {
-// //     name = _vector.at(i)->GetName();
-// //     if(name.Contains(_search.c_str()))
-// //       value = 
-// //   }
+struct defaultMCValues
+{
   
 
-// // }
-// void createOutput(const std::string& _name,TH1* _fb=0,TH1* _fc=0,TH1* _fl=0){
+  void operator()(TH1* _total, const std::vector<TH1*>& _input){
 
-//   TStyle* aStyle =  AtlasStyle();
-//   aStyle->SetOptStat(220002211);
-//   gROOT->SetStyle("ATLAS");
-//   gROOT->ForceStyle();
+    if(_total->GetEntries()!=0){
+      _total->Reset("MICE");
+      _total->ResetStats();}
+    
+    // this->m_integrals.resize(_input.size());
+    // this->m_errors.resize(_input.size());
+
+    for (int i = 0; i < _input.size(); ++i)
+    {
+      // this->m_integrals[i] = _input[i]->IntegralAndError(_input[i]->GetXaxis()->GetFirst(),
+      //                                                    _input[i]->GetXaxis()->GetLast(),
+      //                                                    this->m_errors[i]);
+      _total->Add(_input[i]);
+      // this->m_totalIntegral+= this->m_integrals[i];
+    }
+    
+  };
+
+  //private:
+
+};
+
+
+void createExpectedValuesFromTemplates(const std::vector<TH1*>& _templates,
+                                       std::vector<double>& _expected,
+                                       std::vector<double>& _errors
+                                       ){
+
+  _expected.clear();
+  _expected.resize(_templates.size(),0.);
+  _errors.clear();
+  _errors.resize(_templates.size(),0.);
   
-//   TCanvas c(_name.c_str(),"",3000,1500);
-//   c.Clear();
-//   c.Draw();
-//   c.Divide(3,2);
-//   c.cd(1);
-//   if(_fb){
-//     _fb->Draw();
-//   }
-//   c.cd(2);
-//   if(_fc)
-//     _fc->Draw();
-//   c.cd(3);
-//   if(_fl)
-//     _fl->Draw();
-  
-//   c.cd(4);
-//   gPad->SetLogy();
-//   if(_fb)
-//     _fb->Draw();
-//   c.cd(5);
-//   gPad->SetLogy();
-//   if(_fc)
-//     _fc->Draw();
-//   c.cd(6);
-//   gPad->SetLogy();
-//   if(_fl)
-//     _fl->Draw();
+  double total = 0.;
+  std::vector<double> integrals(_templates.size(),0.);
+  std::vector<double> errors(_templates.size(),0.);
 
-//   c.Update();
-//   c.Print(_name.c_str());
-
-// }
+  for (int i = 0; i < _templates.size(); ++i)
+  {
+    integrals[i] = _templates[i]->IntegralAndError(_templates[i]->GetXaxis()->GetFirst(),
+                                                   _templates[i]->GetXaxis()->GetLast(),
+                                                   errors[i]
+                                                   );
+    total+=integrals[i];
+  }
 
 
-// void createScaledData(const std::vector<TH1*>& _vector,
-//                       const std::vector<double>& _scales,
-//                       TH1D* _data,
-//                       const int& _integral){
+  for (int i = 0; i < _templates.size(); ++i)
+  {
+    _expected[i] = integrals[i];
+    _errors[i] =  errors[i];
+  }
 
-//   if(_vector.empty() || !_data){
-//     std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer vector empty or data histo nil\n";
-//     return;}
-
-//   if(_vector.size()!=_scales.size())
-//     {
-//     std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer vector mismatching scale factor vector\n";
-//     return;}
-
-//   TH1D* total = dynamic_cast<TH1D*>(_vector.front()->Clone("total"));
-//   total->Reset("MICE");
-//   total->ResetStats();
-
-//   for (int i = 0; i < _vector.size(); ++i)
-//   {
-//     total->Add(_vector.at(i),_scales.at(i));
-//   }
-
-//   _data->FillRandom(total,_integral);
-
-// }
+}
 
 int main(int argc, char* argv[])
 {
   TStyle* aStyle =  AtlasStyle();
+  aStyle->SetOptStat(111111);
   gROOT->SetStyle("ATLAS");
   gROOT->ForceStyle();
 
@@ -326,139 +309,85 @@ int main(int argc, char* argv[])
     if(conf.p_msgLevel)
       conf.printConf();
 
-  // ----- INPUT ----- 
+   // ----- INPUT ----- 
   FitterInputs::NormedTH1* input = new FitterInputs::NormedTH1();
   input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str(),conf.p_rebin);
   input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str(),conf.p_rebin);
-  
+
   std::vector<TH1*> m_templates;
   input->getTemplatesDeepCopy(m_templates);
+  TH1D* m_data =  input->getDataDeepCopy();
 
-  TH1D* m_data=input->getDataDeepCopy();
+   // ----- EXPECTED VALUES ----- 
+  std::vector<double> expected          ;
+  std::vector<double> expectedErrors    ;
+  createExpectedValuesFromTemplates(m_templates,
+                                    expected,          
+                                    expectedErrors    );
+
+   // ----- PSEUDO EXPERIMENTS ----- 
+  PseudoStudy<defaultMCValues>  aPseudoStudy(m_templates,
+                                             expected,
+                                             expectedErrors,
+                                             m_data->Integral(),
+                                             conf.p_threads,
+                                             conf.p_nIter
+                                             );
+  aPseudoStudy.setInput(input);
+  aPseudoStudy.setFitterConfigFile(conf.p_configFile);
+  aPseudoStudy.setFitEngine(conf.p_fitEngine);
+  aPseudoStudy.setFitMode(conf.p_fitMode);
+  aPseudoStudy.experiment();
   
-  double dataIntegral = m_data->Integral();
-  TRandom3 myRand3;
-  // ----- Templates ----- 
-  functions::SimpleMaxLLH fcn;
+  aPseudoStudy.printResults();
+
+   // ----- COLLECT RESULTS ----- 
+  std::vector<TH1*> m_results0;aPseudoStudy.getResultsOfParameter(0,m_results0);
+  std::vector<TH1*> m_results1;aPseudoStudy.getResultsOfParameter(1,m_results1);
+  std::vector<TH1*> m_results2;aPseudoStudy.getResultsOfParameter(2,m_results2);
   
-  // ----- Results ------
-  FitterResults::HistoResult* result = new FitterResults::HistoResult(0,conf.p_msgLevel,"pseudo.root");
-
-  // ----- FitterCore ------
-  TH1D pull_fb("fb",";pull fb;N",50,-5.,5.);
-  TH1D pull_fc("fc",";pull fc;N",50,-5.,5.);
-  TH1D pull_fl("fl",";pull fl;N",50,-5.,5.);
-  
-
-  std::vector<double> fitValues(m_templates.size(),0.);
-  std::vector<double> fitErrorsUp(m_templates.size(),0.);
-  std::vector<double> fitErrorsDown(m_templates.size(),0.);
-  std::vector<int>    fitErrorsStatus(m_templates.size(),0.);
-
-  std::vector<double> metaValues(m_templates.size(),0.);
-  std::vector<double> metaErrorsUp(m_templates.size(),0.);
-  std::vector<double> metaErrorsDown(m_templates.size(),0.);
-  std::vector<int>    metaErrorsStatus(m_templates.size(),0.);
-
-
-  double bPull=0;
-  double cPull=0;
-  double lPull=0;
-
-  for (int i = 0; i < (conf.p_nIter); ++i)
+  TCanvas myResults(conf.p_outputfile.c_str(),"",3000,2000);
+  myResults.Clear();
+  myResults.Draw();
+  myResults.Divide(3,m_templates.size());
+  TLine aLine;
+  aLine.SetLineColor(kRed);
+  aLine.SetLineWidth(2);
+  int currentPad=1;
+  for (int i = 0; i < m_results0.size(); ++i,currentPad++)
   {
-    
-    
-    if(i % 50 == 0)
-      std::cout << " iteration " << i << "/" << conf.p_nIter << std::endl;
-
-    //init the fitter
-    core::FitCore<functions::SimpleMaxLLH,FitterInputs::NormedTH1,FitterResults::AbsResult> fitter(input);
-    fitter.configureFromFile(conf.p_configFile);
-    fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
-    fitter.configureKeyWithValue("Mode",conf.p_fitMode);
-    fitter.setupMachinery();
-
-    //run the fitter on data from the input file
-    if(conf.p_msgLevel>3)
-      fitter.fit(true);
-    else
-      fitter.fit(false);
-
-    //collect the results
-    fitter.getMinosErrorSet(metaErrorsStatus,metaErrorsDown,metaErrorsUp);
-    for (int i = 0; i < m_templates.size(); ++i)
+    myResults.cd(currentPad);
+    if(i<1)
     {
-     metaValues[i] = fitter.getMinimizer()->X()[i];
+      aLine.DrawLine(expected[0],0,expected[0],1.);
     }
-
-    m_data->Reset("MICE");
-    m_data->ResetStats();
-
-    //scale b content and
-    // add all MC histos according to the just fitted fractions to give pseudo data
-    createScaledData(m_templates,metaValues,m_data,myRand3.Poisson(dataIntegral));
-
-    //reset the input
-    input->setTemplateHistos(m_templates);
-    input->setDataHisto(m_data);
-    input->init();
-
-    //fit the pseudo data now
-    if(conf.p_msgLevel>3)
-      fitter.fit(true);
-    else
-      fitter.fit(false);
-
-
-    //collect the results of the second fit
-    fitter.getMinosErrorSet(fitErrorsStatus,fitErrorsDown,fitErrorsUp);
-    for (int i = 0; i < m_templates.size(); ++i)
-    {
-     fitValues[i] = fitter.getMinimizer()->X()[i];
-    }
-
-    if(fitValues[0]>metaValues[0])
-      bPull = (metaValues[0]-fitValues[0])/TMath::Sqrt((fitErrorsDown[0]*fitErrorsDown[0])+(metaErrorsDown[0]*metaErrorsDown[0]));
-    else
-      bPull = (metaValues[0]-fitValues[0])/TMath::Sqrt((fitErrorsUp[0]*fitErrorsUp[0])+(metaErrorsUp[0]*metaErrorsUp[0]));
-
-    if(fitValues[1]>metaValues[1])
-      cPull = (metaValues[1]-fitValues[1])/TMath::Sqrt((fitErrorsDown[1]*fitErrorsDown[1])+(metaErrorsDown[1]*metaErrorsDown[1]));
-    else
-      cPull = (metaValues[1]-fitValues[1])/TMath::Sqrt((fitErrorsUp[1]*fitErrorsUp[1])+(metaErrorsUp[1]*metaErrorsUp[1]));
-
-    if(fitValues[2]>metaValues[2])
-      lPull = (metaValues[2]-fitValues[2])/TMath::Sqrt((fitErrorsDown[2]*fitErrorsDown[2])+(metaErrorsDown[2]*metaErrorsDown[2]));
-    else
-      lPull = (metaValues[2]-fitValues[2])/TMath::Sqrt((fitErrorsUp[2]*fitErrorsUp[2])+(metaErrorsUp[2]*metaErrorsUp[2]));
-    //}
-
-    pull_fb.Fill(bPull);
-
-    pull_fc.Fill(cPull);
-
-    pull_fl.Fill(lPull);
-
-
-    ///////////////////////////////////////////
-    // panic print
-    //
-    
-    if(TMath::Abs(bPull)>2.5 || TMath::Abs(cPull)>2.5 || TMath::Abs(cPull)>2.5){
-      std::ostringstream Name;
-      Name << "pseudoExperiment_";
-      Name << i << ".root";
-      result->setFileName(Name.str().c_str());
-      if(conf.p_msgLevel>4)
-        fitter.printTo(result);
-    }
-
-
-    
+    m_results0[i]->Draw();
   }
 
-  createOutput(conf.p_outputfile,&pull_fb,&pull_fc,&pull_fl);
+  for (int i = 0; i < m_results1.size(); ++i,currentPad++)
+  {
+    myResults.cd(currentPad);
+    if(i<1)
+    {
+      aLine.DrawLine(expected[1],0,expected[0],1.);
+    }
+
+    m_results1[i]->Draw();
+  }
+
+  for (int i = 0; i < m_results2.size(); ++i,currentPad++)
+  {
+    myResults.cd(currentPad);
+    if(i<1)
+    {
+      aLine.DrawLine(expected[2],0,expected[0],1.);
+    }
+
+    m_results2[i]->Draw();
+  }
+
+  myResults.Update();
+  myResults.Print(".eps");
   return 0; 
    
 
