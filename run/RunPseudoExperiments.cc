@@ -229,86 +229,86 @@ void RunnerConfig::setOpt(int inArgc, char** inArgv){
 
 }
 
-// TH1* findHisto(const std::vector<TH1*>& _vector, const std::string& _search=""){
+// // TH1* findHisto(const std::vector<TH1*>& _vector, const std::string& _search=""){
   
-//   TH1* value =0;
-//   TString name;
-//   for (int i = 0; i < _vector.size(); ++i)
-//   {
-//     name = _vector.at(i)->GetName();
-//     if(name.Contains(_search.c_str()))
-//       value = 
+// //   TH1* value =0;
+// //   TString name;
+// //   for (int i = 0; i < _vector.size(); ++i)
+// //   {
+// //     name = _vector.at(i)->GetName();
+// //     if(name.Contains(_search.c_str()))
+// //       value = 
+// //   }
+  
+
+// // }
+// void createOutput(const std::string& _name,TH1* _fb=0,TH1* _fc=0,TH1* _fl=0){
+
+//   TStyle* aStyle =  AtlasStyle();
+//   aStyle->SetOptStat(220002211);
+//   gROOT->SetStyle("ATLAS");
+//   gROOT->ForceStyle();
+  
+//   TCanvas c(_name.c_str(),"",3000,1500);
+//   c.Clear();
+//   c.Draw();
+//   c.Divide(3,2);
+//   c.cd(1);
+//   if(_fb){
+//     _fb->Draw();
 //   }
+//   c.cd(2);
+//   if(_fc)
+//     _fc->Draw();
+//   c.cd(3);
+//   if(_fl)
+//     _fl->Draw();
   
+//   c.cd(4);
+//   gPad->SetLogy();
+//   if(_fb)
+//     _fb->Draw();
+//   c.cd(5);
+//   gPad->SetLogy();
+//   if(_fc)
+//     _fc->Draw();
+//   c.cd(6);
+//   gPad->SetLogy();
+//   if(_fl)
+//     _fl->Draw();
+
+//   c.Update();
+//   c.Print(_name.c_str());
 
 // }
-void createOutput(const std::string& _name,TH1* _fb=0,TH1* _fc=0,TH1* _fl=0){
-
-  TStyle* aStyle =  AtlasStyle();
-  aStyle->SetOptStat(220002211);
-  gROOT->SetStyle("ATLAS");
-  gROOT->ForceStyle();
-  
-  TCanvas c(_name.c_str(),"",3000,1500);
-  c.Clear();
-  c.Draw();
-  c.Divide(3,2);
-  c.cd(1);
-  if(_fb){
-    _fb->Draw();
-  }
-  c.cd(2);
-  if(_fc)
-    _fc->Draw();
-  c.cd(3);
-  if(_fl)
-    _fl->Draw();
-  
-  c.cd(4);
-  gPad->SetLogy();
-  if(_fb)
-    _fb->Draw();
-  c.cd(5);
-  gPad->SetLogy();
-  if(_fc)
-    _fc->Draw();
-  c.cd(6);
-  gPad->SetLogy();
-  if(_fl)
-    _fl->Draw();
-
-  c.Update();
-  c.Print(_name.c_str());
-
-}
 
 
-void createScaledData(const std::vector<TH1*>& _vector,
-                      const std::vector<double>& _scales,
-                      TH1D* _data,
-                      const int& _integral){
+// void createScaledData(const std::vector<TH1*>& _vector,
+//                       const std::vector<double>& _scales,
+//                       TH1D* _data,
+//                       const int& _integral){
 
-  if(_vector.empty() || !_data){
-    std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer vector empty or data histo nil\n";
-    return;}
+//   if(_vector.empty() || !_data){
+//     std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer vector empty or data histo nil\n";
+//     return;}
 
-  if(_vector.size()!=_scales.size())
-    {
-    std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer vector mismatching scale factor vector\n";
-    return;}
+//   if(_vector.size()!=_scales.size())
+//     {
+//     std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer vector mismatching scale factor vector\n";
+//     return;}
 
-  TH1D* total = dynamic_cast<TH1D*>(_vector.front()->Clone("total"));
-  total->Reset("MICE");
-  total->ResetStats();
+//   TH1D* total = dynamic_cast<TH1D*>(_vector.front()->Clone("total"));
+//   total->Reset("MICE");
+//   total->ResetStats();
 
-  for (int i = 0; i < _vector.size(); ++i)
-  {
-    total->Add(_vector.at(i),_scales.at(i));
-  }
+//   for (int i = 0; i < _vector.size(); ++i)
+//   {
+//     total->Add(_vector.at(i),_scales.at(i));
+//   }
 
-  _data->FillRandom(total,_integral);
+//   _data->FillRandom(total,_integral);
 
-}
+// }
 
 int main(int argc, char* argv[])
 {

@@ -13,7 +13,7 @@
 
 #include "core/FitCore.hh"
 #include "FitterInputs/NormedTH1.hh"
-#include "FitterResults/HistoResult.hh"
+#include "FitterResults/AbsResult.hh"
 #include "functions/SimpleMaxLLH.hh"
 
 #include "TRandom3.h"
@@ -21,36 +21,34 @@
 #include "TH1D.h"
 
 template<
+  class ProtoCreator,
   class InputT=FitterInputs::NormedTH1,
-  class FitterT=functions::SimpleMaxLLH,
-  class ResultT=FitterResults::HistoResult
+  class FitterT=functions::SimpleMaxLLH
   >
 class PseudoStudy{
 
   InputT m_input;
   FitterT m_fitter;
-  ResultT m_result;
+  ProtoCreator m_creator;
 
   std::string m_fitEngine       ;
   std::string m_fitMode         ;
 
   std::vector<TH1*> m_templateTH1s;
-  std::vector<TH1*> m_dataTH1s;
+  TH1D* m_total;
   std::vector<TH1*> m_resultTH1s;
 
   int m_threads;
   int m_iterations;
   TRandom3 m_TRand3;
 
-  TH1D pull_fb;
-  TH1D pull_fc;
-  TH1D pull_fl;
+  std::vector<TH1D> m_pulls;
+  std::vector<TH1D> m_means;
+  std::vector<TH1D> m_sigmas;
   
-  std::vector<double> m_templateTH1sIntegrals   ;
-  std::vector<double> m_templateTH1sErrors      ;
-  double              m_dataTH1sIntegrals	;
-  double              m_dataTH1sErrors   	;
-
+  std::vector<double> m_expectedValues   ;
+  std::vector<double> m_expectedErrors      ;
+  double              m_dataIntegral	;
 
   std::vector<double> m_fitValues;
   std::vector<double> m_fitErrorsUp;
@@ -64,23 +62,60 @@ class PseudoStudy{
     m_input.init();
   }
 
-  void setupIntegrals(){
-    double integral=0.;
-    double error=0.;
-    for (int i = 0; i <m_templateTH1s.size() ; ++i)
+  // void setupIntegrals(){
+  //   double integral=0.;
+  //   double error=0.;
+  //   for (int i = 0; i <m_templateTH1s.size() ; ++i)
+  //   {
+  //     integral = m_templateTH1s.at(i)->IntegralAndError(m_templateTH1s.at(i)->GetXaxis()->GetXmin(),
+  //                                                       m_templateTH1s.at(i)->GetXaxis()->GetXmax(),
+  //                                                       error);
+  //     m_templateTH1sIntegrals[i] = integral;
+  //     m_templateTH1sErrors[i] = error;
+  //   }
+    
+  // };
+
+  std::string addIntToText(const std::string& _text, const int& _anInt){
+    std::string value = _text;
+    _text+=_anInt;
+    return _text;
+  }
+
+
+  void setupResults(const int& _size){
+    
+    double expMeanDown = 0.;
+    double expMeanUp = 0.;
+
+    double expSigmaDown = 0.;
+    double expSigmaUp = 0.;
+
+    for (int i = 0; i < _size; ++i)
     {
-      integral = m_templateTH1s.at(i)->IntegralAndError(m_templateTH1s.at(i)->GetXaxis()->GetXmin(),
-                                                        m_templateTH1s.at(i)->GetXaxis()->GetXmax(),
-                                                        error);
-      m_templateTH1sIntegrals[i] = integral;
-      m_templateTH1sErrors[i] = error;
+      expMeanDown = 0.5*(m_expectedValues.at(i));
+      expMeanUp = 1.5*(m_expectedValues.at(i));
+      expSigmaDown = 0.5*(m_expectedErrors.at(i));
+      expSigmaUp = 1.5*(m_expectedErrors.at(i));
+
+      m_pulls[i] = TH1D(addIntToText("pull_par",i).c_str(),"pull",50,-5,5);
+      m_means[i] = TH1D(addIntToText("mean_par",i).c_str(),"mean fitted",50,expMeanDown,expMeanUp);
+      m_sigmas[i] = TH1D(addIntToText("sigma_par",i).c_str(),"sigma fitted",50,expSigmaDown,expSigmaUp);
     }
+
+
+  }
+
+  void setupTotalTemplates(){
+
+    m_total = dynamic_cast<TH1D*>(m_templateTH1s.front()->Clone("total"));
+    m_total->Reset("MICE");
+    m_total->ResetStats();
     
-    m_dataTH1sIntegrals = m_dataTH1s.at(0)->IntegralAndError(m_dataTH1s.at(0)->GetXaxis()->GetXmin(),
-                                                             m_dataTH1s.at(0)->GetXaxis()->GetXmax(),
-                                                             m_dataTH1sErrors);
+    ProtoCreator creator;
+    creator(m_total,m_templateTH1s);
     
-  };
+  };  
 
   void prepareData(TH1D* _data=0){
     _data = (TH1D*)m_templateTH1s[0]->Clone("data");
@@ -91,28 +126,29 @@ class PseudoStudy{
 public:
   
   PseudoStudy(const std::vector<TH1*>& _templates,
-              const std::vector<TH1*>& _data,
+              const std::vector<double>& _expected,
+              const std::vector<double>& _expectedErrors,
+              const double& _dataIntegral,
               const int& _thr=1,
-              const int& _iters=1000
+              const int& _iters=5000
               ):
     m_input(),
     m_fitter(),
-    m_result(0,2,"PseudoStudy"),
+    m_creator(),
     m_fitEngine("Minuit"),       
     m_fitMode  ("Migrad"),       
     m_templateTH1s(_templates.size(),0),
-    m_dataTH1s(_data.size(),0),
+    m_total(0),
     m_resultTH1s(),
     m_threads(_thr),
     m_iterations(_iters),
     m_TRand3(),
-    pull_fb("fb",";pull fb;N",50,-5.,5.),
-    pull_fc("fc",";pull fc;N",50,-5.,5.),
-    pull_fl("fl",";pull fl;N",50,-5.,5.),
-    m_templateTH1sIntegrals(_templates.size(),0.),   
-    m_templateTH1sErrors   (_templates.size(),0.),   
-    m_dataTH1sIntegrals    (0.),   
-    m_dataTH1sErrors       (0.),  
+    m_pulls(_templates.size()),
+    m_means(_templates.size()),
+    m_sigmas(_templates.size()),
+    m_expectedValues    (_expected),   
+    m_expectedErrors    (_expectedErrors),   
+    m_dataIntegral      (_dataIntegral),   
     m_fitValues(_templates.size(),0.),
     m_fitErrorsUp(_templates.size(),0.),
     m_fitErrorsDown(_templates.size(),0.),
@@ -126,23 +162,54 @@ public:
       m_templateTH1s[i] = dynamic_cast<TH1*>(_templates.at(i)->Clone(name.c_str()));
     }
 
-    //create deep copies!
-    for (int i = 0; i < _data.size(); ++i)
-    {
-      std::string name = _data.at(i)->GetName();
-      name += "_pseudo";
-      m_dataTH1s[i] = (TH1*)_data.at(i)->Clone(name.c_str());
-    }
 
-    setupInput(m_dataTH1s[0],m_templateTH1s);
-    setupIntegrals();
+    setupTotalTemplates();
+    setupInput(m_total,m_templateTH1s);
+    setupResults(_templates.size());
   };
 
   //setter
   void setFitEngine( const std::string& _engine){m_fitEngine = _engine;};
   void setFitMode( const std::string& _mode){m_fitMode = _mode;};
   
-  //getter
+  //getters
+  void getResultsOfParameter(const int& _idx,std::vector<TH1*>& _results){
+
+    _results.clear();
+    
+    if(!(_idx<m_templateTH1s.size()))
+      return;
+
+    _results.resize(3);
+    
+    try{
+      _results[0] = &(m_means.at(_idx));
+    }
+    catch(std::exception& exc){
+      std::cerr << __FILE__ <<":"<< __LINE__ <<"\t unable to return m_means item at "<< _idx <<" due to \n\t"<< exc.what()<<std::endl;
+      _results[0] = 0;
+    }
+
+    try{
+      _results[1] = &(m_sigmas.at(_idx));
+    }
+    catch(std::exception& exc){
+      std::cerr << __FILE__ <<":"<< __LINE__ <<"\t unable to return m_sigmas item at "
+                << _idx <<" due to \n\t"<< exc.what()<<std::endl;
+      _results[1] = 0;
+    }
+
+    
+    try{
+      _results[2] = &(m_pulls.at(_idx));
+    }
+    catch(std::exception& exc){
+      std::cerr << __FILE__ <<":"<< __LINE__ <<"\t unable to return m_pulls item at "<< _idx<<" due to \n\t"<< exc.what()<<std::endl;
+      _results[2] = 0;
+    }
+    
+    return;
+  };
 
   //utilities
 
@@ -167,30 +234,17 @@ public:
 
   };
   
-  void createScaledData(const std::vector<TH1*>& _vector,
-                      const std::vector<double>& _scales,
-                      TH1D* _data,
-                      const int& _integral){
+  void createScaledData(TH1D* _data=0,
+                        const double& _integral=1.){
 
-  if(_vector.empty() || !_data){
-    std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer vector empty or data histo nil\n";
-    return;}
+    if(!_data){
+      std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer vector empty or data histo nil\n";
+      return;}
 
-  if(_vector.size()!=_scales.size())
-    {
-    std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer vector mismatching scale factor vector\n";
-    return;}
 
-  TH1D* total = dynamic_cast<TH1D*>(_vector.front()->Clone("total"));
-  total->Reset("MICE");
-  total->ResetStats();
-
-  for (int i = 0; i < _vector.size(); ++i)
-  {
-    total->Add(_vector.at(i),_scales.at(i));
-  }
-
-  _data->FillRandom(total,_integral);
+    _data->Reset("MICE");
+    _data->ResetStats();
+    _data->FillRandom(m_total,_integral);
 
   }
 
@@ -211,13 +265,13 @@ public:
 
       //scale b content and
       // add all MC histos according to the just fitted fractions to give pseudo data
-      createScaledData(m_templateTH1s,m_templateTH1sIntegrals,m_data,m_TRand3.Poisson(m_dataTH1sIntegrals));
+      createScaledData(m_data,m_TRand3.Poisson(m_dataIntegral));
 
       //feed m_input
       setupInput(m_data,m_templateTH1s);
 
       //init the fitter
-      core::FitCore<FitterT,InputT,ResultT> fitter(&m_input);
+      core::FitCore<FitterT,InputT,FitterResults::AbsResult> fitter(&m_input);
       fitter.configureKeyWithValue("Engine",m_fitEngine);
       fitter.configureKeyWithValue("Mode",m_fitMode);
       fitter.setupMachinery();
@@ -233,41 +287,36 @@ public:
       }
   
 
-      if(m_fitValues[0]>m_templateTH1sIntegrals[0])
-        bPull = (m_templateTH1sIntegrals[0]-m_fitValues[0])/TMath::Sqrt((m_fitErrorsDown[0]*m_fitErrorsDown[0])+(m_templateTH1sErrors[0]*m_templateTH1sErrors[0]));
+      if(m_fitValues[0]>m_expectedValues[0])
+        bPull = (m_expectedValues[0]-m_fitValues[0])/TMath::Sqrt((m_fitErrorsDown[0]*m_fitErrorsDown[0])+(m_expectedErrors[0]*m_expectedErrors[0]));
       else
-        bPull = (m_templateTH1sIntegrals[0]-m_fitValues[0])/TMath::Sqrt((m_fitErrorsUp[0]*m_fitErrorsUp[0])+(m_templateTH1sErrors[0]*m_templateTH1sErrors[0]));
+        bPull = (m_expectedValues[0]-m_fitValues[0])/TMath::Sqrt((m_fitErrorsUp[0]*m_fitErrorsUp[0])+(m_expectedErrors[0]*m_expectedErrors[0]));
 
-      if(m_fitValues[1]>m_templateTH1sIntegrals[1])
-        cPull = (m_templateTH1sIntegrals[1]-m_fitValues[1])/TMath::Sqrt((m_fitErrorsDown[1]*m_fitErrorsDown[1])+(m_templateTH1sErrors[1]*m_templateTH1sErrors[1]));
+      if(m_fitValues[1]>m_expectedValues[1])
+        cPull = (m_expectedValues[1]-m_fitValues[1])/TMath::Sqrt((m_fitErrorsDown[1]*m_fitErrorsDown[1])+(m_expectedErrors[1]*m_expectedErrors[1]));
       else
-        cPull = (m_templateTH1sIntegrals[1]-m_fitValues[1])/TMath::Sqrt((m_fitErrorsUp[1]*m_fitErrorsUp[1])+(m_templateTH1sErrors[1]*m_templateTH1sErrors[1]));
+        cPull = (m_expectedValues[1]-m_fitValues[1])/TMath::Sqrt((m_fitErrorsUp[1]*m_fitErrorsUp[1])+(m_expectedErrors[1]*m_expectedErrors[1]));
 
-      if(m_fitValues[2]>m_templateTH1sIntegrals[2])
-        lPull = (m_templateTH1sIntegrals[2]-m_fitValues[2])/TMath::Sqrt((m_fitErrorsDown[2]*m_fitErrorsDown[2])+(m_templateTH1sErrors[2]*m_templateTH1sErrors[2]));
+      if(m_fitValues[2]>m_expectedValues[2])
+        lPull = (m_expectedValues[2]-m_fitValues[2])/TMath::Sqrt((m_fitErrorsDown[2]*m_fitErrorsDown[2])+(m_expectedErrors[2]*m_expectedErrors[2]));
       else
-        lPull = (m_templateTH1sIntegrals[2]-m_fitValues[2])/TMath::Sqrt((m_fitErrorsUp[2]*m_fitErrorsUp[2])+(m_templateTH1sErrors[2]*m_templateTH1sErrors[2]));
-      //}
+        lPull = (m_expectedValues[2]-m_fitValues[2])/TMath::Sqrt((m_fitErrorsUp[2]*m_fitErrorsUp[2])+(m_expectedErrors[2]*m_expectedErrors[2]));
 
-      pull_fb.Fill(bPull);
+      /////////////////////////////////////////
+      /// FIXME: the following should be done better by a utility method
+      /////////////////////////////////////////
 
-      pull_fc.Fill(cPull);
+      m_pulls[0].Fill(bPull);
+      m_pulls[1].Fill(cPull);
+      m_pulls[2].Fill(lPull);
 
-      pull_fl.Fill(lPull);
+      m_means[0].Fill(m_fitValues[0]);
+      m_means[1].Fill(m_fitValues[1]);
+      m_means[2].Fill(m_fitValues[2]);
 
-
-      // ///////////////////////////////////////////
-      // // panic print
-      // //
-    
-      // if(TMath::Abs(bPull)>2.5 || TMath::Abs(cPull)>2.5 || TMath::Abs(cPull)>2.5){
-      //   std::ostringstream Name;
-      //   Name << "pseudoExperiment_";
-      //   Name << i << ".root";
-      //   result->setFileName(Name.str().c_str());
-      //   if(conf.p_msgLevel>4)
-      //     fitter.printTo(result);
-      // }
+      m_sigmas[0].Fill(std::min(m_fitErrorsDown[0],m_fitErrorsUp[0]));
+      m_sigmas[1].Fill(std::min(m_fitErrorsDown[1],m_fitErrorsUp[1]));
+      m_sigmas[2].Fill(std::min(m_fitErrorsDown[2],m_fitErrorsUp[2]));
 
       //clean-up data
       m_data->Reset("MICE");
