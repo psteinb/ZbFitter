@@ -11,6 +11,8 @@
 #include "core/FitCore.hh"
 #include "FitterInputs/NormedTH1.hh"
 #include "FitterResults/HistoResult.hh"
+#include "FitterResults/TermResult.hh"
+#include "FitterResults/LLHResult.hh"
 #include "functions/SimpleMaxLLH.hh"
 
 #include "TRandom3.h"
@@ -54,6 +56,7 @@ class PseudoStudy{
   std::vector<int>    m_fitErrorsStatus;
 
   bool m_doPanicPrint;
+  int m_verbosity;
 
   //setups
   void setupInput(TH1* _data, const std::vector<TH1*> _templates){
@@ -145,7 +148,8 @@ public:
     m_fitErrorsUp(_templates.size(),0.),
     m_fitErrorsDown(_templates.size(),0.),
     m_fitErrorsStatus(_templates.size(),0.),
-    m_doPanicPrint(false)
+    m_doPanicPrint(false),
+    m_verbosity(2)
   {
     //create deep copies!
     for (int i = 0; i < _templates.size(); ++i)
@@ -168,6 +172,7 @@ public:
   void setFitterConfigFile(const std::string& _file){m_fitConfigFile = _file;};
   void setInput(InputT* _input=0){m_input = _input;};
   void setPanicPrint(bool _value=false){m_doPanicPrint = _value;};
+  void setVerbosity(int _value=false){m_verbosity = _value;};
 
   //getters
   void getResultsOfParameter(const int& _idx,std::vector<TH1*>& _results){
@@ -277,6 +282,8 @@ public:
       return;}
 
     FitterResults::HistoResult* currentResult = new FitterResults::HistoResult();
+    FitterResults::TermResult* tResult = new FitterResults::TermResult();
+    FitterResults::LLHResult* llhResult = new FitterResults::LLHResult();
     std::string name;
 
     setupInput(m_total,m_templateTH1s);
@@ -313,14 +320,30 @@ public:
       fitter.setupMachinery();
 
       //run the fitter on data from the input file
-      status = fitter.fit(false);
+      if(m_verbosity>2)
+        status = fitter.fit(false);
+      else
+        status = fitter.fit(true);
+
       if(status!=0){
         nNon0Status++;
         if(m_doPanicPrint){
         name += i;
-        name += ".root";
-        currentResult->setFileName(name.c_str());
-        fitter.printTo(currentResult);}
+        if(m_verbosity<3){
+          std::string cName = name;
+          cName += "_fit";
+          cName += ".root";
+          std::string llhName = name;
+          llhName += "_LLH";
+          llhName += ".root";
+          currentResult->setFileName(cName.c_str());
+          llhResult->setFileName(llhName.c_str());
+          fitter.printTo(currentResult);
+          if(m_verbosity<2)
+            fitter.printTo(llhResult);
+        }
+          fitter.printTo(tResult);
+        }
       }
       //collect the errors
       fitter.getMinosErrorSet(m_fitErrorsStatus,m_fitErrorsDown,m_fitErrorsUp);

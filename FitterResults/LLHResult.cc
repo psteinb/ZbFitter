@@ -1,10 +1,11 @@
-#include "LLHHisto.hh"
+#define LLHRESULT_CC
+#include "FitterResults/LLHResult.hh"
 #include "functions/AbsFittingFunction.hh"
 #include "TGraph.h"
 #include "TMath.h"
 #include "TAxis.h"
 
-void FitterResults::LLHHisto::print(){
+void FitterResults::LLHResult::print(){
 
   if(!getMinimizer()){
     std::cerr << __FILE__ <<":"<< __LINE__ <<"\t no minimizer given!\n";

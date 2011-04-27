@@ -25,7 +25,9 @@
 #include "AtlasStyle.h"
 #include "TRandom3.h"
 #include "TMath.h"
-#include "TLine.h"
+#include "TArrow.h"
+#include "TPad.h"
+
 
 //small class
 class RunnerConfig {
@@ -190,7 +192,7 @@ void RunnerConfig::printHelp(){
   std::cout << "\t -d <args> define data directory" << std::endl;
   std::cout << "\t -o <foo.root> set output file name (to foo.root)" << std::endl;
   std::cout << "\t -c <bar.env> set TEnv style config file" << std::endl;
-  std::cout << "\t -m set message level (0=VERBOSE,..,2=INFO,..,5=ERROR)" << std::endl;
+  std::cout << "\t -m set message level (0=NONE,1=TERMPANIC,2=INFO)" << std::endl;
   std::cout << "\t -t <num> number of threads to use " << std::endl;
   std::cout << "\t -E <TMinuitEngine> define fit engine" << std::endl;
   std::cout << "\t -M <TMinuitMode> define fit mode" << std::endl;
@@ -262,8 +264,8 @@ struct defaultMCValues
 
 void createExpectedValuesFromTemplates(const std::vector<TH1*>& _templates,
                                        std::vector<double>& _expected,
-                                       std::vector<double>& _errors
-                                       ){
+                                       std::vector<double>& _errors,
+                                       const double& _dataIntegral){
 
   _expected.clear();
   _expected.resize(_templates.size(),0.);
@@ -286,9 +288,24 @@ void createExpectedValuesFromTemplates(const std::vector<TH1*>& _templates,
 
   for (int i = 0; i < _templates.size(); ++i)
   {
-    _expected[i] = integrals[i];
-    _errors[i] =  errors[i];
+    _expected[i] = (integrals[i]/total)*_dataIntegral;
+    _errors[i] =  (errors[i]/integrals[i])*_expected[i];
+    std::cout << "expected value ["<<i <<"]\t"<<_expected[i]<<" +/- "<<_errors[i] <<std::endl;
   }
+
+}
+
+void addVerticalArrowToPad(TVirtualPad* _thisPad, TArrow* _arrow,const double& _value=0.){
+  
+  if(!(_value!=0.))
+    return;
+
+  double xpos = _thisPad->XtoPad(_value);
+  double yStart = _thisPad->GetUymin();
+  double yEnd = _thisPad->GetUymax();
+  _arrow->DrawArrow(xpos,yStart,
+                    xpos,yEnd,
+                    0.03,"<");
 
 }
 
@@ -323,7 +340,8 @@ int main(int argc, char* argv[])
   std::vector<double> expectedErrors    ;
   createExpectedValuesFromTemplates(m_templates,
                                     expected,          
-                                    expectedErrors    );
+                                    expectedErrors,
+                                    m_data->Integral());
 
    // ----- PSEUDO EXPERIMENTS ----- 
   PseudoStudy<defaultMCValues>  aPseudoStudy(m_templates,
@@ -337,6 +355,7 @@ int main(int argc, char* argv[])
   aPseudoStudy.setFitterConfigFile(conf.p_configFile);
   aPseudoStudy.setFitEngine(conf.p_fitEngine);
   aPseudoStudy.setFitMode(conf.p_fitMode);
+  aPseudoStudy.setVerbosity(conf.p_msgLevel);
   aPseudoStudy.experiment();
   
   aPseudoStudy.printResults();
@@ -346,21 +365,25 @@ int main(int argc, char* argv[])
   std::vector<TH1*> m_results1;aPseudoStudy.getResultsOfParameter(1,m_results1);
   std::vector<TH1*> m_results2;aPseudoStudy.getResultsOfParameter(2,m_results2);
   
+  
+  // ----- DRAW RESULTS ----- 
   TCanvas myResults(conf.p_outputfile.c_str(),"",3000,2000);
   myResults.Clear();
   myResults.Draw();
   myResults.Divide(3,m_templates.size());
-  TLine aLine;
-  aLine.SetLineColor(kRed);
-  aLine.SetLineWidth(2);
+  TArrow anArrow;
+  anArrow.SetLineColor(kRed);
+  anArrow.SetLineWidth(2);
   int currentPad=1;
   for (int i = 0; i < m_results0.size(); ++i,currentPad++)
   {
     myResults.cd(currentPad);
-    if(i<1)
-    {
-      aLine.DrawLine(expected[0],0,expected[0],1.);
+
+    if(i<1){
+      myResults.Update();
+      addVerticalArrowToPad(gPad,&anArrow,expected[0]);
     }
+
     m_results0[i]->Draw();
   }
 
@@ -369,7 +392,8 @@ int main(int argc, char* argv[])
     myResults.cd(currentPad);
     if(i<1)
     {
-      aLine.DrawLine(expected[1],0,expected[0],1.);
+      myResults.Update();
+      addVerticalArrowToPad(gPad,&anArrow,expected[1]);
     }
 
     m_results1[i]->Draw();
@@ -380,7 +404,8 @@ int main(int argc, char* argv[])
     myResults.cd(currentPad);
     if(i<1)
     {
-      aLine.DrawLine(expected[2],0,expected[0],1.);
+      myResults.Update();
+      addVerticalArrowToPad(gPad,&anArrow,expected[2]);
     }
 
     m_results2[i]->Draw();

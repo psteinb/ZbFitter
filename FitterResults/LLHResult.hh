@@ -10,11 +10,11 @@ namespace FitterResults {
 
 
 /**
-  * class LLHHisto
+  * class LLHResult
   * 
   */
 
-class LLHHisto : public AbsResult
+class LLHResult : public AbsResult
 {
 private:
 
@@ -30,9 +30,9 @@ public:
   /**
    * Empty Constructor
    */
-  LLHHisto (ROOT::Math::Minimizer* _min=0 , 
+  LLHResult (ROOT::Math::Minimizer* _min=0 , 
                const int& _verb=1,
-               const std::string& _text="LLHHisto.root"):
+               const std::string& _text="LLHResult.root"):
     AbsResult(_min),
     m_verbosity(_verb),
     m_filename(_text)
@@ -41,13 +41,13 @@ public:
   /**
    * Empty Destructor
    */
-  virtual ~LLHHisto ( ){};
+  virtual ~LLHResult ( ){};
 
   
 
   virtual void print ( );
 
-
+  void setFileName(const std::string& _text="LLHResult.root"){m_filename=_text;};
 };
 }; // end of package namespace
 

@@ -19,26 +19,33 @@ void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
 
   if(isConfigured("Tolerance"))
     m_minimizer->SetTolerance(getDoubleFromString(m_config["Tolerance"]));
+
+  /////////////////////////////////////////
+  /// laod data/templates to Likelihood function
+  /////////////////////////////////////////
+  loadDataToFunction();
+
   
   // Set the free variables to be minimized!
   /////////////////////////////////////////
   /// FIXME: need to automise the following, current implementation hinders manual set of Start/Step/Name through other methods than TEnv
   /////////////////////////////////////////
-
+  
+  
   m_minimizer->SetVariable(0,
-                           m_environment.GetValue("Parameter1.Name","fb"), 
-                           m_environment.GetValue("Parameter1.Start",0.3),
-                           m_environment.GetValue("Parameter1.Step",0.05));
+                           m_environment.GetValue("Parameter1.Name","Nb"), 
+                           m_environment.GetValue("Parameter1.Start",30),
+                           m_environment.GetValue("Parameter1.Step",0.1));
 
   m_minimizer->SetVariable(1,
-                           m_environment.GetValue("Parameter2.Name","fc"), 
-                           m_environment.GetValue("Parameter2.Start",0.3),
-                           m_environment.GetValue("Parameter2.Step",0.05));
+                           m_environment.GetValue("Parameter2.Name","Nc"), 
+                           m_environment.GetValue("Parameter2.Start",10),
+                           m_environment.GetValue("Parameter2.Step",0.1));
 
   m_minimizer->SetVariable(2,
-                           m_environment.GetValue("Parameter3.Name","fl"), 
+                           m_environment.GetValue("Parameter3.Name","Nl"), 
                            m_environment.GetValue("Parameter3.Start",0.3),
-                           m_environment.GetValue("Parameter3.Step",0.05));
+                           m_environment.GetValue("Parameter3.Step",0.1));
   
 }
 
@@ -48,7 +55,7 @@ int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   /////////////////////////////////////////
   /// laod data/templates to Likelihood function
   /////////////////////////////////////////
-  loadDataToFunction();
+  //loadDataToFunction();
 
   if(_verbose){
     m_fcn.print();
