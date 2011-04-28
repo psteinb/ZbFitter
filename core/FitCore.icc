@@ -107,7 +107,9 @@ void core::FitCore<Fcn,Scr,Res>::printTo(Res* _result=0){
   if(_result){
     _result->setMinimizer(dynamic_cast<ROOT::Math::Minimizer*>(m_minimizer));
     _result->setFunction(dynamic_cast< Fcn* >(&m_fcn));
+    _result->setMinosResults(m_minosStatus,m_minosUp,m_minosDown);
     _result->print();
+    
   }
   else
     throw std::runtime_error("FitCore::printTo AbsResult pointer invalid");
@@ -134,7 +136,7 @@ void core::FitCore<Fcn,Scr,Res>::runMinos(){
     if(!minosStatus){
       m_minosStatus[i] = (-1)*iStatus;
       std::cout << "MINOS\tFAILED TO GET ERRORS FOR: parameter " << i 
-                << "\t[minos status: "<<m_minosStatus[i] <<"],\n" 
+                << "\t[minos status: "<<m_minosStatus[i] <<"], [error: "<<iStatus <<"]\n" 
                 << "\t\tFCN: " << m_minimizer->MinValue() 
                 << ", fitted: " << m_minimizer->X()[i]
                 << ", fittedError: " << m_minimizer->Errors()[i]<< std::endl ;}

@@ -22,12 +22,12 @@
 template<
   class ProtoCreator,
   class InputT=FitterInputs::NormedTH1,
-  class FitterT=functions::SimpleMaxLLH
+  class FunctionT=functions::SimpleMaxLLH
   >
 class PseudoStudy{
 
   InputT* m_input;
-  FitterT m_fitter;
+  FunctionT m_fitter;
   ProtoCreator m_creator;
 
   std::string m_fitConfigFile       ;
@@ -98,6 +98,19 @@ class PseudoStudy{
     }
 
 
+  }
+
+  void preparePlots(const std::string& _baseName, FitterResults::HistoResult* _histo= 0, FitterResults::LLHResult* _llh = 0){
+             
+    std::string cName = _baseName;
+    cName += "_fit";
+    cName += ".root";
+    std::string llhName = _baseName;
+    llhName += "_LLH";
+    llhName += ".root";
+    _histo->setFileName(cName.c_str());
+    _llh->setFileName(llhName.c_str());
+    
   }
 
   void setupTotalTemplates(){
@@ -171,8 +184,8 @@ public:
   void setProtoCreator(const ProtoCreator& _creator){m_creator = _creator;};
   void setFitterConfigFile(const std::string& _file){m_fitConfigFile = _file;};
   void setInput(InputT* _input=0){m_input = _input;};
-  void setPanicPrint(bool _value=false){m_doPanicPrint = _value;};
-  void setVerbosity(int _value=false){m_verbosity = _value;};
+  void setPanicPrint(const bool& _value=false){m_doPanicPrint = _value;};
+  void setVerbosity(const int& _value=3){m_verbosity = _value;};
 
   //getters
   void getResultsOfParameter(const int& _idx,std::vector<TH1*>& _results){
@@ -281,10 +294,10 @@ public:
             std::cerr << __FILE__ << ":"<< __LINE__ <<"\t input data object pointer nil\n";
       return;}
 
-    FitterResults::HistoResult* currentResult = new FitterResults::HistoResult();
-    FitterResults::TermResult* tResult = new FitterResults::TermResult();
+    FitterResults::HistoResult* histoResult = new FitterResults::HistoResult();
+    FitterResults::TermResult* termResult = new FitterResults::TermResult();
     FitterResults::LLHResult* llhResult = new FitterResults::LLHResult();
-    std::string name;
+    std::ostringstream name;
 
     setupInput(m_total,m_templateTH1s);
 
@@ -300,8 +313,11 @@ public:
 
     for (int i = 0; i < (m_iterations); ++i)
     {
-      name = "PseudoStudy_";
-    
+      //flush the name
+      name.str("");
+      name << "PseudoStudy_" << i;
+      
+
       if(i % 500 == 0)
         std::cout << " iteration " << i << "/" << m_iterations << std::endl;
 
@@ -313,53 +329,53 @@ public:
       setupInput(m_data,m_templateTH1s);
 
       //init the fitter
-      core::FitCore<FitterT,InputT,FitterResults::AbsResult> fitter(m_input);
-      fitter.configureFromFile(m_fitConfigFile);
-      fitter.configureKeyWithValue("Engine",m_fitEngine);
-      fitter.configureKeyWithValue("Mode",m_fitMode);
-      fitter.setupMachinery();
+      core::FitCore<FunctionT,InputT,FitterResults::AbsResult> aFitter(m_input);
+      aFitter.configureFromFile(m_fitConfigFile);
+      aFitter.configureKeyWithValue("Engine",m_fitEngine);
+      aFitter.configureKeyWithValue("Mode",m_fitMode);
+      aFitter.setupMachinery();
 
       //run the fitter on data from the input file
       if(m_verbosity>2)
-        status = fitter.fit(false);
+        status = aFitter.fit(false);
       else
-        status = fitter.fit(true);
+        status = aFitter.fit(true);
 
       if(status!=0){
         nNon0Status++;
         if(m_doPanicPrint){
-        name += i;
-        if(m_verbosity<3){
-          std::string cName = name;
-          cName += "_fit";
-          cName += ".root";
-          std::string llhName = name;
-          llhName += "_LLH";
-          llhName += ".root";
-          currentResult->setFileName(cName.c_str());
-          llhResult->setFileName(llhName.c_str());
-          fitter.printTo(currentResult);
-          if(m_verbosity<2)
-            fitter.printTo(llhResult);
+          name << "_failed";
+          preparePlots(name.str(),histoResult,llhResult);
+          if(m_verbosity<3){
+            aFitter.printTo(histoResult);
+            aFitter.printTo(llhResult);
+          }
+          aFitter.printTo(termResult);
         }
-          fitter.printTo(tResult);
+      }
+      else{
+        name << "_success";
+        preparePlots(name.str(),histoResult,llhResult);
+        if(i % 50 == 0){
+          aFitter.printTo(histoResult);
+          aFitter.printTo(llhResult);
         }
       }
       //collect the errors
-      fitter.getMinosErrorSet(m_fitErrorsStatus,m_fitErrorsDown,m_fitErrorsUp);
+      aFitter.getMinosErrorSet(m_fitErrorsStatus,m_fitErrorsDown,m_fitErrorsUp);
 
       //collect the results
       for (int i = 0; i < m_templateTH1s.size(); ++i)
       {
-        m_fitValues[i] = fitter.getMinimizer()->X()[i];
+        m_fitValues[i] = aFitter.getMinimizer()->X()[i];
         m_means[i].Fill(m_fitValues[i]);
 
-        std::cout << "Minos on param "<< i <<" finished with "<<m_fitErrorsStatus.at(i)<<std::endl;
+        //std::cout << "Minos on param "<< i <<" finished with "<<m_fitErrorsStatus.at(i)<<std::endl;
 
-        if(m_fitErrorsStatus.at(i)<10)
+        if(TMath::Abs(m_fitErrorsStatus.at(i))<10)
           m_sigmas[i].Fill(TMath::Abs(std::min(m_fitErrorsDown[i],m_fitErrorsUp[i])));
         else{
-          m_sigmas[i].Fill(fitter.getMinimizer()->Errors()[i]);
+          m_sigmas[i].Fill(aFitter.getMinimizer()->Errors()[i]);
         }
       }
 
@@ -399,7 +415,9 @@ public:
     double irregulars = (nNon0Status/double(m_iterations))*100;
     std::cout << nNon0Status<< "/" <<m_iterations << " = ("<< std::setprecision(2) <<irregulars <<" %) were irregular!\n";
 
-    delete currentResult;currentResult=0;
+    delete termResult;termResult=0;
+    delete histoResult;histoResult=0;
+    delete llhResult;llhResult=0;
   };
   
 };

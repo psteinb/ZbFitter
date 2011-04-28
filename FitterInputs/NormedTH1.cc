@@ -305,10 +305,12 @@ void FitterInputs::NormedTH1::normalizeTemplateTH1s(){
 
   //create object
   TH1D* total = dynamic_cast<TH1D*>(m_templates.front()->Clone(totalName.c_str()));
-
+  total->Reset("MICE");
+  total->ResetStats();
+  
   //add all up
-  std::vector<TH1*>::const_iterator histItr = m_templates.begin()+1;
-  std::vector<TH1*>::const_iterator histEnd = m_templates.end();
+  std::vector<TH1*>::iterator histItr = m_templates.begin();
+  std::vector<TH1*>::iterator histEnd = m_templates.end();
   for (; histItr!=histEnd; ++histItr)
   {
     total->Add(*histItr);
@@ -321,13 +323,9 @@ void FitterInputs::NormedTH1::normalizeTemplateTH1s(){
   histItr = m_templates.begin();
   for (; histItr!=histEnd; ++histItr)
   {
+    std::cout << "original\t" << (*histItr)->GetName() << "\t" << (*histItr)->Integral() << " , max " << (*histItr)->GetMaximum()  <<std::endl;
     (*histItr)->Scale(1/totalIntegral);
+    std::cout << "original\t" << (*histItr)->GetName() << "\t" << (*histItr)->Integral()<< " , max " << (*histItr)->GetMaximum()<<std::endl;
   }
-
-  // std::cout << ">>> normalized all distributions to add up to 1 in the integral\n";
-  // for (int i = 0; i < m_templates.size(); ++i)
-  // {
-  //   std::cout << m_templates.at(i)->GetName() << "\t" << m_templates.at(i)->Integral()<<std::endl;
-  // }
   
 }

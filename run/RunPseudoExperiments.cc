@@ -356,6 +356,8 @@ int main(int argc, char* argv[])
   aPseudoStudy.setFitEngine(conf.p_fitEngine);
   aPseudoStudy.setFitMode(conf.p_fitMode);
   aPseudoStudy.setVerbosity(conf.p_msgLevel);
+  if(conf.p_msgLevel<3)
+    aPseudoStudy.setPanicPrint(true);
   aPseudoStudy.experiment();
   
   aPseudoStudy.printResults();

@@ -64,7 +64,7 @@ void FitterResults::HistoResult::print(){
   TCanvas myC(m_filenameCore.c_str(),"",2400,1200);
   myC.Clear();
   myC.Draw();
-  myC.Divide(2,1);
+  myC.Divide(3,2);
   myC.cd(1);
   newStack.SetMaximum(1.5*newStack.GetMaximum());
   newStack.Draw("BAR");
@@ -82,17 +82,21 @@ void FitterResults::HistoResult::print(){
   leg.Draw();
 
   myC.cd(2);
-  TPaveText mtext(0,0,1,1,"ARC");
-
-  // mtext.AddText(getParameterResult(0,mcBFrac).c_str());
-  // mtext.AddText(getParameterResult(1,mcCFrac).c_str());
-  // mtext.AddText(getParameterResult(2,mcLFrac).c_str());
-
+  TPaveText mtext(0.2,0.2,.9,.9,"ARC");
   mtext.AddText(getParameterResult(0,1.).c_str());
   mtext.AddText(getParameterResult(1,1.).c_str());
   mtext.AddText(getParameterResult(2,1.).c_str());
   mtext.Draw();
-
+  
+  myC.cd(3);
+  fitterData->Draw();
+  myC.cd(4);
+  fitterT0->Draw();
+  myC.cd(5);
+  fitterT1->Draw();
+  myC.cd(6);
+  fitterT2->Draw();
+  
   myC.Update();
   myC.Print(".eps");
 
@@ -119,17 +123,17 @@ std::string FitterResults::HistoResult::getParameterResult(const int& _idx, doub
 
     double Error=getMinimizer()->Errors()[_idx];
     double relError = Error/centralValue;
-
-    bool minosStatus = getMinimizer()->GetMinosError(_idx,Down,Up);
-    if(!minosStatus){
+    int minosStatus = 0;
+    getMinosResultsForIndex(_idx,minosStatus,Up,Down);
+    if(minosStatus<0){
       _text << " +/- " << centralValue*relError << ")";
-    }
-    else{
-      rUp = Up/centralValue;
-      rDown = Down/centralValue;
+     }
+     else{
+       rUp = Up/centralValue;
+       rDown = Down/centralValue;
 
-      _text << "^{" << centralValue*rUp << "}_{"<< centralValue*rDown << "})";
-    }
+       _text << "^{" << centralValue*rUp << "}_{"<< centralValue*rDown << "})";
+     }
   }
     
   return _text.str();

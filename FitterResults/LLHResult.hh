@@ -5,6 +5,7 @@
 #include "TObject.h"
 #include <string>
 
+class TGraph;
 
 namespace FitterResults {
 
@@ -48,6 +49,8 @@ public:
   virtual void print ( );
 
   void setFileName(const std::string& _text="LLHResult.root"){m_filename=_text;};
+  
+  void printTGraphVector(const std::vector<TGraph*>&);
 };
 }; // end of package namespace
 
