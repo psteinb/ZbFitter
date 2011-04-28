@@ -101,6 +101,8 @@ namespace FitterInputs {
 
 
     void init();
+    void initData();
+
     /**
      * open _fileName and retrieve histoNames
      * @param  _fileName file to be opened
@@ -117,9 +119,9 @@ namespace FitterInputs {
         std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer nil\n";
     };
 
-    TH1D* getDataDeepCopy(){
+    TH1* getDataDeepCopy(){
       std::string name = m_data->GetName();name+="_new";
-      return dynamic_cast<TH1D*>(m_data->Clone(name.c_str()));
+      return dynamic_cast<TH1*>(m_data->Clone(name.c_str()));
     };
 
     /**

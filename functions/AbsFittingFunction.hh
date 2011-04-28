@@ -152,7 +152,13 @@ namespace functions {
      */
     virtual double up() = 0;
 
-    
+    void printTemplates(){
+
+      for (int i = 0; i < m_templates.size(); ++i)
+      {
+        m_templates.at(i).getHisto()->Print("all");
+      }
+    }
     
   };
 }; // end of package namespace

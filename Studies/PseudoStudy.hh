@@ -33,9 +33,10 @@ class PseudoStudy{
   std::string m_fitConfigFile       ;
   std::string m_fitEngine       ;
   std::string m_fitMode         ;
+  std::string m_baseName;
 
   std::vector<TH1*> m_templateTH1s;
-  TH1D* m_total;
+  TH1* m_total;
   std::vector<TH1*> m_resultTH1s;
 
   int m_threads;
@@ -59,6 +60,13 @@ class PseudoStudy{
   int m_verbosity;
 
   //setups
+  void setupData(TH1* _data){
+    m_input->setDataHisto(_data);
+    //m_input->setTemplateHistos(_templates);
+    m_input->initData();
+  }
+  
+
   void setupInput(TH1* _data, const std::vector<TH1*> _templates){
     m_input->setDataHisto(_data);
     m_input->setTemplateHistos(_templates);
@@ -115,7 +123,7 @@ class PseudoStudy{
 
   void setupTotalTemplates(){
 
-    m_total = dynamic_cast<TH1D*>(m_templateTH1s.front()->Clone("total"));
+    m_total = dynamic_cast<TH1*>(m_templateTH1s.front()->Clone("total"));
     m_total->Reset("MICE");
     m_total->ResetStats();
     
@@ -124,8 +132,8 @@ class PseudoStudy{
     
   };  
 
-  void prepareData(TH1D*& _data=0){
-    _data = (TH1D*)m_templateTH1s[0]->Clone("data");
+  void prepareData(TH1*& _data=0){
+    _data = (TH1*)m_templateTH1s[0]->Clone("data");
     _data->Reset("MICE");
     _data->ResetStats();
   };
@@ -145,6 +153,7 @@ public:
     m_fitConfigFile(""),       
     m_fitEngine("Minuit2"),       
     m_fitMode  ("Migrad"),       
+    m_baseName("PseudoStudy_"),
     m_templateTH1s(_templates.size(),0),
     m_total(0),
     m_resultTH1s(),
@@ -186,6 +195,7 @@ public:
   void setInput(InputT* _input=0){m_input = _input;};
   void setPanicPrint(const bool& _value=false){m_doPanicPrint = _value;};
   void setVerbosity(const int& _value=3){m_verbosity = _value;};
+  void setBaseName(const std::string& _value){m_baseName = _value;};
 
   //getters
   void getResultsOfParameter(const int& _idx,std::vector<TH1*>& _results){
@@ -233,7 +243,9 @@ public:
     std::cout << "-- meas --\n";
     std::vector<TH1D>::const_iterator rItr = m_means.begin()    ;
     std::vector<TH1D>::const_iterator rEnd = m_means.end()      ;
-    TFile aNewFile("PseudoStudy.root","RECREATE");
+    std::string rootFileName = m_baseName;
+    rootFileName += "_MeansSigmasPulls.root";
+    TFile aNewFile(rootFileName.c_str(),"RECREATE");
 
     for (; rItr!=rEnd; ++rItr)
     {
@@ -274,7 +286,7 @@ public:
 
   };
   
-  void createScaledData(TH1D* _data=0,
+  void createScaledData(TH1* _data=0,
                         const double& _integral=1.){
 
     if(!_data){
@@ -305,7 +317,7 @@ public:
     double cPull=0;
     double lPull=0;
 
-    TH1D* m_data=0;
+    TH1* m_data=0;
     prepareData(m_data);
 
     int status = 0;
@@ -315,7 +327,7 @@ public:
     {
       //flush the name
       name.str("");
-      name << "PseudoStudy_" << i;
+      name << m_baseName << i;
       
 
       if(i % 500 == 0)
@@ -325,8 +337,8 @@ public:
       // add all MC histos according to the just fitted fractions to give pseudo data
       createScaledData(m_data,m_TRand3.Poisson(m_dataIntegral));
 
-      //feed m_input
-      setupInput(m_data,m_templateTH1s);
+      //feed m_input with pseudo data
+      setupData(m_data);
 
       //init the fitter
       core::FitCore<FunctionT,InputT,FitterResults::AbsResult> aFitter(m_input);

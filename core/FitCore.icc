@@ -60,6 +60,7 @@ int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   if(_verbose){
     m_fcn.print();
     m_minimizer->SetPrintLevel(2002);
+    m_fcn.printTemplates();
   }
   /////////////////////////////////////////
   /// provide the Likelihood function

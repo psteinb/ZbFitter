@@ -333,7 +333,7 @@ int main(int argc, char* argv[])
 
   std::vector<TH1*> m_templates;
   input->getTemplatesDeepCopy(m_templates);
-  TH1D* m_data =  input->getDataDeepCopy();
+  TH1* m_data =  input->getDataDeepCopy();
 
    // ----- EXPECTED VALUES ----- 
   std::vector<double> expected          ;
@@ -356,6 +356,7 @@ int main(int argc, char* argv[])
   aPseudoStudy.setFitEngine(conf.p_fitEngine);
   aPseudoStudy.setFitMode(conf.p_fitMode);
   aPseudoStudy.setVerbosity(conf.p_msgLevel);
+  aPseudoStudy.setBaseName(conf.p_outputfile);
   if(conf.p_msgLevel<3)
     aPseudoStudy.setPanicPrint(true);
   aPseudoStudy.experiment();

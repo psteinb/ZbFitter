@@ -105,6 +105,10 @@ void FitterInputs::NormedTH1::loadTemplatesFromOneFile (const std::string& _file
   {
     aHistName = dynamic_cast<TObjString*>(Histo->At(i))->GetString();
     metaObject = dynamic_cast<TH1*>(fileObject->Get(aHistName.Data()));
+    //against strange UCL TH1F histos
+    if(metaObject)
+      metaObject->SetName(aHistName.Data());
+
     metaObject->Sumw2();
     if(_rebin!=1)
       metaObject->Rebin(_rebin);
@@ -229,6 +233,21 @@ void FitterInputs::NormedTH1::init(){
   this->setupFitterData();
 }
 
+void FitterInputs::NormedTH1::initData(){
+
+  FitterData metaData;
+  createFitterDataFromTH1(m_data,metaData);
+
+  //we expect that the first FitterData is the of type Data (to fit)
+  m_values[0] = metaData;
+
+  // for (int i = 0; i < m_values.size(); ++i)
+  // {
+  //   m_values[i].print();
+  // }
+}
+
+
 void FitterInputs::NormedTH1::createFitterDataFromTH1(TH1* _hist, FitterData& _fdata){
   //setup
   _fdata.setName(_hist->GetName());
@@ -270,6 +289,9 @@ void FitterInputs::NormedTH1::setupFitterData(){
     m_values.push_back(metaData);  
   }
 
+  //sort the values, so "data" is always first
+  std::sort(m_values.begin(),m_values.end(),FitterInputs::lessForDataType());
+
 }
 
 void FitterInputs::NormedTH1::getTemplatesDeepCopy(std::vector<TH1*>& _templates){
@@ -304,7 +326,7 @@ void FitterInputs::NormedTH1::normalizeTemplateTH1s(){
     totalName = "totalMC";
 
   //create object
-  TH1D* total = dynamic_cast<TH1D*>(m_templates.front()->Clone(totalName.c_str()));
+  TH1* total = dynamic_cast<TH1*>(m_templates.front()->Clone(totalName.c_str()));
   total->Reset("MICE");
   total->ResetStats();
   
@@ -323,9 +345,13 @@ void FitterInputs::NormedTH1::normalizeTemplateTH1s(){
   histItr = m_templates.begin();
   for (; histItr!=histEnd; ++histItr)
   {
-    std::cout << "original\t" << (*histItr)->GetName() << "\t" << (*histItr)->Integral() << " , max " << (*histItr)->GetMaximum()  <<std::endl;
+    std::cout << "\n\noriginal\t" << (*histItr)->GetName() << "\t" << (*histItr)->Integral() << " , max " << (*histItr)->GetMaximum()  <<std::endl;
+
+
     (*histItr)->Scale(1/totalIntegral);
-    std::cout << "original\t" << (*histItr)->GetName() << "\t" << (*histItr)->Integral()<< " , max " << (*histItr)->GetMaximum()<<std::endl;
+
+    std::cout << "\n\nscaled\t" << (*histItr)->GetName() << "\t" << (*histItr)->Integral()<< " , max " << (*histItr)->GetMaximum()<<std::endl;
+
   }
   
 }

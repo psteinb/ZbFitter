@@ -13,6 +13,8 @@
 
 namespace FitterInputs {
 
+  
+
   enum dataType {
     eData = 0,
     eTempl = 1,
@@ -31,7 +33,7 @@ class FitterData
   double m_sum;
   double m_sumError;
   std::vector<double> m_weights;
-  TH1D* m_histo;
+  TH1* m_histo;
 
   void calcSumAndUncertainty(){
     m_sum = std::accumulate(m_values.begin(), m_values.end(),0,std::plus<double>());
@@ -108,6 +110,8 @@ public:
     std::cout << "\n\t\t> ";
     std::copy(m_weights.begin(), m_weights.end(),comma);
     std::cout << "\n";
+    if(m_histo)
+      m_histo->Print("all");
   };
 
   void clear(){m_values.clear();m_weights.clear();};
@@ -119,14 +123,25 @@ public:
   double getSumError() const {return m_sumError;};
   double getSumAndError(double& _sum,double& _err) const {_sum=m_sum;_err=m_sumError;};
 
-  const TH1D* getHisto() const {return m_histo;};
+  const TH1* getHisto() const {return m_histo;};
   void setHisto(TH1* _histo) {
     std::string histo = m_name;
     histo += "_histo";
-    m_histo = dynamic_cast<TH1D*>(_histo->Clone(histo.c_str()));
+    m_histo = dynamic_cast<TH1*>(_histo->Clone(histo.c_str()));
     m_histo->SetDirectory(0);
   };
 };
+
+struct lessForDataType : public std::binary_function<FitterData,FitterData,bool>
+  {
+    bool operator()(const FitterData& _first, const FitterData& _second){
+      return _first.getType() < _second.getType();
+    }
+
+    bool operator()(FitterData* _first, FitterData* _second){
+      return _first->getType() < _second->getType();
+    }
+  };
 
 };
 #endif // FITTERDATA_H
