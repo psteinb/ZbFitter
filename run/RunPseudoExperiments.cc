@@ -244,8 +244,6 @@ struct defaultMCValues
       _total->Reset("MICE");
       _total->ResetStats();}
     
-    // this->m_integrals.resize(_input.size());
-    // this->m_errors.resize(_input.size());
 
     for (int i = 0; i < _input.size(); ++i)
     {

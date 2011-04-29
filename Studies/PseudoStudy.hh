@@ -293,7 +293,7 @@ public:
       std::cerr << __FILE__ << ":"<< __LINE__ <<"\t data histo pointer nil\n";
       return;}
 
-
+    std::cout << __FILE__ << ":"<< __LINE__ <<"\t sampling data histo with"<< _integral <<"entries\n";
     _data->Reset("MICE");
     _data->ResetStats();
     _data->FillRandom(m_total,_integral);
@@ -312,7 +312,11 @@ public:
     std::ostringstream name;
 
     setupInput(m_total,m_templateTH1s);
-
+    if(m_verbosity<3){
+      std::cout << "\nproto function to fill the data from\n";
+      m_total->Print("all");
+    }
+      
     double bPull=0;
     double cPull=0;
     double lPull=0;
@@ -336,6 +340,11 @@ public:
       //scale b content and
       // add all MC histos according to the just fitted fractions to give pseudo data
       createScaledData(m_data,m_TRand3.Poisson(m_dataIntegral));
+      if(m_verbosity<3){
+        std::cout << "\nsampled data\n";
+        m_data->Print("all");
+      }
+
 
       //feed m_input with pseudo data
       setupData(m_data);

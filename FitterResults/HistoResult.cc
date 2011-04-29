@@ -41,12 +41,12 @@ void FitterResults::HistoResult::print(){
    double mcBFrac = fitterT0->Integral();
    double mcCFrac = fitterT1->Integral();
    double mcLFrac = fitterT2->Integral();
-  // double mcTotal = mcBFrac + mcCFrac + mcLFrac;
+   double mcTotal = mcBFrac + mcCFrac + mcLFrac;
   double totData = fitterData->Integral();
 
-  fitterT0->Scale(xs[0]/mcBFrac);fitterT0->SetFillColor(kRed);
-  fitterT1->Scale(xs[1]/mcCFrac);fitterT1->SetFillColor(kViolet);
-  fitterT2->Scale(xs[2]/mcLFrac);fitterT2->SetFillColor(kAzure); 
+  fitterT0->Scale(xs[0]/mcTotal);fitterT0->SetFillColor(kRed);
+  fitterT1->Scale(xs[1]/mcTotal);fitterT1->SetFillColor(kViolet);
+  fitterT2->Scale(xs[2]/mcTotal);fitterT2->SetFillColor(kAzure); 
   fitterT0->SetLineColor(kRed);   
   fitterT1->SetLineColor(kViolet);
   fitterT2->SetLineColor(kAzure); 
