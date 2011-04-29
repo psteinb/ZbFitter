@@ -21,12 +21,20 @@ functions::SimpleMaxLLH::SimpleMaxLLH ( ) :
 
 functions::SimpleMaxLLH::~SimpleMaxLLH( ) { }
 
-double functions::SimpleMaxLLH::getTotalMCFractionPerBin(const short& _bin){
-  double value =0;
-  
+double functions::SimpleMaxLLH::getMCPredictionOfBin(const short& _bin){
+
+  //total MC prediction for this bin
+  double total = 0;
   for (short i=0; i < this->getNumberOfParameters(); ++i)
   {
-    value+=((getParameterValue(i))*(m_templates.at(i).getContent()->at(_bin)));
+    total += (m_templates.at(i).getHisto()->GetBinContent(_bin+1));
+  }
+
+  double value =0;  
+  for (short i=0; i < this->getNumberOfParameters(); ++i)
+  {
+    value+=((getParameterValue(i))*(m_templates.at(i).getContent()->at(_bin)))*total;
+    //value+=(getParameterValue(i))*total;
   }
   
   return value;
@@ -55,7 +63,7 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
   double sumTemp = 0.;
   for (short tidx = 0; tidx < m_data.getContent()->size(); ++tidx)
   {
-    sumTemp += (this->getTotalMCFractionPerBin(tidx));
+    sumTemp += (this->getMCPredictionOfBin(tidx));
   }
 
   //the likelihood function
@@ -70,7 +78,7 @@ double functions::SimpleMaxLLH::operator()(const double* _values ){
   for (; dataItr!=dataEnd; ++dataItr,++bin)
   {
     
-    mcPredictionPerBin = this->getTotalMCFractionPerBin(bin);
+    mcPredictionPerBin = this->getMCPredictionOfBin(bin);
     
 
     if(!(mcPredictionPerBin!=0))

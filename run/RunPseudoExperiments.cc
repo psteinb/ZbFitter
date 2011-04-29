@@ -13,6 +13,7 @@
 #include "unistd.h"
 
 #include "core/FitCore.hh"
+#include "FitterInputs/NormalisationFunctors.hh"
 #include "FitterInputs/NormedTH1.hh"
 #include "FitterResults/HistoResult.hh"
 #include "functions/SimpleMaxLLH.hh"
@@ -248,11 +249,7 @@ struct defaultMCValues
 
     for (int i = 0; i < _input.size(); ++i)
     {
-      // this->m_integrals[i] = _input[i]->IntegralAndError(_input[i]->GetXaxis()->GetFirst(),
-      //                                                    _input[i]->GetXaxis()->GetLast(),
-      //                                                    this->m_errors[i]);
       _total->Add(_input[i]);
-      // this->m_totalIntegral+= this->m_integrals[i];
     }
     
   };
@@ -265,13 +262,17 @@ struct defaultMCValues
 void createExpectedValuesFromTemplates(const std::vector<TH1*>& _templates,
                                        std::vector<double>& _expected,
                                        std::vector<double>& _errors,
-                                       const double& _dataIntegral){
+                                       TH1* _data=0){
 
   _expected.clear();
   _expected.resize(_templates.size(),0.);
   _errors.clear();
   _errors.resize(_templates.size(),0.);
   
+  if(!_data){
+    std::cout << __FILE__ << ":" << __LINE__ << "\t no data histo available\n";
+    return;}
+
   double total = 0.;
   std::vector<double> integrals(_templates.size(),0.);
   std::vector<double> errors(_templates.size(),0.);
@@ -286,10 +287,15 @@ void createExpectedValuesFromTemplates(const std::vector<TH1*>& _templates,
   }
 
 
+  double dataIntError = 0.;
+  double dataIntegral = _data->IntegralAndError(_data->GetXaxis()->GetFirst(),
+                                                _data->GetXaxis()->GetLast(),
+                                                dataIntError);
+
   for (int i = 0; i < _templates.size(); ++i)
   {
-    _expected[i] = (integrals[i]/total)*_dataIntegral;
-    _errors[i] =  (errors[i]/integrals[i])*_expected[i];
+    _expected[i] = (integrals[i]/total);
+    _errors[i] = (errors[i]/total);
     std::cout << "expected value ["<<i <<"]\t"<<_expected[i]<<" +/- "<<_errors[i] <<std::endl;
   }
 
@@ -327,7 +333,7 @@ int main(int argc, char* argv[])
       conf.printConf();
 
    // ----- INPUT ----- 
-  FitterInputs::NormedTH1* input = new FitterInputs::NormedTH1();
+  FitterInputs::NormedTH1<FitterInputs::Norm2AThird>* input = new FitterInputs::NormedTH1<FitterInputs::Norm2AThird>();
   input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str(),conf.p_rebin);
   input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str(),conf.p_rebin);
 
@@ -341,16 +347,18 @@ int main(int argc, char* argv[])
   createExpectedValuesFromTemplates(m_templates,
                                     expected,          
                                     expectedErrors,
-                                    m_data->Integral());
+                                    m_data);
 
    // ----- PSEUDO EXPERIMENTS ----- 
-  PseudoStudy<defaultMCValues>  aPseudoStudy(m_templates,
-                                             expected,
-                                             expectedErrors,
-                                             m_data->Integral(),
-                                             conf.p_threads,
-                                             conf.p_nIter
-                                             );
+  PseudoStudy<defaultMCValues,FitterInputs::NormedTH1<FitterInputs::Norm2AThird> >  
+    aPseudoStudy(m_templates,
+                 expected,
+                 expectedErrors,
+                 m_data->Integral(),
+                 conf.p_threads,
+                 conf.p_nIter
+                 );
+
   aPseudoStudy.setInput(input);
   aPseudoStudy.setFitterConfigFile(conf.p_configFile);
   aPseudoStudy.setFitEngine(conf.p_fitEngine);

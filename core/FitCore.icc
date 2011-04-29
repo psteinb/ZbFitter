@@ -33,19 +33,22 @@ void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
   
   
   m_minimizer->SetVariable(0,
-                           m_environment.GetValue("Parameter1.Name","Nb"), 
-                           m_environment.GetValue("Parameter1.Start",30),
-                           m_environment.GetValue("Parameter1.Step",0.1));
+                           m_config["Parameter1.Name"], 
+                           getDoubleFromString(m_config["Parameter1.Start"]),
+                           getDoubleFromString(m_config["Parameter1.Step"])
+                           );
 
   m_minimizer->SetVariable(1,
-                           m_environment.GetValue("Parameter2.Name","Nc"), 
-                           m_environment.GetValue("Parameter2.Start",10),
-                           m_environment.GetValue("Parameter2.Step",0.1));
+                           m_config["Parameter2.Name"], 
+                           getDoubleFromString(m_config["Parameter2.Start"]),
+                           getDoubleFromString(m_config["Parameter2.Step"])
+                           );
 
   m_minimizer->SetVariable(2,
-                           m_environment.GetValue("Parameter3.Name","Nl"), 
-                           m_environment.GetValue("Parameter3.Start",0.3),
-                           m_environment.GetValue("Parameter3.Step",0.1));
+                           m_config["Parameter3.Name"], 
+                           getDoubleFromString(m_config["Parameter3.Start"]),
+                           getDoubleFromString(m_config["Parameter3.Step"])
+                           );
   
 }
 
@@ -60,7 +63,7 @@ int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   if(_verbose){
     m_fcn.print();
     m_minimizer->SetPrintLevel(2002);
-    m_fcn.printTemplates();
+    //m_fcn.printTemplates();
   }
   /////////////////////////////////////////
   /// provide the Likelihood function

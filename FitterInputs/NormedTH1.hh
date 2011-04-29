@@ -6,9 +6,16 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <stdexcept>
+#include <sstream>
+#include <algorithm>
+
 #include "TH1D.h"
 #include "TFile.h"
 #include "TString.h"
+#include "TObjString.h"
+#include "TObjArray.h"
 
 namespace FitterInputs {
 
@@ -40,7 +47,8 @@ namespace FitterInputs {
 
     };
   };
-
+  
+  template<typename NormFunc>
   class NormedTH1 : public AbsHisto
   {
   private:
@@ -79,7 +87,7 @@ namespace FitterInputs {
     void createFitterDataFromTH1(TH1*, FitterData&);
     void setupFitterData();
 
-    void normalizeTemplateTH1s();
+    void normalizeTemplateTH1s(std::vector<TH1*>&);
 
   protected:
                 
@@ -187,4 +195,5 @@ namespace FitterInputs {
   };
 }; // end of package namespace
 
+#include "NormedTH1.icc"
 #endif // NORMEDTH1_H

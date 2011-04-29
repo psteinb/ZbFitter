@@ -21,7 +21,7 @@
 
 template<
   class ProtoCreator,
-  class InputT=FitterInputs::NormedTH1,
+  class InputT,
   class FunctionT=functions::SimpleMaxLLH
   >
 class PseudoStudy{
@@ -92,16 +92,16 @@ class PseudoStudy{
 
     for (int i = 0; i < _size; ++i)
     {
-      expMeanDown = 0.;
-      expMeanUp = 2.*(m_expectedValues.at(i));
+      expMeanDown = .75*m_expectedValues.at(i);
+      expMeanUp = 1.25*(m_expectedValues.at(i));
       expSigmaDown = 0.;
       expSigmaUp = .5*(m_expectedValues.at(i));
 
       m_pulls[i] = TH1D(addItemToText<int>("pull_par",i).c_str(),"pull",50,-5,5);
       m_pulls[i].GetXaxis()->SetTitle(addItemToText<int>("pull: ",i).c_str());
-      m_means[i] = TH1D(addItemToText<int>("mean_par",i).c_str(),"mean fitted",50,expMeanDown,expMeanUp);
+      m_means[i] = TH1D(addItemToText<int>("mean_par",i).c_str(),"mean fitted",80,expMeanDown,expMeanUp);
       m_means[i].GetXaxis()->SetTitle(addItemToText<int>("fitted: ",i).c_str());
-      m_sigmas[i] = TH1D(addItemToText<int>("sigma_par",i).c_str(),"sigma fitted",50,expSigmaDown,expSigmaUp);
+      m_sigmas[i] = TH1D(addItemToText<int>("sigma_par",i).c_str(),"sigma fitted",80,expSigmaDown,expSigmaUp);
       m_sigmas[i].GetXaxis()->SetTitle(addItemToText<int>("fitted error: ",i).c_str());
     }
 
@@ -368,7 +368,7 @@ public:
       else{
         name << "_success";
         preparePlots(name.str(),histoResult,llhResult);
-        if(i % 50 == 0){
+        if(i % 500 == 0 && m_verbosity<3){
           aFitter.printTo(histoResult);
           aFitter.printTo(llhResult);
         }

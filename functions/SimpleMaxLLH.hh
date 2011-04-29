@@ -44,7 +44,7 @@ namespace functions {
     }
   
 
-    double getTotalMCFractionPerBin(const short& _bin);
+    double getMCPredictionOfBin(const short& _bin);
 
 
 

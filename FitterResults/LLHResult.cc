@@ -24,7 +24,7 @@ void FitterResults::LLHResult::print(){
 
   TFile newFile(m_filename.c_str(),"RECREATE");
   unsigned int numFitVariables = getMinimizer()->NDim();
-  std::cout << __FILE__ << ":" << __LINE__ << "\t dimensions received "<< numFitVariables << std::endl;
+  // std::cout << __FILE__ << ":" << __LINE__ << "\t dimensions received "<< numFitVariables << std::endl;
   std::vector<TGraph*> results(numFitVariables);
 
   std::ostringstream name;
