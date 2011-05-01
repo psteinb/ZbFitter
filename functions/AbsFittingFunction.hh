@@ -119,6 +119,8 @@ namespace functions {
       _valueDown = m_parametersDown.at(_idx);
     };
 
+    virtual std::vector<double>* const getParameters(){return (&m_parameters);};
+
     virtual void print(){
       std::ostream_iterator<double> dblOutIt (std::cout,", ");
 
