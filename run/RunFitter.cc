@@ -238,19 +238,19 @@ int main(int argc, char* argv[])
       conf.printConf();
 
   // ----- INPUT ----- 
-  FitterInputs::NormedTH1* input = new FitterInputs::NormedTH1();
+  FitterInputs::NormedTH1<FitterInputs::Norm2Unity>* input = new FitterInputs::NormedTH1<FitterInputs::Norm2Unity>();
   input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str(),conf.p_rebin);
   input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str(),conf.p_rebin);
 
   // ----- Templates ----- 
-  functions::SimpleMaxLLH fcn;
+  functions::BinnedEML fcn;
   
   // ----- Results ------
   FitterResults::HistoResult* hresult = new FitterResults::HistoResult(0,conf.p_msgLevel,conf.p_outputfile);
   FitterResults::Chi2Result* cresult = new FitterResults::Chi2Result(0,conf.p_msgLevel);
 
   // ----- FitterCore ------
-  core::FitCore<functions::SimpleMaxLLH,FitterInputs::NormedTH1,FitterResults::AbsResult> fitter(input, hresult);
+  core::FitCore<functions::BinnedEML,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>,FitterResults::HistoResult> fitter(input, hresult);
   fitter.configureFromFile(conf.p_configFile);
   fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
   fitter.configureKeyWithValue("Mode",conf.p_fitMode);
@@ -261,18 +261,16 @@ int main(int argc, char* argv[])
 
   
 
-  if(conf.p_msgLevel>2){
+  if(conf.p_msgLevel<3){
     fitter.fit(true);
+    fitter.printTo(cresult);
   }
   else
     fitter.fit(false);
-
   
   
 
-  fitter.printTo(cresult);
-  fitter.getMinosErrorSet(Status,Down,Up);
-
+  // fitter.getMinosErrorSet(Status,Down,Up);
   // std::cout << "b:\t(up) "<< Up[0] << "\t(down) " << Down[0] << std::endl;
   // std::cout << "c:\t(up) "<< Up[1] << "\t(down) " << Down[1] << std::endl;
   // std::cout << "l:\t(up) "<< Up[2] << "\t(down) " << Down[2] << std::endl;
