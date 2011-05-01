@@ -246,8 +246,11 @@ int main(int argc, char* argv[])
   functions::BinnedEML fcn;
   
   // ----- Results ------
+  //FIXME: create different names for both outputs!
   FitterResults::HistoResult* hresult = new FitterResults::HistoResult(0,conf.p_msgLevel,conf.p_outputfile);
-  FitterResults::Chi2Result* cresult = new FitterResults::Chi2Result(0,conf.p_msgLevel);
+  std::string name = conf.p_outputfile;
+  name += "_LLH";
+  FitterResults::LLHResult* lresult = new FitterResults::LLHResult(0,conf.p_msgLevel,name);
 
   // ----- FitterCore ------
   core::FitCore<functions::BinnedEML,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>,FitterResults::HistoResult> fitter(input, hresult);
@@ -263,7 +266,7 @@ int main(int argc, char* argv[])
 
   if(conf.p_msgLevel<3){
     fitter.fit(true);
-    fitter.printTo(cresult);
+    fitter.printTo(lresult);
   }
   else
     fitter.fit(false);
