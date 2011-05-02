@@ -38,13 +38,8 @@ public:
                const std::string& _text="histoResult.root"):
     AbsResult(_min),
     m_verbosity(_verb),
-    m_filename(_text),
-    m_filenameCore()
+    m_filename(_text)
   {
-    if(m_filename.find_last_of(".")!=std::string::npos)
-      m_filenameCore = m_filename.substr(0,m_filename.find_last_of("."));
-    else
-      m_filenameCore = m_filename;
 
   };
 
@@ -60,7 +55,7 @@ public:
   template<typename T>
   std::string appendToNameString(const T& _value){
     std::ostringstream text;
-    text.str(m_filenameCore);
+    text.str(m_filename);
     text << _value;
     return text.str();
   }
@@ -71,10 +66,6 @@ public:
 
   void setFileName(const std::string& _name){
     m_filename = _name;
-    if(m_filename.find_last_of(".")!=std::string::npos)
-      m_filenameCore = m_filename.substr(0,m_filename.find_last_of("."));
-    else
-      m_filenameCore = m_filename;
   }
 };
 }; // end of package namespace

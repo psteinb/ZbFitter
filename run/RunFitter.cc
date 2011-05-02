@@ -14,10 +14,11 @@
 
 #include "core/FitCore.hh"
 #include "FitterInputs/NormedTH1.hh"
+#include "FitterInputs/NormalisationFunctors.hh"
 #include "FitterResults/HistoResult.hh"
-#include "FitterResults/LLHHisto.hh"
+#include "FitterResults/LLHResult.hh"
 #include "FitterResults/Chi2Result.hh"
-#include "functions/SimpleMaxLLH.hh"
+#include "functions/BinnedEML.hh"
 #include "AtlasStyle.h"
 //small class
 class RunnerConfig {
@@ -247,20 +248,22 @@ int main(int argc, char* argv[])
   
   // ----- Results ------
   //FIXME: create different names for both outputs!
-  FitterResults::HistoResult* hresult = new FitterResults::HistoResult(0,conf.p_msgLevel,conf.p_outputfile);
   std::string name = conf.p_outputfile;
+  name += "_fit";
+  FitterResults::AbsResult* hresult = new FitterResults::HistoResult(0,conf.p_msgLevel,name);
+  name = conf.p_outputfile;
   name += "_LLH";
-  FitterResults::LLHResult* lresult = new FitterResults::LLHResult(0,conf.p_msgLevel,name);
+  FitterResults::AbsResult* lresult = new FitterResults::LLHResult(0,conf.p_msgLevel,name);
 
   // ----- FitterCore ------
-  core::FitCore<functions::BinnedEML,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>,FitterResults::HistoResult> fitter(input, hresult);
+  core::FitCore<functions::BinnedEML,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>,FitterResults::AbsResult> fitter(input);
   fitter.configureFromFile(conf.p_configFile);
   fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
   fitter.configureKeyWithValue("Mode",conf.p_fitMode);
   fitter.setupMachinery();
-  std::vector<double> Up;
-  std::vector<double> Down;
-  std::vector<int> Status;
+  // std::vector<double> Up;
+  // std::vector<double> Down;
+  // std::vector<int> Status;
 
   
 
@@ -271,12 +274,16 @@ int main(int argc, char* argv[])
   else
     fitter.fit(false);
   
-  
+  fitter.printTo(hresult);
 
   // fitter.getMinosErrorSet(Status,Down,Up);
   // std::cout << "b:\t(up) "<< Up[0] << "\t(down) " << Down[0] << std::endl;
   // std::cout << "c:\t(up) "<< Up[1] << "\t(down) " << Down[1] << std::endl;
   // std::cout << "l:\t(up) "<< Up[2] << "\t(down) " << Down[2] << std::endl;
+
+  //clean-up
+  delete lresult;
+  delete hresult;
   return 0; 
    
 

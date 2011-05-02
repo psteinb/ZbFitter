@@ -25,7 +25,10 @@ void FitterResults::HistoResult::print(){
   }
 
   TFile* newFile=0;
-  newFile = new TFile(m_filename.c_str(),"RECREATE");
+  std::string name = m_filename;
+  if(!(m_filename.find(".root")!=std::string::npos))
+    name += ".root";
+  newFile = new TFile(name.c_str(),"RECREATE");
 
   THStack newStack(appendToNameString<std::string>("_stack").c_str(),"");
 
@@ -38,15 +41,15 @@ void FitterResults::HistoResult::print(){
   const double *xs = getMinimizer()->X();
   const double *xErrors = getMinimizer()->Errors();
   
-   double mcBFrac = fitterT0->Integral();
-   double mcCFrac = fitterT1->Integral();
-   double mcLFrac = fitterT2->Integral();
-   double mcTotal = mcBFrac + mcCFrac + mcLFrac;
+   double mcBint = fitterT0->Integral();
+   double mcCint = fitterT1->Integral();
+   double mcLint = fitterT2->Integral();
+   double mcTotal = mcBint + mcCint + mcLint;
   double totData = fitterData->Integral();
 
-  fitterT0->Scale(xs[0]/mcTotal);fitterT0->SetFillColor(kRed);
-  fitterT1->Scale(xs[1]/mcTotal);fitterT1->SetFillColor(kViolet);
-  fitterT2->Scale(xs[2]/mcTotal);fitterT2->SetFillColor(kAzure); 
+  fitterT0->Scale(xs[0]/mcBint);fitterT0->SetFillColor(kRed);
+  fitterT1->Scale(xs[1]/mcCint);fitterT1->SetFillColor(kViolet);
+  fitterT2->Scale(xs[2]/mcLint);fitterT2->SetFillColor(kAzure); 
   fitterT0->SetLineColor(kRed);   
   fitterT1->SetLineColor(kViolet);
   fitterT2->SetLineColor(kAzure); 
@@ -62,7 +65,7 @@ void FitterResults::HistoResult::print(){
   newStack.Add(fitterT1);
   newStack.Add(fitterT2);
 
-  TCanvas myC(m_filenameCore.c_str(),"",2400,1200);
+  TCanvas myC(m_filename.c_str(),"",2400,1200);
   myC.Clear();
   myC.Draw();
   myC.Divide(3,2);
@@ -84,9 +87,9 @@ void FitterResults::HistoResult::print(){
 
   myC.cd(2);
   TPaveText mtext(0.2,0.2,.9,.9,"ARC");
-  mtext.AddText(getParameterResult(0,totData).c_str());
-  mtext.AddText(getParameterResult(1,totData).c_str());
-  mtext.AddText(getParameterResult(2,totData).c_str());
+  mtext.AddText(getParameterResult(0,1.).c_str());
+  mtext.AddText(getParameterResult(1,1.).c_str());
+  mtext.AddText(getParameterResult(2,1.).c_str());
   mtext.Draw();
   
   myC.cd(3);

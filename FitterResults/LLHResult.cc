@@ -21,8 +21,11 @@ void FitterResults::LLHResult::print(){
     return;
   }
 
+  std::string fname = m_filename;
+  if(!(m_filename.find(".root")!=std::string::npos))
+    fname += ".root";
 
-  TFile newFile(m_filename.c_str(),"RECREATE");
+  TFile newFile(fname.c_str(),"RECREATE");
   unsigned int numFitVariables = getMinimizer()->NDim();
   // std::cout << __FILE__ << ":" << __LINE__ << "\t dimensions received "<< numFitVariables << std::endl;
   std::vector<TGraph*> results(numFitVariables);
@@ -77,6 +80,8 @@ void FitterResults::LLHResult::printTGraphVector(const std::vector<TGraph*>& _re
   std::string name;
   if(m_filename.find(".root")!=std::string::npos)
    name = this->m_filename.substr(0,m_filename.find(".root"));
+  else
+    name = m_filename;
 
   TCanvas aCanvas(name.c_str(),"",_results.size()*600,500);
   aCanvas.Clear();

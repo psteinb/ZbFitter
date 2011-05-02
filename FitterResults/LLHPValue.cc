@@ -3,8 +3,8 @@
 
 #include "FitterResults/LLHPValue.hh"
 #include "functions/AbsFittingFunction.hh"
-#include "TGraph.h"
-#include "TCanvas.h"
+
+//#include "TCanvas.h"
 #include "TMath.h"
 #include "TAxis.h"
 #include "TFile.h"
@@ -27,18 +27,29 @@ void FitterResults::LLHPValue::print(){
   }
 
 
-  TFile newFile(m_filename.c_str(),"RECREATE");
-  unsigned int numFitVariables = getMinimizer()->NDim();
-  const double *xs = getMinimizer()->X();
-  const double *xErrors = getMinimizer()->Errors();
-  std::string mode = getMinimizer()->Options().MinimizerAlgorithm();
-  //FIXME
-  double = getMinimizer()->MinValue();
+  // TFile newFile(m_filename.c_str(),"RECREATE");
+  // unsigned int numFitVariables = getMinimizer()->NDim();
+  // const double *xs = getMinimizer()->X();
+  // const double *xErrors = getMinimizer()->Errors();
+  // std::string mode = getMinimizer()->Options().MinimizerAlgorithm();
+  
+  double minValue = getMinimizer()->MinValue();
+  int lowBound =0;int highBound =0;
+  integrationBoundsForMaxLLH(minValue,lowBound,highBound);
+  
+  double lowIntErr = 0;
+  double lowInt = m_maxLLH->IntegralAndError(0,lowBound,lowIntErr);
+  
+  double highIntErr = 0;
+  double highInt = m_maxLLH->IntegralAndError(highBound,m_maxLLH->GetXaxis()->GetLast(),highIntErr);
 
-  //...
+  double pValue = highInt + lowInt;
+  double pUncertainty = TMath::Sqrt((lowIntErr*lowIntErr) + (highIntErr*highIntErr));
 
-  newFile.Write();
-  newFile.Close();
+
+  std::cout << "pValue Analysis\n\tp: "<<pValue << " +/- " << pUncertainty << std::endl;
+  // newFile.Write();
+  // newFile.Close();
 }
 
 // void FitterResults::LLHPValue::printTGraphVector(const std::vector<TGraph*>& _results){
