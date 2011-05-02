@@ -1,7 +1,6 @@
 #include "HistoResult.hh"
-#include "functions/AbsFittingFunction.hh"
+
 #include "TH1D.h"
-#include "TFile.h"
 #include "TMath.h"
 #include "TAxis.h"
 #include "THStack.h"
@@ -24,83 +23,63 @@ void FitterResults::HistoResult::print(){
     return;
   }
 
+  setupParameters();
+  
+  setupInputHistos();
+
   TFile* newFile=0;
   std::string name = m_filename;
   if(!(m_filename.find(".root")!=std::string::npos))
     name += ".root";
   newFile = new TFile(name.c_str(),"RECREATE");
-
+  
+  joinHistosToFile(newFile);
+  treatInputHistosForResult();
+  
   THStack newStack(appendToNameString<std::string>("_stack").c_str(),"");
-
-  TH1D* fitterData = (TH1D*)getFunction()->getData()->getHisto()->Clone(appendToNameString<std::string>("_data").c_str());
+  for (int i = 0; i < m_numOfParameters; ++i)
+  {
+    newStack.Add(m_inputHistos[i]);
+  }
   
-  TH1D* fitterT0 = (TH1D*)getFunction()->getTemplate(0)->getHisto()->Clone(appendToNameString<int>(0).c_str());
-  TH1D* fitterT1 = (TH1D*)getFunction()->getTemplate(1)->getHisto()->Clone(appendToNameString<int>(1).c_str());
-  TH1D* fitterT2 = (TH1D*)getFunction()->getTemplate(2)->getHisto()->Clone(appendToNameString<int>(2).c_str());
-  
-  const double *xs = getMinimizer()->X();
-  const double *xErrors = getMinimizer()->Errors();
-  
-   double mcBint = fitterT0->Integral();
-   double mcCint = fitterT1->Integral();
-   double mcLint = fitterT2->Integral();
-   double mcTotal = mcBint + mcCint + mcLint;
-  double totData = fitterData->Integral();
-
-  fitterT0->Scale(xs[0]/mcBint);fitterT0->SetFillColor(kRed);
-  fitterT1->Scale(xs[1]/mcCint);fitterT1->SetFillColor(kViolet);
-  fitterT2->Scale(xs[2]/mcLint);fitterT2->SetFillColor(kAzure); 
-  fitterT0->SetLineColor(kRed);   
-  fitterT1->SetLineColor(kViolet);
-  fitterT2->SetLineColor(kAzure); 
-  fitterT0->SetMarkerColor(kRed);   
-  fitterT1->SetMarkerColor(kViolet);
-  fitterT2->SetMarkerColor(kAzure); 
-  fitterT0->SetDrawOption("");   
-  fitterT1->SetDrawOption("");
-  fitterT2->SetDrawOption(""); 
-
-
-  newStack.Add(fitterT0);
-  newStack.Add(fitterT1);
-  newStack.Add(fitterT2);
-
   TCanvas myC(m_filename.c_str(),"",2400,1200);
   myC.Clear();
   myC.Draw();
-  myC.Divide(3,2);
+  myC.Divide(m_numOfParameters,2);
   myC.cd(1);
   newStack.SetMaximum(1.5*newStack.GetMaximum());
   newStack.Draw("BAR");
-  
-  fitterData->SetMarkerSize(1.5*fitterData->GetMarkerSize());
-  fitterData->SetMarkerStyle(8);
-  fitterData->Draw("e1same");
+  m_dataHisto->SetMarkerSize(1.5*m_dataHisto->GetMarkerSize());
+  m_dataHisto->SetMarkerStyle(8);
+  m_dataHisto->Draw("e1same");
   TLegend leg(0.6,0.7,0.92,0.92);
-  leg.AddEntry(fitterData,"data","lep");
-  leg.AddEntry(fitterT0,"N_{b}","f");
-  leg.AddEntry(fitterT1,"N_{c}","f");
-  leg.AddEntry(fitterT2,"N_{l}","f");
+  leg.AddEntry(m_dataHisto,"data","lep");
+  for (int i = 0; i < m_numOfParameters; ++i)
+  {
+    leg.AddEntry(m_inputHistos[i],getMinimizer()->VariableName(i).c_str(),"lep");
+  }
   leg.SetFillColor(kWhite);
   leg.SetLineColor(kWhite);
   leg.Draw();
 
   myC.cd(2);
   TPaveText mtext(0.2,0.2,.9,.9,"ARC");
-  mtext.AddText(getParameterResult(0,1.).c_str());
-  mtext.AddText(getParameterResult(1,1.).c_str());
-  mtext.AddText(getParameterResult(2,1.).c_str());
+  for (int i = 0; i < m_numOfParameters; ++i)
+  {
+    mtext.AddText(getParameterResult(i,1.).c_str());
+  }
   mtext.Draw();
-  
   myC.cd(3);
-  fitterData->Draw();
-  myC.cd(4);
-  fitterT0->Draw();
-  myC.cd(5);
-  fitterT1->Draw();
-  myC.cd(6);
-  fitterT2->Draw();
+  m_dataHisto->Draw();
   
+  int CanvasTot = m_numOfParameters*2;
+  int CanvasIdx = CanvasTot-m_numOfParameters+1;
+  for (int i = 0; i < (m_numOfParameters); ++i,CanvasIdx++)
+  {
+    myC.cd(CanvasIdx);
+    m_inputHistos[i]->Draw();
+  }
+    
   myC.Update();
   myC.Print(".eps");
 

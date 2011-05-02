@@ -29,7 +29,7 @@ class PseudoStudy{
   InputT* m_input;
   FunctionT m_fitter;
   ProtoCreator m_creator;
-
+  
   std::string m_fitConfigFile       ;
   std::string m_fitEngine       ;
   std::string m_fitMode         ;
@@ -38,6 +38,7 @@ class PseudoStudy{
   std::vector<TH1*> m_templateTH1s;
   TH1* m_total;
   std::vector<TH1*> m_resultTH1s;
+  TH1D* m_maxLLH;
 
   int m_threads;
   int m_iterations;
@@ -93,15 +94,17 @@ class PseudoStudy{
     for (int i = 0; i < _size; ++i)
     {
       expMeanDown = .75*m_expectedValues.at(i);
-      expMeanUp = 1.25*(m_expectedValues.at(i));
+      expMeanUp = 2.*(m_expectedValues.at(i));
       expSigmaDown = 0.;
-      expSigmaUp = .5*(m_expectedValues.at(i));
+      expSigmaUp = 2.*(m_expectedValues.at(i));
 
       m_pulls[i] = TH1D(addItemToText<int>("pull_par",i).c_str(),"pull",50,-5,5);
       m_pulls[i].GetXaxis()->SetTitle(addItemToText<int>("pull: ",i).c_str());
-      m_means[i] = TH1D(addItemToText<int>("mean_par",i).c_str(),"mean fitted",80,expMeanDown,expMeanUp);
+      m_means[i] = TH1D(addItemToText<int>("mean_par",i).c_str(),"mean fitted",
+                        80,0.,expMeanUp);
       m_means[i].GetXaxis()->SetTitle(addItemToText<int>("fitted: ",i).c_str());
-      m_sigmas[i] = TH1D(addItemToText<int>("sigma_par",i).c_str(),"sigma fitted",80,expSigmaDown,expSigmaUp);
+      m_sigmas[i] = TH1D(addItemToText<int>("sigma_par",i).c_str(),"sigma fitted",
+                         80,0.,expSigmaUp);
       m_sigmas[i].GetXaxis()->SetTitle(addItemToText<int>("fitted error: ",i).c_str());
     }
 
@@ -157,6 +160,7 @@ public:
     m_templateTH1s(_templates.size(),0),
     m_total(0),
     m_resultTH1s(),
+    m_maxLLH(new TH1D("maxLLH",";max(logLH);N",100,-100,0)),
     m_threads(_thr),
     m_iterations(_iters),
     m_TRand3(),
@@ -181,11 +185,16 @@ public:
       m_templateTH1s[i] = dynamic_cast<TH1*>(_templates.at(i)->Clone(name.c_str()));
     }
 
+    //m_maxLLH->SetBit(TH1::kCanRebin);
 
     setupTotalTemplates();
     
     setupResults(_templates.size());
   };
+
+  // ~PseudoStudy(){
+  //   delete m_maxLLH;m_maxLLH=0;
+  // }
 
   //setter
   void setFitEngine( const std::string& _engine){m_fitEngine = _engine;};
@@ -235,7 +244,7 @@ public:
     
     return;
   };
-
+  TH1D* getMaxLLHDistribution(){return m_maxLLH;};
   //utilities
 
   void printResults(){
@@ -244,8 +253,11 @@ public:
     std::vector<TH1D>::const_iterator rItr = m_means.begin()    ;
     std::vector<TH1D>::const_iterator rEnd = m_means.end()      ;
     std::string rootFileName = m_baseName;
-    rootFileName += "_MeansSigmasPulls.root";
+    rootFileName += "_MeansSigmasPullsMaxLLH.root";
     TFile aNewFile(rootFileName.c_str(),"RECREATE");
+
+    m_maxLLH->SetDirectory(aNewFile.GetDirectory("/"));
+    m_maxLLH->Write();
 
     for (; rItr!=rEnd; ++rItr)
     {
@@ -293,7 +305,7 @@ public:
       std::cerr << __FILE__ << ":"<< __LINE__ <<"\t data histo pointer nil\n";
       return;}
 
-    std::cout << __FILE__ << ":"<< __LINE__ <<"\t sampling data histo with"<< _integral <<"entries\n";
+    // std::cout << __FILE__ << ":"<< __LINE__ <<"\t sampling data histo with"<< _integral <<"entries\n";
     _data->Reset("MICE");
     _data->ResetStats();
     _data->FillRandom(m_total,_integral);
@@ -317,9 +329,7 @@ public:
       m_total->Print("all");
     }
       
-    double bPull=0;
-    double cPull=0;
-    double lPull=0;
+    std::vector<double> pullValues(m_templateTH1s.size(),0.);
 
     TH1* m_data=0;
     prepareData(m_data);
@@ -361,6 +371,8 @@ public:
         status = aFitter.fit(false);
       else
         status = aFitter.fit(true);
+      
+      m_maxLLH->Fill(aFitter.getMinimizer()->MinValue());
 
       if(status!=0){
         nNon0Status++;
@@ -391,47 +403,31 @@ public:
         m_fitValues[i] = aFitter.getMinimizer()->X()[i];
         m_means[i].Fill(m_fitValues[i]);
 
-        //std::cout << "Minos on param "<< i <<" finished with "<<m_fitErrorsStatus.at(i)<<std::endl;
-
         if(TMath::Abs(m_fitErrorsStatus.at(i))<10)
           m_sigmas[i].Fill(TMath::Abs(std::min(m_fitErrorsDown[i],m_fitErrorsUp[i])));
         else{
           m_sigmas[i].Fill(aFitter.getMinimizer()->Errors()[i]);
         }
+
+        if(m_fitValues[i]>m_expectedValues[i])
+          pullValues[i] = (m_expectedValues[i]-m_fitValues[i])/TMath::Sqrt((m_fitErrorsDown[i]*m_fitErrorsDown[i]));
+        else
+          pullValues[i] = (m_expectedValues[i]-m_fitValues[i])/TMath::Sqrt((m_fitErrorsUp[i]*m_fitErrorsUp[i])/*+(m_expectedErrors[i]*m_expectedErrors[i])*/);
       }
-
-      
-
-
-      //compute the pulls
-      if(m_fitValues[0]>m_expectedValues[0])
-        bPull = (m_expectedValues[0]-m_fitValues[0])/TMath::Sqrt((m_fitErrorsDown[0]*m_fitErrorsDown[0])+(m_expectedErrors[0]*m_expectedErrors[0]));
-      else
-        bPull = (m_expectedValues[0]-m_fitValues[0])/TMath::Sqrt((m_fitErrorsUp[0]*m_fitErrorsUp[0])+(m_expectedErrors[0]*m_expectedErrors[0]));
-
-      if(m_fitValues[1]>m_expectedValues[1])
-        cPull = (m_expectedValues[1]-m_fitValues[1])/TMath::Sqrt((m_fitErrorsDown[1]*m_fitErrorsDown[1])+(m_expectedErrors[1]*m_expectedErrors[1]));
-      else
-        cPull = (m_expectedValues[1]-m_fitValues[1])/TMath::Sqrt((m_fitErrorsUp[1]*m_fitErrorsUp[1])+(m_expectedErrors[1]*m_expectedErrors[1]));
-
-      if(m_fitValues[2]>m_expectedValues[2])
-        lPull = (m_expectedValues[2]-m_fitValues[2])/TMath::Sqrt((m_fitErrorsDown[2]*m_fitErrorsDown[2])+(m_expectedErrors[2]*m_expectedErrors[2]));
-      else
-        lPull = (m_expectedValues[2]-m_fitValues[2])/TMath::Sqrt((m_fitErrorsUp[2]*m_fitErrorsUp[2])+(m_expectedErrors[2]*m_expectedErrors[2]));
 
       /////////////////////////////////////////
       /// FIXME: the following should be done better by a utility method
       /////////////////////////////////////////
-
-      m_pulls[0].Fill(bPull);
-      m_pulls[1].Fill(cPull);
-      m_pulls[2].Fill(lPull);
-     
+      for (int i = 0; i < pullValues.size(); ++i)
+      {
+        m_pulls[i].Fill(pullValues[i]);
+      }
+           
 
       //clean-up data
       m_data->Reset("MICE");
       m_data->ResetStats(); 
-    
+      
     }
     double irregulars = (nNon0Status/double(m_iterations))*100;
     std::cout << nNon0Status<< "/" <<m_iterations << " = ("<< std::setprecision(2) <<irregulars <<" %) were irregular!\n";
@@ -439,6 +435,7 @@ public:
     delete termResult;termResult=0;
     delete histoResult;histoResult=0;
     delete llhResult;llhResult=0;
+   
   };
   
 };

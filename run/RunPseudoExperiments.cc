@@ -16,7 +16,7 @@
 #include "FitterInputs/NormalisationFunctors.hh"
 #include "FitterInputs/NormedTH1.hh"
 #include "FitterResults/HistoResult.hh"
-#include "functions/SimpleMaxLLH.hh"
+#include "functions/BinnedEML.hh"
 #include "Studies/PseudoStudy.hh"
 
 #include "TString.h"
@@ -271,29 +271,24 @@ void createExpectedValuesFromTemplates(const std::vector<TH1*>& _templates,
     std::cout << __FILE__ << ":" << __LINE__ << "\t no data histo available\n";
     return;}
 
-  double total = 0.;
+  
   std::vector<double> integrals(_templates.size(),0.);
   std::vector<double> errors(_templates.size(),0.);
-
+  double total = 0.;
   for (int i = 0; i < _templates.size(); ++i)
   {
     integrals[i] = _templates[i]->IntegralAndError(_templates[i]->GetXaxis()->GetFirst(),
                                                    _templates[i]->GetXaxis()->GetLast(),
                                                    errors[i]
                                                    );
-    total+=integrals[i];
+    total += integrals[i];
   }
 
 
-  double dataIntError = 0.;
-  double dataIntegral = _data->IntegralAndError(_data->GetXaxis()->GetFirst(),
-                                                _data->GetXaxis()->GetLast(),
-                                                dataIntError);
-
   for (int i = 0; i < _templates.size(); ++i)
   {
-    _expected[i] = (integrals[i]/total);
-    _errors[i] = (errors[i]/total);
+    _expected[i] = (integrals[i]/total)*_data->Integral();
+    _errors[i] = (errors[i]/total)*_expected[i];
     std::cout << "expected value ["<<i <<"]\t"<<_expected[i]<<" +/- "<<_errors[i] <<std::endl;
   }
 
@@ -331,7 +326,7 @@ int main(int argc, char* argv[])
       conf.printConf();
 
    // ----- INPUT ----- 
-  FitterInputs::NormedTH1<FitterInputs::Norm2AThird>* input = new FitterInputs::NormedTH1<FitterInputs::Norm2AThird>();
+  FitterInputs::NormedTH1<FitterInputs::Norm2Unity>* input = new FitterInputs::NormedTH1<FitterInputs::Norm2Unity>();
   input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str(),conf.p_rebin);
   input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str(),conf.p_rebin);
 
@@ -348,7 +343,7 @@ int main(int argc, char* argv[])
                                     m_data);
 
    // ----- PSEUDO EXPERIMENTS ----- 
-  PseudoStudy<defaultMCValues,FitterInputs::NormedTH1<FitterInputs::Norm2AThird> >  
+  PseudoStudy<defaultMCValues,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEML>  
     aPseudoStudy(m_templates,
                  expected,
                  expectedErrors,
@@ -367,12 +362,14 @@ int main(int argc, char* argv[])
     aPseudoStudy.setPanicPrint(true);
   aPseudoStudy.experiment();
   
-  aPseudoStudy.printResults();
+  
 
    // ----- COLLECT RESULTS ----- 
-  std::vector<TH1*> m_results0;aPseudoStudy.getResultsOfParameter(0,m_results0);
-  std::vector<TH1*> m_results1;aPseudoStudy.getResultsOfParameter(1,m_results1);
-  std::vector<TH1*> m_results2;aPseudoStudy.getResultsOfParameter(2,m_results2);
+  std::vector<std::vector<TH1*> > m_results(m_templates.size());
+  for (int i = 0; i < m_templates.size(); ++i)
+  {
+    aPseudoStudy.getResultsOfParameter(i,m_results[i]);
+  }
   
   
   // ----- DRAW RESULTS ----- 
@@ -380,48 +377,42 @@ int main(int argc, char* argv[])
   myResults.Clear();
   myResults.Draw();
   myResults.Divide(3,m_templates.size());
+  int padSize = 3*m_templates.size();
   TArrow anArrow;
   anArrow.SetLineColor(kRed);
   anArrow.SetLineWidth(2);
-  int currentPad=1;
-  for (int i = 0; i < m_results0.size(); ++i,currentPad++)
+  int currentPad=0;
+  int padStart=1;
+  for (int i = 0; i < m_results.size(); ++i,padStart+=3)
   {
-    myResults.cd(currentPad);
-
-    if(i<1){
-      myResults.Update();
-      addVerticalArrowToPad(gPad,&anArrow,expected[0]);
-    }
-
-    m_results0[i]->Draw();
-  }
-
-  for (int i = 0; i < m_results1.size(); ++i,currentPad++)
-  {
-    myResults.cd(currentPad);
-    if(i<1)
+    for (int pad = 0; pad < 3; ++pad)
     {
-      myResults.Update();
-      addVerticalArrowToPad(gPad,&anArrow,expected[1]);
+      currentPad= pad + padStart;
+      myResults.cd(currentPad);
+      // if(i<1){
+      //   myResults.Update();
+      //   addVerticalArrowToPad(gPad,&anArrow,expected[i]);
+      // }
+      m_results[i][pad]->Draw();
     }
-
-    m_results1[i]->Draw();
-  }
-
-  for (int i = 0; i < m_results2.size(); ++i,currentPad++)
-  {
-    myResults.cd(currentPad);
-    if(i<1)
-    {
-      myResults.Update();
-      addVerticalArrowToPad(gPad,&anArrow,expected[2]);
-    }
-
-    m_results2[i]->Draw();
   }
 
   myResults.Update();
   myResults.Print(".eps");
+
+  std::string name = conf.p_outputfile;
+  name += "_maxLLH";
+
+  TCanvas PseudoMaxLLH(name.c_str(),"",800,600);
+  PseudoMaxLLH.Clear();
+  PseudoMaxLLH.Draw();
+  PseudoMaxLLH.cd(0);
+  aPseudoStudy.getMaxLLHDistribution()->Print("all");
+  aPseudoStudy.getMaxLLHDistribution()->Draw();
+  PseudoMaxLLH.Update();
+  PseudoMaxLLH.Print(".eps");
+
+  aPseudoStudy.printResults();
   return 0; 
    
 

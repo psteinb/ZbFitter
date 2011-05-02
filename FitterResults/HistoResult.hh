@@ -2,7 +2,9 @@
 #ifndef HISTORESULT_H
 #define HISTORESULT_H
 #include "AbsResult.hh"
-#include "TObject.h"
+#include "functions/AbsFittingFunction.hh"
+#include "TH1.h"
+#include "TFile.h"
 #include <string>
 #include <sstream>
 
@@ -21,9 +23,60 @@ private:
   int m_verbosity;
   std::string m_filename;
   std::string m_filenameCore;
+  std::vector<TH1*> m_inputHistos;
+  TH1* m_dataHisto;
+  const double* m_results;
+  const double* m_resultsSymErrors;
+  int m_numOfParameters;
 
+  void cleanUp(){
+    // for (int i = 0; i < m_inputHistos.size(); ++i)
+    // {
+    //   if(m_inputHistos[i])
+    //     delete m_inputHistos[i];
+    // }
+    m_inputHistos.clear();
+    delete m_dataHisto;m_dataHisto=0;
+  }
 
+  void setupParameters(){
+    m_numOfParameters = getMinimizer()->NDim();
+    cleanUp();
+    m_inputHistos.reserve(m_numOfParameters);
+    m_results = getMinimizer()->X();
+    m_resultsSymErrors = getMinimizer()->Errors();
+  };
 
+  void setupInputHistos(){
+    for (int i = 0; i < m_numOfParameters; ++i)
+    {
+      m_inputHistos.push_back(dynamic_cast<TH1*>(getFunction()->getTemplate(i)->getHisto()->Clone(appendToNameString<int>(0).c_str())));
+    }
+    m_dataHisto = dynamic_cast<TH1*>(getFunction()->getData()->getHisto()->Clone(appendToNameString<std::string>("_data").c_str()));
+  }
+
+  void treatInputHistosForResult(){
+    int color = 2;
+    for (int i = 0; i < m_numOfParameters; ++i,color++)
+    {
+      m_inputHistos[i]->Scale(m_results[i]/m_inputHistos[i]->Integral());
+      m_inputHistos[i]->SetFillColor(color);
+      m_inputHistos[i]->SetLineColor(color);
+      m_inputHistos[i]->SetMarkerColor(color);
+    }
+  }
+
+  void joinHistosToFile(TFile* _file=0){
+    if(_file && !(_file->IsZombie())){
+      for (int i = 0; i < m_numOfParameters; ++i)
+      {
+        m_inputHistos[i]->SetDirectory(_file->GetDirectory("/"));
+      }
+    }
+    else
+      std::cerr << __FILE__ << ":" << __LINE__ << "\t file does not exist\n";
+  }
+  
 public:
 
   // Constructors/Destructors
@@ -38,7 +91,12 @@ public:
                const std::string& _text="histoResult.root"):
     AbsResult(_min),
     m_verbosity(_verb),
-    m_filename(_text)
+    m_filename(_text),
+    m_inputHistos(),
+    m_dataHisto(0),
+    m_results(0),
+    m_resultsSymErrors(0),
+    m_numOfParameters(0)
   {
 
   };
