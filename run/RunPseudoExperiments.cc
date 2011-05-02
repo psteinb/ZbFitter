@@ -311,7 +311,7 @@ void addVerticalArrowToPad(TVirtualPad* _thisPad, TArrow* _arrow,const double& _
 int main(int argc, char* argv[])
 {
   TStyle* aStyle =  AtlasStyle();
-  aStyle->SetOptStat(111111);
+  aStyle->SetOptStat(112211);
   gROOT->SetStyle("ATLAS");
   gROOT->ForceStyle();
 

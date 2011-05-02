@@ -372,7 +372,7 @@ public:
       else
         status = aFitter.fit(true);
       
-      m_maxLLH->Fill(aFitter.getMinimizer()->MinValue());
+      
 
       if(status!=0){
         nNon0Status++;
@@ -389,40 +389,44 @@ public:
       else{
         name << "_success";
         preparePlots(name.str(),histoResult,llhResult);
-        if(i % 500 == 0 && m_verbosity<3){
+        if(i % 500 == 0 ){
           aFitter.printTo(histoResult);
           aFitter.printTo(llhResult);
         }
       }
-      //collect the errors
-      aFitter.getMinosErrorSet(m_fitErrorsStatus,m_fitErrorsDown,m_fitErrorsUp);
 
-      //collect the results
-      for (int i = 0; i < m_templateTH1s.size(); ++i)
-      {
-        m_fitValues[i] = aFitter.getMinimizer()->X()[i];
-        m_means[i].Fill(m_fitValues[i]);
+      //if the fit converged, collect the results
+      if(!(status!=0)){
+        //collect the errors
+        aFitter.getMinosErrorSet(m_fitErrorsStatus,m_fitErrorsDown,m_fitErrorsUp);
 
-        if(TMath::Abs(m_fitErrorsStatus.at(i))<10)
-          m_sigmas[i].Fill(TMath::Abs(std::min(m_fitErrorsDown[i],m_fitErrorsUp[i])));
-        else{
-          m_sigmas[i].Fill(aFitter.getMinimizer()->Errors()[i]);
+        //collect the results
+        m_maxLLH->Fill(aFitter.getMinimizer()->MinValue());
+        double pullSigma = 0.;
+        for (int i = 0; i < m_templateTH1s.size(); ++i)
+        {
+          m_fitValues[i] = aFitter.getMinimizer()->X()[i];
+          m_means[i].Fill(m_fitValues[i]);
+
+          if(TMath::Abs(m_fitErrorsStatus.at(i))<10)
+            m_sigmas[i].Fill(TMath::Abs(std::max(TMath::Abs(m_fitErrorsDown[i]),m_fitErrorsUp[i])));
+          else{
+            m_sigmas[i].Fill(aFitter.getMinimizer()->Errors()[i]);
+          }
+
+          if(m_fitValues[i]>m_expectedValues[i])
+            pullSigma  = TMath::Abs(m_fitErrorsDown[i]);
+          else
+            pullSigma = TMath::Abs(m_fitErrorsUp[i]);
+
+          pullValues[i] = (m_expectedValues[i]-m_fitValues[i])/(pullSigma);
         }
 
-        if(m_fitValues[i]>m_expectedValues[i])
-          pullValues[i] = (m_expectedValues[i]-m_fitValues[i])/TMath::Sqrt((m_fitErrorsDown[i]*m_fitErrorsDown[i]));
-        else
-          pullValues[i] = (m_expectedValues[i]-m_fitValues[i])/TMath::Sqrt((m_fitErrorsUp[i]*m_fitErrorsUp[i])/*+(m_expectedErrors[i]*m_expectedErrors[i])*/);
+        for (int i = 0; i < pullValues.size(); ++i)
+        {
+          m_pulls[i].Fill(pullValues[i]);
+        }
       }
-
-      /////////////////////////////////////////
-      /// FIXME: the following should be done better by a utility method
-      /////////////////////////////////////////
-      for (int i = 0; i < pullValues.size(); ++i)
-      {
-        m_pulls[i].Fill(pullValues[i]);
-      }
-           
 
       //clean-up data
       m_data->Reset("MICE");
