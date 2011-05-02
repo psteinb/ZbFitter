@@ -20,7 +20,7 @@ ConfLinearTest::ConfLinearTest():
   p_rebin(1),
   p_giveHelp(false),
   p_stepsize(.2)
-{}
+{};
 
 //constructor with initialisation
 ConfLinearTest::ConfLinearTest(int inArgc, char** inArgv):
