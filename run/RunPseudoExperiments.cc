@@ -294,19 +294,19 @@ void createExpectedValuesFromTemplates(const std::vector<TH1*>& _templates,
 
 }
 
-void addVerticalArrowToPad(TVirtualPad* _thisPad, TArrow* _arrow,const double& _value=0.){
+// void addVerticalArrowToPad(TVirtualPad* _thisPad, TArrow* _arrow,const double& _value=0.){
   
-  if(!(_value!=0.))
-    return;
+//   if(!(_value!=0.))
+//     return;
 
-  double xpos = _thisPad->XtoPad(_value);
-  double yStart = _thisPad->GetUymin();
-  double yEnd = _thisPad->GetUymax();
-  _arrow->DrawArrow(xpos,yStart,
-                    xpos,yEnd,
-                    0.03,"<");
+//   double xpos = _thisPad->XtoPad(_value);
+//   double yStart = _thisPad->GetUymin();
+//   double yEnd = _thisPad->GetUymax();
+//   _arrow->DrawArrow(xpos,yStart,
+//                     xpos,yEnd,
+//                     0.03,"<");
 
-}
+// }
 
 int main(int argc, char* argv[])
 {
