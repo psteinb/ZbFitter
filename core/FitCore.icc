@@ -69,7 +69,7 @@ int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   /// provide the Likelihood function
   /////////////////////////////////////////
  
-  ROOT::Math::Functor f(m_fcn,3);
+  ROOT::Math::Functor f(m_fcn,m_fcn.getNumberOfParameters());
   m_minimizer->SetFunction(f);
   /////////////////////////////////////////
   /// run the fit

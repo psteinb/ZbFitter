@@ -45,6 +45,7 @@ class PseudoStudy{
   TRandom3 m_TRand3;
 
   std::vector<TH1D> m_pulls;
+  std::vector<TH1D> m_MigradPulls;
   std::vector<TH1D> m_means;
   std::vector<TH1D> m_sigmas;
   
@@ -94,19 +95,25 @@ class PseudoStudy{
     for (int i = 0; i < _size; ++i)
     {
       expMeanDown = .75*m_expectedValues.at(i);
-      expMeanUp = 2.*(m_expectedValues.at(i));
+      expMeanUp = 1.5*(m_expectedValues.at(i));
       expSigmaDown = 0.;
-      expSigmaUp = 2.*(m_expectedValues.at(i));
+      expSigmaUp = 1.*(m_expectedValues.at(i));
 
       m_pulls[i] = TH1D(addItemToText<int>("pull_par",i).c_str(),"pull",50,-5,5);
       m_pulls[i].GetXaxis()->SetTitle(addItemToText<int>("pull: ",i).c_str());
       m_pulls[i].SetBit(TH1::kCanRebin);
+
+      m_MigradPulls[i] = TH1D(addItemToText<int>("Migrad_pull_par",i).c_str(),"pull",50,-5,5);
+      m_MigradPulls[i].GetXaxis()->SetTitle(addItemToText<int>("pull: ",i).c_str());
+      m_MigradPulls[i].SetBit(TH1::kCanRebin);
+
       m_means[i] = TH1D(addItemToText<int>("mean_par",i).c_str(),"mean fitted",
-                        80,0.,expMeanUp);
+                        80,expMeanDown,expMeanUp);
       m_means[i].GetXaxis()->SetTitle(addItemToText<int>("fitted: ",i).c_str());
       m_means[i].SetBit(TH1::kCanRebin);
+
       m_sigmas[i] = TH1D(addItemToText<int>("sigma_par",i).c_str(),"sigma fitted",
-                         80,0.,expSigmaUp);
+                         80,expSigmaDown,expSigmaUp);
       m_sigmas[i].GetXaxis()->SetTitle(addItemToText<int>("fitted error: ",i).c_str());
       m_sigmas[i].SetBit(TH1::kCanRebin);
     }
@@ -168,6 +175,7 @@ public:
     m_iterations(_iters),
     m_TRand3(),
     m_pulls(_templates.size()),
+    m_MigradPulls(_templates.size()),
     m_means(_templates.size()),
     m_sigmas(_templates.size()),
     m_expectedValues    (_expected),   
@@ -244,7 +252,7 @@ public:
       std::cerr << __FILE__ <<":"<< __LINE__ <<"\t unable to return m_pulls item at "<< _idx<<" due to \n\t"<< exc.what()<<std::endl;
       _results[2] = 0;
     }
-    
+
     return;
   };
   TH1D* getMaxLLHDistribution(){return m_maxLLH;};
@@ -296,6 +304,20 @@ public:
 
     }
 
+    std::cout << "-- Migrad pulls --\n";
+    rItr = m_MigradPulls.begin()    ;
+    rEnd = m_MigradPulls.end()      ;
+    for (; rItr!=rEnd; ++rItr)
+    {
+      std::cout << rItr->GetName() << "("<< rItr->GetEntries()<<") "
+                <<"mean: " << rItr->GetMean()
+                <<", rms: " << rItr->GetRMS()
+                <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() << std::endl;
+      rItr->Write();
+
+    }
+
+
     aNewFile.Write();
     aNewFile.Close();
 
@@ -335,6 +357,8 @@ public:
     }
       
     std::vector<double> pullValues(m_templateTH1s.size(),0.);
+
+    std::vector<double> MigradPullValues(m_templateTH1s.size(),0.);
 
     TH1* m_data=0;
     prepareData(m_data);
@@ -437,12 +461,18 @@ public:
           else
             pullSigma = TMath::Abs(m_fitErrorsUp[i]);
 
-          pullValues[i] = ((expectationScale*m_expectedValues[i])-m_fitValues[i])/(pullSigma);
+          pullValues[i] = (m_fitValues[i] - (expectationScale*m_expectedValues[i]))/(pullSigma);
+          MigradPullValues[i] = (m_fitValues[i] - (expectationScale*m_expectedValues[i]))/(pullSigma);
+          MigradPullValues[i] *= 2;
+          // std::cout << "fit results: "<< totalSmearedData <<" (" <<totalData <<")\n"
+          //           << i << ": (fit)\t" << m_fitValues[i] << " +/- " << pullSigma << " (Migrad: "<< aFitter.getMinimizer()->Errors()[i] <<")\n"
+          //           << "(expect)\t"<< expectationScale*m_expectedValues[i] << " ["<<m_expectedValues[i] <<"] +/- " << expectationScale*m_expectedErrors[i] << "\n";
         }
 
         for (int i = 0; i < pullValues.size(); ++i)
         {
           m_pulls[i].Fill(pullValues[i]);
+          m_MigradPulls[i].Fill(MigradPullValues[i]);
         }
       }
 

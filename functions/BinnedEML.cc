@@ -63,7 +63,7 @@ double functions::BinnedEML::operator()(const double* _values ){
     sumOverAllBins += ((*dataItr)*this->getLogTerm(bin));
   }
   
-  logLHValue += -1.*(sumOverAllBins);
+  logLHValue += (-1.*(sumOverAllBins));
 
   return (logLHValue);
 }

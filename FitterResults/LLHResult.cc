@@ -8,6 +8,7 @@
 #include "TMath.h"
 #include "TAxis.h"
 #include "TFile.h"
+#include "TLine.h"
 
 void FitterResults::LLHResult::print(){
 
@@ -52,7 +53,7 @@ void FitterResults::LLHResult::print(){
 
   double errShift = 0.;
   int    pointIdx = 0;
-
+  std::cout << std::endl;
   for (int i = -6; i < 8; ++i,pointIdx++)
   {
     errShift = i/2.;
@@ -65,6 +66,9 @@ void FitterResults::LLHResult::print(){
         results[j]->SetPoint(i+6, input[j], 0.);
       else
         results[j]->SetPoint(i+6, input[j], LLHatPoint);
+      
+      if(TMath::Abs(errShift)<2 && j<1)
+        std::cout << " ["<<j<<"] "<< errShift <<"\t LLH at "<<input[j]<<" is " << LLHatPoint << " ("<< xErrors[j] <<")\n";
       
     }
   }
@@ -87,11 +91,17 @@ void FitterResults::LLHResult::printTGraphVector(const std::vector<TGraph*>& _re
   aCanvas.Clear();
   aCanvas.Draw();
   aCanvas.Divide(_results.size(),1);
+  TLine Half;
   for (int i = 0; i < (_results.size()); ++i)
   {
     aCanvas.cd(i+1);
     _results[i]->Draw("AP+");
-
+    gPad->SetGridy(true);
+    gPad->SetGridx(true);
+    aCanvas.Update();
+    Half.DrawLine(gPad->GetUxmin(),gPad->YtoPad(_results[i]->GetMinimum()+.5),
+                  gPad->GetUxmax(),gPad->YtoPad(_results[i]->GetMinimum()+.5));
+    
   }
   aCanvas.Update();
   aCanvas.Print(".eps");

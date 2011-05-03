@@ -38,10 +38,16 @@ namespace functions {
     /**
      * @return double
      */
-    double up ( )
+    double up() 
     {
       //this is a log likelihood function
-      return 0.5;
+      return double(.5);
+    }
+
+    double Up() const
+    {
+      //this is a log likelihood function
+      return double(.5);
     }
   
 
