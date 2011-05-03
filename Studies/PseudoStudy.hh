@@ -463,7 +463,7 @@ public:
 
           pullValues[i] = (m_fitValues[i] - (expectationScale*m_expectedValues[i]))/(pullSigma);
           MigradPullValues[i] = (m_fitValues[i] - (expectationScale*m_expectedValues[i]))/(pullSigma);
-          MigradPullValues[i] *= 2;
+
           // std::cout << "fit results: "<< totalSmearedData <<" (" <<totalData <<")\n"
           //           << i << ": (fit)\t" << m_fitValues[i] << " +/- " << pullSigma << " (Migrad: "<< aFitter.getMinimizer()->Errors()[i] <<")\n"
           //           << "(expect)\t"<< expectationScale*m_expectedValues[i] << " ["<<m_expectedValues[i] <<"] +/- " << expectationScale*m_expectedErrors[i] << "\n";

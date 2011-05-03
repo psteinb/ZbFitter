@@ -29,6 +29,8 @@
 // #include "AtlasStyle.h"
 // #include "TCanvas.h"
 
+#include "run/ConfLinearTest.hh"
+
 struct StepValueGenerator
 {
   double stepsize;
@@ -82,13 +84,32 @@ public:
 
 class ExperimentPerformer
 {
+  ConfLinearTest m_configuration;
 
 public:
-  ExperimentPerformer(){};
-  ExperimentPerformer( const ExperimentPerformer& ){};
+  std::vector<std::vector<double> > m_means;
+  std::vector<std::vector<double> > m_sigmas;
+
+  ExperimentPerformer( const ConfLinearTest& _configuration, const int& iters=0):
+    m_means(iters),
+    m_sigmas(iters),
+    m_configuration(_configuration)
+  {
+    for (int i = 0; i < iters; ++i)
+    {
+      m_means[i].reserve(3);
+      m_sigmas[i].reserve(3);
+    }
+  };
+
+  ExperimentPerformer( const ExperimentPerformer& _other):
+    m_means(_other.m_means),
+    m_sigmas(_other.m_sigmas),
+    m_configuration(_other.m_configuration)
+  {};
   virtual ~ExperimentPerformer(){};
 
-  void operator()(const tbb::blocked_range<double>& ) const {};
+  void operator()(const tbb::blocked_range<double>& ) const ;
 
 };
 

@@ -23,6 +23,7 @@ public:
   int         p_msgLevel;
   int         p_threads;
   int         p_rebin;
+  int         p_nIter;
   bool        p_giveHelp;
   double      p_stepsize;
   
@@ -38,6 +39,7 @@ public:
   p_msgLevel(3),
   p_threads(1),
   p_rebin(1),
+  p_nIter(1),
   p_giveHelp(false),
   p_stepsize(.2)
 {};
@@ -63,6 +65,7 @@ ConfLinearTest::ConfLinearTest(int inArgc, char** inArgv):
   p_msgLevel(3),
   p_threads(1),
   p_rebin(1),
+  p_nIter(1),
   p_giveHelp(false),
   p_stepsize(.2)
 {
@@ -75,7 +78,7 @@ void ConfLinearTest::parse(){
 
 
   int opt = 0;
-  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:r:E:M:D:T:s:h" ))!=-1 ){
+  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:r:i:E:M:D:T:s:h" ))!=-1 ){
     std::istringstream instream;
     std::ostringstream outstream;
     size_t found;
@@ -125,6 +128,17 @@ void ConfLinearTest::parse(){
       }
 
       break;
+    case 'i':
+      instream.str(optarg);
+      if( !(instream >> meta) ){
+        std::cerr << "RunFitter \t invalid argument format for [-r]" << std::endl;
+        p_nIter = 1;
+      }
+      else{
+        p_nIter = meta;
+      }
+      break;
+
     case 's':
       instream.str(optarg);
       if( !(instream >> dmeta) ){

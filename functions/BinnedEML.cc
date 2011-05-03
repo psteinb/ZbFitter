@@ -65,6 +65,10 @@ double functions::BinnedEML::operator()(const double* _values ){
   
   logLHValue += (-1.*(sumOverAllBins));
 
+  //Roots interface seem not to pick up the predefined up function returning .5
+  //according to the TMinuit2 manual, one may instead double the LLH to get correct errors
+  logLHValue *= 2;
+
   return (logLHValue);
 }
 

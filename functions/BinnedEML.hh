@@ -44,11 +44,6 @@ namespace functions {
       return double(.5);
     }
 
-    double Up() const
-    {
-      //this is a log likelihood function
-      return double(.5);
-    }
   
 
     double getLogTerm(const short& _bin);
