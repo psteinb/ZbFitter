@@ -23,12 +23,12 @@
 #include "TRegexp.h"
 #include "TGraphErrors.h"
 #include "TCanvas.h"
-#include "AtlasStyle.h"
 #include "TRandom3.h"
 #include "TMath.h"
 #include "TArrow.h"
 #include "TPad.h"
 
+#include "AtlasStyle.h"
 
 //small class
 class RunnerConfig {
@@ -53,7 +53,7 @@ public:
   int         p_nIter;
   int         p_rebin;
   bool        p_giveHelp;
-
+  double      p_pseudoDataNormFactor;
   
   RunnerConfig();
   RunnerConfig(int , char**);
@@ -77,6 +77,7 @@ RunnerConfig::RunnerConfig():
   p_msgLevel(3),
   p_threads(1),
   p_giveHelp(false),
+  p_pseudoDataNormFactor(1.),
   p_nIter(10000),
   p_rebin(1)
 {}
@@ -94,6 +95,7 @@ RunnerConfig::RunnerConfig(int inArgc, char** inArgv):
   p_msgLevel(3),
   p_threads(1),
   p_giveHelp(false),
+  p_pseudoDataNormFactor(1.),
   p_nIter(10000.),
   p_rebin(1)
 {
@@ -106,7 +108,7 @@ void RunnerConfig::parse(){
 
 
   int opt = 0;
-  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:E:M:D:T:i:r:h" ))!=-1 ){
+  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:E:M:D:T:P:i:r:h" ))!=-1 ){
     std::istringstream instream;
     std::ostringstream outstream;
     size_t found;
@@ -145,6 +147,17 @@ void RunnerConfig::parse(){
       }
 
       break;
+    case 'P':
+      instream.str(optarg);
+      if( !(instream >> dmeta) ){
+        std::cerr << "RunFitter \t invalid argument format for [-P]" << std::endl;
+        p_pseudoDataNormFactor = 1.;
+      }
+      else{
+        p_pseudoDataNormFactor = dmeta;
+      }
+      break;
+
     case 'i':
       instream.str(optarg);
       if( !(instream >> meta) ){
@@ -199,6 +212,7 @@ void RunnerConfig::printHelp(){
   std::cout << "\t -M <TMinuitMode> define fit mode" << std::endl;
   std::cout << "\t -D <ObjectName> define data object to retrieve from root file" << std::endl;
   std::cout << "\t -T <ObjectName> define template (+systematics) object(s) to retrieve from root file" << std::endl;
+  std::cout << "\t -P <NormFactor> to apply to the data statistics to (if NormFactor<0, the data statistics IS NOT DRAWN from a POISSON(data statistics)" << std::endl;
   std::cout << "\t -i <N iterations> define number of pseudo experiments" << std::endl;
   std::cout << "\t -r <factor> rebin all input by factor" << std::endl;
   std::cout << "\t -h print this help" << std::endl;
@@ -220,6 +234,7 @@ void RunnerConfig::printConf(){
   std::cout << "[-M] fitMode = "<< p_fitMode << std::endl;
   std::cout << "[-D] dataTitle = "<< p_dataTitle << std::endl;
   std::cout << "[-T] tempTitle = "<< p_tempTitle << std::endl;
+  std::cout << "[-P] NormFactor = "<< p_pseudoDataNormFactor << std::endl;
   std::cout << "[-i] NumIterations = "<< p_nIter << std::endl;
   std::cout << "[-r] 2rebin2 = "<< p_rebin << std::endl;
   
@@ -260,16 +275,13 @@ struct defaultMCValues
 void createExpectedValuesFromTemplates(const std::vector<TH1*>& _templates,
                                        std::vector<double>& _expected,
                                        std::vector<double>& _errors,
-                                       TH1* _data=0){
+                                       const double& _dataIntegral){
 
   _expected.clear();
   _expected.resize(_templates.size(),0.);
   _errors.clear();
   _errors.resize(_templates.size(),0.);
   
-  if(!_data){
-    std::cout << __FILE__ << ":" << __LINE__ << "\t no data histo available\n";
-    return;}
 
   
   std::vector<double> integrals(_templates.size(),0.);
@@ -287,7 +299,7 @@ void createExpectedValuesFromTemplates(const std::vector<TH1*>& _templates,
 
   for (int i = 0; i < _templates.size(); ++i)
   {
-    _expected[i] = (integrals[i]/total)*_data->Integral();
+    _expected[i] = (integrals[i]/total)*_dataIntegral;
     _errors[i] = (errors[i]/total)*_expected[i];
     std::cout << "expected value ["<<i <<"]\t"<<_expected[i]<<" +/- "<<_errors[i] <<std::endl;
   }
@@ -340,14 +352,14 @@ int main(int argc, char* argv[])
   createExpectedValuesFromTemplates(m_templates,
                                     expected,          
                                     expectedErrors,
-                                    m_data);
+                                    m_data->Integral()*TMath::Abs(conf.p_pseudoDataNormFactor));
 
    // ----- PSEUDO EXPERIMENTS ----- 
   PseudoStudy<defaultMCValues,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEML>  
     aPseudoStudy(m_templates,
                  expected,
                  expectedErrors,
-                 m_data->Integral(),
+                 conf.p_pseudoDataNormFactor*(m_data->Integral()),
                  conf.p_threads,
                  conf.p_nIter
                  );

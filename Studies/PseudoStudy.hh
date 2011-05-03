@@ -100,12 +100,15 @@ class PseudoStudy{
 
       m_pulls[i] = TH1D(addItemToText<int>("pull_par",i).c_str(),"pull",50,-5,5);
       m_pulls[i].GetXaxis()->SetTitle(addItemToText<int>("pull: ",i).c_str());
+      m_pulls[i].SetBit(TH1::kCanRebin);
       m_means[i] = TH1D(addItemToText<int>("mean_par",i).c_str(),"mean fitted",
                         80,0.,expMeanUp);
       m_means[i].GetXaxis()->SetTitle(addItemToText<int>("fitted: ",i).c_str());
+      m_means[i].SetBit(TH1::kCanRebin);
       m_sigmas[i] = TH1D(addItemToText<int>("sigma_par",i).c_str(),"sigma fitted",
                          80,0.,expSigmaUp);
       m_sigmas[i].GetXaxis()->SetTitle(addItemToText<int>("fitted error: ",i).c_str());
+      m_sigmas[i].SetBit(TH1::kCanRebin);
     }
 
 
@@ -303,13 +306,15 @@ public:
 
     if(!_data){
       std::cerr << __FILE__ << ":"<< __LINE__ <<"\t data histo pointer nil\n";
-      return;}
+      return ;}
 
-    // std::cout << __FILE__ << ":"<< __LINE__ <<"\t sampling data histo with"<< _integral <<"entries\n";
+    
+
     _data->Reset("MICE");
     _data->ResetStats();
     _data->FillRandom(m_total,_integral);
-
+    
+    return ;
   }
 
   void experiment(){
@@ -337,6 +342,9 @@ public:
     int status = 0;
     int nNon0Status = 0;
 
+    double totalData = 1;
+    double totalSmearedData = 1;
+    double expectationScale =1.;
     for (int i = 0; i < (m_iterations); ++i)
     {
       //flush the name
@@ -349,7 +357,16 @@ public:
 
       //scale b content and
       // add all MC histos according to the just fitted fractions to give pseudo data
-      createScaledData(m_data,m_TRand3.Poisson(m_dataIntegral));
+      totalData = TMath::Abs(m_dataIntegral);
+                  
+      if(m_dataIntegral<0)
+        createScaledData(m_data,totalData);
+      else{
+        totalSmearedData =  m_TRand3.Poisson(totalData);
+        createScaledData(m_data,totalSmearedData);
+        expectationScale = totalSmearedData/totalData;
+      }
+
       if(m_verbosity<3){
         std::cout << "\nsampled data\n";
         m_data->Print("all");
@@ -376,6 +393,7 @@ public:
 
       if(status!=0){
         nNon0Status++;
+        std::cout << "fitter status:\t"<< status << std::endl;
         if(m_doPanicPrint){
           name << "_failed";
           preparePlots(name.str(),histoResult,llhResult);
@@ -414,12 +432,12 @@ public:
             m_sigmas[i].Fill(aFitter.getMinimizer()->Errors()[i]);
           }
 
-          if(m_fitValues[i]>m_expectedValues[i])
+          if(m_fitValues[i]>(expectationScale*m_expectedValues[i]))
             pullSigma  = TMath::Abs(m_fitErrorsDown[i]);
           else
             pullSigma = TMath::Abs(m_fitErrorsUp[i]);
 
-          pullValues[i] = (m_expectedValues[i]-m_fitValues[i])/(pullSigma);
+          pullValues[i] = ((expectationScale*m_expectedValues[i])-m_fitValues[i])/(pullSigma);
         }
 
         for (int i = 0; i < pullValues.size(); ++i)

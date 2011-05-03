@@ -28,7 +28,7 @@ double functions::BinnedEML::getLogTerm(const short& _bin){
 
   }
 
-  value*=binWidth;
+  //value*=binWidth;
   if(value)
     return std::log(value);
   else
