@@ -242,7 +242,13 @@ int main(int argc, char* argv[])
   FitterInputs::NormedTH1<FitterInputs::Norm2Unity>* input = new FitterInputs::NormedTH1<FitterInputs::Norm2Unity>();
   input->loadData(conf.p_datadir.c_str(),conf.p_dataTitle.c_str(),conf.p_rebin);
   input->loadTemplates(conf.p_datadir.c_str(),conf.p_tempTitle.c_str(),conf.p_rebin);
-
+  
+  if(conf.p_msgLevel<3){
+    TH1* m_data =  input->getDataDeepCopy();
+    std::cout << "received data:\n";
+    m_data->Print("all");
+    delete m_data;
+  }
   // ----- Templates ----- 
   functions::BinnedEML fcn;
   
@@ -261,9 +267,6 @@ int main(int argc, char* argv[])
   fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
   fitter.configureKeyWithValue("Mode",conf.p_fitMode);
   fitter.setupMachinery();
-  // std::vector<double> Up;
-  // std::vector<double> Down;
-  // std::vector<int> Status;
 
   
 
@@ -275,11 +278,6 @@ int main(int argc, char* argv[])
     fitter.fit(false);
   
   fitter.printTo(hresult);
-
-  // fitter.getMinosErrorSet(Status,Down,Up);
-  // std::cout << "b:\t(up) "<< Up[0] << "\t(down) " << Down[0] << std::endl;
-  // std::cout << "c:\t(up) "<< Up[1] << "\t(down) " << Down[1] << std::endl;
-  // std::cout << "l:\t(up) "<< Up[2] << "\t(down) " << Down[2] << std::endl;
 
   //clean-up
   delete lresult;

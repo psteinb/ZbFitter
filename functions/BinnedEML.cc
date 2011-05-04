@@ -3,6 +3,7 @@
 #include <cmath>
 #include "TMath.h"
 #include <numeric>
+#include <iterator>
 
 
 // Constructors/Destructors
@@ -68,6 +69,14 @@ double functions::BinnedEML::operator()(const double* _values ){
   //Roots interface seem not to pick up the predefined up function returning .5
   //according to the TMinuit2 manual, one may instead double the LLH to get correct errors
   logLHValue *= 2;
+  
+  std::cout << "for parameters: \t";
+  std::copy(getParameters()->begin(),
+            getParameters()->end(),
+            std::ostream_iterator<double>(std::cout,", "));
+  std::cout << " == " << sumOverAllBins
+            <<"\n\tLLH:\t\t" << logLHValue 
+            << std::endl;
 
   return (logLHValue);
 }

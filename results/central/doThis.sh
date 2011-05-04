@@ -1,1 +1,2 @@
-RunFitter.exe -M Migrad -d ./extractedSV0.root -c $SRC/functions/SimpleMaxLLH.env -D "data_muid" -T "z_muid_trueB,z_muid_trueC,z_muid_trueL" -o migrad.muid.root -r 5
+RunFitter.exe -M Migrad -d ./extractedSV0.root -c /amnt/remote/pkthafc.home/psteinb/development/sandbox/fitter/results/central/BinnedEML.env -D "data_muid" -T "z_muid_trueB,z_muid_trueC,z_muid_trueL" -o migrad -r 5 -m 1 > fit.Sherpa.log 2>&1 &
+RunFitter.exe -M Migrad -d $SRC/AlpgenZmumuJetVertexMassByFlav.root  -c /amnt/remote/pkthafc.home/psteinb/development/sandbox/fitter/results/central/BinnedEML.Alpgen.env -D "Data" -T "MC_Signal_B,MC_Signal_C,MC_Signal_L" -o results.alpgen -r 10 -m 1 > $SRC/results/central/fit.Alpgen.r10.log 2>&1 &

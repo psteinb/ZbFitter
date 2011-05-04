@@ -87,9 +87,10 @@ namespace functions {
       //shooting into the blind
       //std::assert( _params[(m_nParameters-1)] > 0);
       //copy parameters to vector
+      m_parameters.clear();
       m_parameters.resize(m_nParameters,0);
-      m_parametersUp.resize(m_nParameters,0);
-      m_parametersDown.resize(m_nParameters,0);
+      // m_parametersUp.resize(m_nParameters,0);
+      // m_parametersDown.resize(m_nParameters,0);
       std::copy(_params,_params+int(m_nParameters),m_parameters.begin());
 
     };

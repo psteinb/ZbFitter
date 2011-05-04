@@ -41,7 +41,7 @@ void FitterResults::LLHResult::print(){
     results[i]->GetYaxis()->SetTitle(" - log(L) / a.u.");
     name << " -log(L)";
     results[i]->SetName(name.str().c_str());
-    //results[i]->SetDirectory(newFile.GetDirectory("/"));
+    results[i]->Write();
   }
 
   const double *xs = getMinimizer()->X();

@@ -27,6 +27,7 @@
 #include "TMath.h"
 #include "TArrow.h"
 #include "TPad.h"
+#include "TPaveStats.h"
 
 #include "AtlasStyle.h"
 
@@ -323,7 +324,14 @@ void createExpectedValuesFromTemplates(const std::vector<TH1*>& _templates,
 int main(int argc, char* argv[])
 {
   TStyle* aStyle =  AtlasStyle();
-  aStyle->SetOptStat(112211);
+  aStyle->SetStatY(1.);
+  aStyle->SetStatX(.95);
+  aStyle->SetStatW(.8);
+  aStyle->SetStatH(0.15);
+  aStyle->SetStatBorderSize(0.);
+  aStyle->SetPadTopMargin(0.2);
+  //aStyle->SetHistTopMargin(0.3);
+  aStyle->SetOptStat(2210);
   gROOT->SetStyle("ATLAS");
   gROOT->ForceStyle();
 
@@ -355,6 +363,7 @@ int main(int argc, char* argv[])
                                     m_data->Integral()*TMath::Abs(conf.p_pseudoDataNormFactor));
 
    // ----- PSEUDO EXPERIMENTS ----- 
+  double scaleExpectation = TMath::Abs(conf.p_pseudoDataNormFactor);
   PseudoStudy<defaultMCValues,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEML>  
     aPseudoStudy(m_templates,
                  expected,
@@ -384,14 +393,14 @@ int main(int argc, char* argv[])
   }
   
   
-  // ----- DRAW RESULTS ----- 
+  // ----- DRAW RESULTS IN ONE PAD ----- 
   TCanvas myResults(conf.p_outputfile.c_str(),"",3000,2000);
   myResults.Clear();
   myResults.Draw();
   myResults.Divide(3,m_templates.size());
   int padSize = 3*m_templates.size();
   TArrow anArrow;
-  anArrow.SetLineColor(kRed);
+  anArrow.SetLineColor(kBlue);
   anArrow.SetLineWidth(2);
   int currentPad=0;
   int padStart=1;
@@ -401,18 +410,69 @@ int main(int argc, char* argv[])
     {
       currentPad= pad + padStart;
       myResults.cd(currentPad);
-      // if(i<1){
-      //   myResults.Update();
-      //   addVerticalArrowToPad(gPad,&anArrow,expected[i]);
-      // }
       m_results[i][pad]->Draw();
+      if(pad<1){
+        myResults.Update();
+        anArrow.DrawArrow(gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymin(),
+                          gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymax(),0.03,"<|");
+      }
+      
     }
   }
-
   myResults.Update();
   myResults.Print(".eps");
 
+    // ----- DRAW MEAN RESULTS IN ONE PAD ----- 
   std::string name = conf.p_outputfile;
+  name += "_means";
+  TCanvas MeanCanvas(name.c_str(),"",3000,1000);
+  MeanCanvas.Clear();
+  MeanCanvas.Draw();
+  MeanCanvas.Divide(m_templates.size(),1);
+  int pad=1;
+  for (int i = 0; i < m_results.size(); ++i,pad++)
+  {
+    MeanCanvas.cd(pad);
+    // if(i<1){
+    m_results[i][0]->Draw();
+      MeanCanvas.Update();
+      anArrow.DrawArrow(gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymin(),
+                        gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymax(),0.03,"<|");
+    // }
+    
+    
+  }
+  MeanCanvas.Update();
+  MeanCanvas.Print(".eps");
+
+    // ----- DRAW PULL RESULTS IN ONE PAD ----- 
+  name = conf.p_outputfile;
+  name += "_pulls";
+  TCanvas PullCanvas(name.c_str(),"",3000,1000);
+  PullCanvas.Clear();
+  PullCanvas.Draw();
+  PullCanvas.Divide(m_templates.size(),1);
+  pad=1;
+  TPaveStats *stats=0;
+  
+  for (int i = 0; i < m_results.size(); ++i,pad++)
+  {
+    PullCanvas.cd(pad);
+    m_results[i][2]->Draw();
+    PullCanvas.Update();
+    stats = (TPaveStats*)m_results[i][2]->FindObject("stats");
+    if(stats){
+      stats->SetY2(gPad->GetUymax());
+      stats->SetY1(gPad->GetUymax()*.75);
+      stats->SetX2(gPad->GetUxmax());
+      stats->SetX1(gPad->GetUxmin()*.25);
+    }
+  }
+  PullCanvas.Update();
+  PullCanvas.Print(".eps");
+
+
+  name = conf.p_outputfile;
   name += "_maxLLH";
 
   TCanvas PseudoMaxLLH(name.c_str(),"",800,600);
