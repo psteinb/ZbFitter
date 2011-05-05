@@ -6,19 +6,19 @@ template <class Fcn, class Scr, class Res>
 void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
   
   if(isConfigured("Engine") && isConfigured("Mode"))
-    m_minimizer = ROOT::Math::Factory::CreateMinimizer(m_config["Engine"], m_config["Mode"]);
+    m_minimizer = ROOT::Math::Factory::CreateMinimizer(m_configMap["Engine"], m_configMap["Mode"]);
   else{
     throw std::runtime_error("FitCore::setupMachinery for neither engine nor mode was configured");
   }
 
   if(isConfigured("MaxFunCalls"))
-    m_minimizer->SetMaxFunctionCalls(getIntFromString(m_config["MaxFunCalls"]));
+    m_minimizer->SetMaxFunctionCalls(getIntFromString(m_configMap["MaxFunCalls"]));
 
   if(isConfigured("MaxIterations"))
-    m_minimizer->SetMaxIterations(getIntFromString(m_config["MaxIterations"]));
+    m_minimizer->SetMaxIterations(getIntFromString(m_configMap["MaxIterations"]));
 
   if(isConfigured("Tolerance"))
-    m_minimizer->SetTolerance(getDoubleFromString(m_config["Tolerance"]));
+    m_minimizer->SetTolerance(getDoubleFromString(m_configMap["Tolerance"]));
 
   /////////////////////////////////////////
   /// laod data/templates to Likelihood function
@@ -26,29 +26,13 @@ void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
   loadDataToFunction();
 
   
+  //load the param configuration
+  std::vector<std::string> dummy;//can be used to set the names from e.g. data
+  m_paramConfiguration.init(m_configMap,dummy);
+  
   // Set the free variables to be minimized!
-  /////////////////////////////////////////
-  /// FIXME: need to automise the following, current implementation hinders manual set of Start/Step/Name through other methods than TEnv
-  /////////////////////////////////////////
-  
-  
-  m_minimizer->SetVariable(0,
-                           m_config["Parameter1.Name"], 
-                           getDoubleFromString(m_config["Parameter1.Start"]),
-                           getDoubleFromString(m_config["Parameter1.Step"])
-                           );
+  m_paramConfiguration.configureMinimizer(m_minimizer);
 
-  m_minimizer->SetVariable(1,
-                           m_config["Parameter2.Name"], 
-                           getDoubleFromString(m_config["Parameter2.Start"]),
-                           getDoubleFromString(m_config["Parameter2.Step"])
-                           );
-
-  m_minimizer->SetVariable(2,
-                           m_config["Parameter3.Name"], 
-                           getDoubleFromString(m_config["Parameter3.Start"]),
-                           getDoubleFromString(m_config["Parameter3.Step"])
-                           );
   
 }
 

@@ -46,9 +46,7 @@ double functions::BinnedEML::operator()(const double* _values ){
 
   double sumOfParameters = std::accumulate(getParameters()->begin(), 
 					   getParameters()->end(),
-					   0.,
-					   std::plus<double>()
-					   );
+					   0.);
   
   //the likelihood function
   double logLHValue = sumOfParameters;

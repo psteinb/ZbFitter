@@ -16,6 +16,8 @@
 #include "TEnv.h"
 #include "THashList.h"
 
+#include "core/MinimizerConfiguration.hh"
+
 
 
 namespace core {
@@ -48,8 +50,9 @@ namespace core {
     Fcn m_fcn;
     
     //configuration map
-    std::map<std::string,std::string> m_config;
-
+    std::map<std::string,std::string> m_configMap;
+    MinimizerConfiguration m_paramConfiguration;
+    
     //minimizer to use
     ROOT::Math::Minimizer* m_minimizer;
 
@@ -64,8 +67,8 @@ namespace core {
 
     void printConfig ( )
     {
-      std::map<std::string,std::string>::const_iterator cfgItr = m_config.begin();
-      std::map<std::string,std::string>::const_iterator cfgEnd = m_config.end();
+      std::map<std::string,std::string>::const_iterator cfgItr = m_configMap.begin();
+      std::map<std::string,std::string>::const_iterator cfgEnd = m_configMap.end();
       std::cout << "FitCore:\tusing the following configurations\n";
       for (;cfgItr!=cfgEnd;++cfgEnd)
       {
@@ -89,7 +92,8 @@ namespace core {
       m_resources(_sources),
       m_result(_results),
       m_fcn(),
-      m_config(),
+      m_configMap(),
+      m_paramConfiguration(),
       m_minimizer(0),
       m_configFile(""),
       m_environment(),
@@ -151,8 +155,8 @@ namespace core {
      */
     bool isConfigured (const std::string& _name ) const
     {
-      std::map<std::string,std::string>::const_iterator cfgItr = m_config.find(_name);
-      if(cfgItr!=m_config.end())
+      std::map<std::string,std::string>::const_iterator cfgItr = m_configMap.find(_name);
+      if(cfgItr!=m_configMap.end())
         return true;
       else
         return false;
@@ -160,8 +164,8 @@ namespace core {
 
     std::string getConfigured (const std::string& _name ) const
     {
-      std::map<std::string,std::string>::const_iterator cfgItr = m_config.find(_name);
-      if(cfgItr!=m_config.end())
+      std::map<std::string,std::string>::const_iterator cfgItr = m_configMap.find(_name);
+      if(cfgItr!=m_configMap.end())
         return *(cfgItr);
       else
         return "";
@@ -174,7 +178,7 @@ namespace core {
      */
     bool configureKeyWithValue (const std::string& _key, const std::string& _value )
     {
-      m_config[_key] = _value;
+      m_configMap[_key] = _value;
     }
     
 
