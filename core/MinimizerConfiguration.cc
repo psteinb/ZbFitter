@@ -55,12 +55,12 @@ void core::MinimizerConfiguration::loadItemsFromMap(){
     {
       if(mItr->first.find(m_names[nameIdx])!=std::string::npos){
         metaString = mItr->first.substr(mItr->first.find_first_of(".")+1);
-        std::cout << metaString << " - " << mItr->second << std::endl;
+        //std::cout << metaString << " - " << mItr->second << std::endl;
         metaConfigItem.setItem(metaString,mItr->second);
       }
     }
     m_items.push_back(metaConfigItem);
-    metaConfigItem.print();
+    //metaConfigItem.print();
   }
 
 }
@@ -75,28 +75,28 @@ void core::MinimizerConfiguration::configureMinimizer(ROOT::Math::Minimizer* _mi
   {
     if(itItr->isFixed()){
       _minim->SetFixedVariable(i,itItr->Name,itItr->Start);
-      std::cout << "setting "<<i<<" fixed\n" ;
+      // std::cout << "setting "<<i<<" fixed\n" ;
       continue;
     }
 
     if(itItr->lowConstrain && itItr->highConstrain){
       _minim->SetLimitedVariable(i,itItr->Name,itItr->Start,itItr->Step,
                                  itItr->LowLimit,itItr->HighLimit);
-      std::cout << "setting "<<i<<" 2 constrained\n" ;
+      // std::cout << "setting "<<i<<" 2 constrained\n" ;
       continue;
     }
 
     if(itItr->lowConstrain && !(itItr->highConstrain)){
       _minim->SetLowerLimitedVariable(i,itItr->Name,itItr->Start,itItr->Step,
                                       itItr->LowLimit);
-      std::cout << "setting "<<i<<" low constrained\n" ;
+      // std::cout << "setting "<<i<<" low constrained\n" ;
       continue;
     }
     
     if(!(itItr->lowConstrain) && (itItr->highConstrain)){
       _minim->SetLowerLimitedVariable(i,itItr->Name,itItr->Start,itItr->Step,
                                       itItr->HighLimit);
-      std::cout << "setting "<<i<<" high constrained\n" ;
+      // std::cout << "setting "<<i<<" high constrained\n" ;
       continue;
     }
     

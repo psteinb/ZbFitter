@@ -68,9 +68,11 @@ void FitterResults::LLHResult::print(){
         results[j]->SetPoint(i+6, input[j], 0.);
       else
         results[j]->SetPoint(i+6, input[j], LLHatPoint);
-      
+
+      #ifdef __DEBUG__
       if(TMath::Abs(errShift)<2 && j<1)
         std::cout << " ["<<j<<"] "<< errShift <<"\t LLH at "<<input[j]<<" is " << LLHatPoint << " ("<< xErrors[j] <<")\n";
+      #endif
       
     }
   }
