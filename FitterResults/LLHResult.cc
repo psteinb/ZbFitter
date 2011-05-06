@@ -30,22 +30,24 @@ void FitterResults::LLHResult::print(){
   unsigned int numFitVariables = getMinimizer()->NDim();
   // std::cout << __FILE__ << ":" << __LINE__ << "\t dimensions received "<< numFitVariables << std::endl;
   std::vector<TGraph*> results(numFitVariables);
-
-  std::ostringstream name;
-  for (int i = 0; i < numFitVariables; ++i)
-  {
-    name.str("");
-    name << "parameter " << i;
-    results[i] = new TGraph(14);
-    results[i]->GetXaxis()->SetTitle(name.str().c_str());
-    results[i]->GetYaxis()->SetTitle(" - log(L) / a.u.");
-    name << " -log(L)";
-    results[i]->SetName(name.str().c_str());
-    results[i]->Write();
-  }
-
   const double *xs = getMinimizer()->X();
   double input[numFitVariables];
+  std::ostringstream GraphTitle;
+  std::string GraphName;
+  for (int i = 0; i < numFitVariables; ++i)
+  {
+    GraphName = "LLH_";
+    GraphName += getMinimizer()->VariableName(i);
+    GraphTitle.str(GraphName);
+    GraphTitle << ";" << getMinimizer()->VariableName(i) 
+               << ";" << " -log(L) / a.u.";
+
+    results[i] = new TGraph(14);
+    results[i]->SetTitle(GraphTitle.str().c_str());
+    results[i]->SetName(GraphName.c_str());
+  }
+
+  
 
   const double *xErrors = getMinimizer()->Errors();
   double LLHatPoint= 0.;
@@ -74,8 +76,10 @@ void FitterResults::LLHResult::print(){
   }
       
   printTGraphVector(results);
-  newFile.Write();
+  //  newFile.Write();
   newFile.Close();
+  
+  
 }
 
 void FitterResults::LLHResult::printTGraphVector(const std::vector<TGraph*>& _results){
@@ -98,9 +102,10 @@ void FitterResults::LLHResult::printTGraphVector(const std::vector<TGraph*>& _re
     _results[i]->Draw("AP+");
     gPad->SetGridy(true);
     gPad->SetGridx(true);
-    aCanvas.Update();
-    Half.DrawLine(gPad->GetUxmin(),gPad->YtoPad(_results[i]->GetMinimum()+.5),
-                  gPad->GetUxmax(),gPad->YtoPad(_results[i]->GetMinimum()+.5));
+    _results[i]->Write();
+    // aCanvas.Update();
+    // Half.DrawLine(gPad->GetUxmin(),gPad->YtoPad(_results[i]->GetMinimum()+.5),
+    //               gPad->GetUxmax(),gPad->YtoPad(_results[i]->GetMinimum()+.5));
     
   }
   aCanvas.Update();

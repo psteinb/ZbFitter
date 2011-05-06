@@ -29,6 +29,8 @@ void functions::AbsFittingFunction::setupFromInput (FitterInputs::AbsHisto* _inp
                             compDataType());
 
   int nFound = bounds.second - bounds.first;
+  this->m_nParameters = nFound;
+
   if((nFound)!=0){
     //templates found
     m_templates.clear();
@@ -52,6 +54,7 @@ void functions::AbsFittingFunction::setupFromInput (FitterInputs::AbsHisto* _inp
     m_templatesSys.clear();
     return;
   }
+  
 
 }
 

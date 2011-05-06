@@ -20,11 +20,8 @@ void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
   if(isConfigured("Tolerance"))
     m_minimizer->SetTolerance(getDoubleFromString(m_configMap["Tolerance"]));
 
-  /////////////////////////////////////////
-  /// laod data/templates to Likelihood function
-  /////////////////////////////////////////
-  loadDataToFunction();
-
+  
+  
   
   //load the param configuration
   std::vector<std::string> dummy;//can be used to set the names from e.g. data
@@ -33,7 +30,10 @@ void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
   // Set the free variables to be minimized!
   m_paramConfiguration.configureMinimizer(m_minimizer);
 
-  
+  /////////////////////////////////////////
+  /// load data/templates to Likelihood function
+  /////////////////////////////////////////
+  loadDataToFunction();
 }
 
 template <class Fcn, class Scr, class Res>
