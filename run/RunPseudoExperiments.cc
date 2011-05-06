@@ -430,7 +430,7 @@ int main(int argc, char* argv[])
         expValue.SetY2NDC(gPad->GetYlowNDC()+ (1.6*gPad->GetHNDC()));
         expValue.AddText(expValueString.str().c_str());
         //std::cout << expValueString.str().c_str() << std::endl;
-        expValue.Draw();
+        //expValue.Draw();
       }
       //myResults.Update();
     }
