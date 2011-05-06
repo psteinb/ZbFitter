@@ -50,7 +50,7 @@ private:
   void setupInputHistos(){
     for (int i = 0; i < m_numOfParameters; ++i)
     {
-      m_inputHistos.push_back(dynamic_cast<TH1*>(getFunction()->getTemplate(i)->getHisto()->Clone(appendToNameString<int>(0).c_str())));
+      m_inputHistos.push_back(dynamic_cast<TH1*>(getFunction()->getTemplate(i)->getHisto()->Clone(appendToNameString<int>(i).c_str())));
     }
     m_dataHisto = dynamic_cast<TH1*>(getFunction()->getData()->getHisto()->Clone(appendToNameString<std::string>("_data").c_str()));
   }

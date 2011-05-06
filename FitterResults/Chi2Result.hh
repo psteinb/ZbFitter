@@ -5,7 +5,8 @@
 #include "TObject.h"
 #include <string>
 #include <sstream>
-
+#include "TH1D.h"
+#include "functions/AbsFittingFunction.hh"
 namespace FitterResults {
 
 
@@ -21,8 +22,44 @@ private:
   int m_verbosity;
   std::string m_filename;
   std::string m_filenameCore;
+  std::vector<TH1*> m_inputHistos;
+  TH1* m_dataHisto;
+  int m_numOfParameters;
+  double m_chi2;
+  int m_ndf;
 
 
+  void cleanUp(){
+    // for (int i = 0; i < m_inputHistos.size(); ++i)
+    // {
+    //   if(m_inputHistos[i])
+    //     delete m_inputHistos[i];
+    // }
+    m_inputHistos.clear();
+    delete m_dataHisto;m_dataHisto=0;
+  }
+
+  void setupParameters(){
+    m_numOfParameters = getMinimizer()->NDim();
+    cleanUp();
+    m_inputHistos.reserve(m_numOfParameters);
+  }
+  
+  void setupInputHistos(){
+    for (int i = 0; i < m_numOfParameters; ++i)
+    {
+      m_inputHistos.push_back(dynamic_cast<TH1*>(getFunction()->getTemplate(i)->getHisto()->Clone(appendToNameString<int>(i).c_str())));
+    }
+    m_dataHisto = dynamic_cast<TH1*>(getFunction()->getData()->getHisto()->Clone(appendToNameString<std::string>("_data").c_str()));
+  }
+  
+  template<typename T>
+  std::string appendToNameString(const T& _value){
+    std::ostringstream text;
+    text.str(m_filename);
+    text << _value;
+    return text.str();
+  }
 
 public:
 
@@ -57,16 +94,6 @@ public:
 
   virtual void print ( );
 
-  template<typename T>
-  std::string appendToNameString(const T& _value){
-    std::ostringstream text;
-    text.str(m_filenameCore);
-    text << _value;
-    return text.str();
-  }
-
-  
-  
 
 
   void setFileName(const std::string& _name){
@@ -76,6 +103,11 @@ public:
     else
       m_filenameCore = m_filename;
   }
+
+  void getResult(double& _chi2,double& _ndf){
+    _chi2 = m_chi2;
+    _ndf = m_ndf;
+  };
 };
 }; // end of package namespace
 

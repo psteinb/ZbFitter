@@ -26,7 +26,8 @@ private:
   std::string m_resource;
   TFile* m_rscFile;
   TH1* m_maxLLH;
-  double m_llh;
+  double m_pValue       ;
+  double m_pValueError  ;
 
 public:
 
@@ -48,7 +49,8 @@ public:
     m_resource(_rsc),
     m_rscFile(TFile::Open(_rsc.c_str())),
     m_maxLLH(0),
-    m_llh(0.)
+    m_pValue(0.),       
+    m_pValueError(0.)  
   {
     m_maxLLH = dynamic_cast<TH1*>(m_rscFile->Get("maxllh")) ;  
   };
@@ -74,7 +76,6 @@ public:
     m_maxLLH = dynamic_cast<TH1*>(m_rscFile->Get("maxllh")) ;  
   };
   
-  void setLLH(const double& _value=0.){m_llh=_value;};
 
   void integrationBoundsForMaxLLH(const double& _value, int& _low, int& _high){
     int maxBin = m_maxLLH->GetMaximumBin();
@@ -83,7 +84,14 @@ public:
     _low = maxBin - diff;
     _high = maxBin + diff;
   };
-  // void printTGraphVector(const std::vector<TGraph*>&);
+
+  void calculate();
+
+  void getResult(double& _value, double& _error){
+    _value = m_pValue;
+    _value = m_pValueError;
+  };
+
 };
 }; // end of package namespace
 

@@ -33,7 +33,10 @@ void FitterResults::HistoResult::print(){
     name += ".root";
   newFile = new TFile(name.c_str(),"RECREATE");
   
+  //set directory for all TObjects
   joinHistosToFile(newFile);
+  
+  //scale the input files
   treatInputHistosForResult();
   
   THStack newStack(appendToNameString<std::string>("_stack").c_str(),"");
@@ -46,11 +49,14 @@ void FitterResults::HistoResult::print(){
   myC.Clear();
   myC.Draw();
   myC.Divide(m_numOfParameters,2);
+
+  //---------------- DATA and fitted MC histos ---------------- 
   myC.cd(1);
   newStack.SetMaximum(1.5*newStack.GetMaximum());
   newStack.Draw("BAR");
   m_dataHisto->SetMarkerSize(1.5*m_dataHisto->GetMarkerSize());
   m_dataHisto->SetMarkerStyle(8);
+  m_dataHisto->SetStats(0);
   m_dataHisto->Draw("e1same");
   TLegend leg(0.6,0.7,0.92,0.92);
   leg.AddEntry(m_dataHisto,"data","lep");
@@ -62,6 +68,7 @@ void FitterResults::HistoResult::print(){
   leg.SetLineColor(kWhite);
   leg.Draw();
 
+  //---------------- RESUTLS ---------------- 
   myC.cd(2);
   TPaveText mtext(0.2,0.2,.9,.9,"ARC");
   for (int i = 0; i < m_numOfParameters; ++i)
@@ -69,14 +76,16 @@ void FitterResults::HistoResult::print(){
     mtext.AddText(getParameterResult(i,1.).c_str());
   }
   mtext.Draw();
-  myC.cd(3);
-  m_dataHisto->Draw();
-  
+  // myC.cd(3);
+  // m_dataHisto->Draw();
+
+  //---------------- TEMPLATES USED ---------------- 
   int CanvasTot = m_numOfParameters*2;
   int CanvasIdx = CanvasTot-m_numOfParameters+1;
   for (int i = 0; i < (m_numOfParameters); ++i,CanvasIdx++)
   {
     myC.cd(CanvasIdx);
+    m_inputHistos[i]->Scale(1/m_inputHistos[i]->Integral());
     m_inputHistos[i]->Draw();
   }
     
