@@ -19,7 +19,7 @@ functions::BinnedEML::~BinnedEML( ) { }
 
 double functions::BinnedEML::getLogTerm(const short& _bin){
 
-  double binWidth = m_templates.at(0).getHisto()->GetBinWidth(1);
+  //double binWidth = m_templates.at(0).getHisto()->GetBinWidth(1);
   double value =0;  
 
   for (short i=0; i < this->getNumberOfParameters(); ++i)

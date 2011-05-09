@@ -389,10 +389,18 @@ public:
 
     int status = 0;
     int nNon0Status = 0;
+    int nMinosFailed = 0;
 
     double totalData = 1;
     double totalSmearedData = 1;
     double expectationScale =1.;
+
+    double expError=0.;
+    double expValue=0.;
+    double fitError=0.;
+    double fitValue=0.;
+    double pullSigma=0.;
+    
     for (int i = 0; i < (m_iterations); ++i)
     {
       //flush the name
@@ -472,21 +480,37 @@ public:
         for (int i = 0; i < m_templateTH1s.size(); ++i)
         {
           m_fitValues[i] = aFitter.getMinimizer()->X()[i];
+          fitError = aFitter.getMinimizer()->Errors()[i];
           m_means[i].Fill(m_fitValues[i]);
 
-          if(TMath::Abs(m_fitErrorsStatus.at(i))<10)
+          expError = m_expectedErrors[i];
+          expValue = m_expectedValues[i];
+
+          if(TMath::Abs(m_fitErrorsStatus.at(i))<10){
             m_sigmas[i].Fill(TMath::Abs(std::max(TMath::Abs(m_fitErrorsDown[i]),m_fitErrorsUp[i])));
+            
+          if(m_fitValues[i]>(expValue))
+            pullSigma  = TMath::Sqrt((m_fitErrorsDown[i]*m_fitErrorsDown[i]) - (expError*expError));
+          else
+            pullSigma = TMath::Sqrt((m_fitErrorsUp[i]*m_fitErrorsUp[i]) - (expError*expError));
+
+          }
           else{
-            m_sigmas[i].Fill(aFitter.getMinimizer()->Errors()[i]);
+            nMinosFailed++;
+            m_sigmas[i].Fill(fitError);
+            pullSigma = TMath::Sqrt((fitError*fitError) - (expError*expError));
           }
 
-          if(m_fitValues[i]>(expectationScale*m_expectedValues[i]))
-            pullSigma  = TMath::Abs(m_fitErrorsDown[i]);
-          else
-            pullSigma = TMath::Abs(m_fitErrorsUp[i]);
+          // if(m_fitValues[i]>(expectationScale*m_expectedValues[i]))
+          //   pullSigma  = TMath::Abs(m_fitErrorsDown[i]);
+          // else
+          //   pullSigma = TMath::Abs(m_fitErrorsUp[i]);
+          
+          
 
-          pullValues[i] = (m_fitValues[i] - (expectationScale*m_expectedValues[i]))/(pullSigma);
-          MigradPullValues[i] = (m_fitValues[i] - (expectationScale*m_expectedValues[i]))/(pullSigma);
+
+          pullValues[i] = (m_fitValues[i] - (expValue))/(pullSigma);
+          MigradPullValues[i] = (m_fitValues[i] - (m_expectedValues[i]))/(pullSigma);
 
           // std::cout << "fit results: "<< totalSmearedData <<" (" <<totalData <<")\n"
           //           << i << ": (fit)\t" << m_fitValues[i] << " +/- " << pullSigma << " (Migrad: "<< aFitter.getMinimizer()->Errors()[i] <<")\n"
@@ -509,6 +533,7 @@ public:
     }
     double irregulars = (nNon0Status/double(m_iterations))*100;
     std::cout << nNon0Status<< "/" <<m_iterations << " = ("<< std::setprecision(2) <<irregulars <<" %) were irregular!\n";
+    std::cout << nMinosFailed<< "/" <<m_iterations*m_templateTH1s.size() << " = ("<< std::setprecision(2) <<irregulars <<" %) where Minos failed!\n";
 
     delete termResult;termResult=0;
     delete histoResult;histoResult=0;
