@@ -28,6 +28,7 @@
 #include "TArrow.h"
 #include "TPad.h"
 #include "TPaveStats.h"
+#include "TSystem.h"
 
 #include "AtlasStyle.h"
 
@@ -407,38 +408,48 @@ int main(int argc, char* argv[])
   std::ostringstream expValueString;
   TPaveText expValue;
   expValue.SetTextColor(kBlue);
-  // expValue.SetBorderSize(0.1);
+  expValue.SetBorderSize(0.1);
   expValue.SetFillColor(kWhite);
+
+  TVirtualPad* currentPadPtr = 0;
+  double ArrowXNDC = 0.;
   for (int i = 0; i < m_results.size(); ++i,padStart+=3)
   {
     expValueString.str("");
-    expValueString << (scaleExpectation*expected[i]) << " +/- " << (scaleExpectation*expectedErrors[i]);
+    expValueString <</* "expected:\t"<<*/ (scaleExpectation*expected[i]) << " #pm " << (scaleExpectation*expectedErrors[i]);
     for (int pad = 0; pad < 3; ++pad)
     {
       currentPad= pad + padStart;
-      myResults.cd(currentPad);
+      currentPadPtr = myResults.cd(currentPad);
       expValue.Clear();
-      m_results[i][pad]->Draw();
+      m_results[i][pad]->SetMaximum(1.4*m_results[i][pad]->GetMaximum());
+      m_results[i][pad]->Draw("");
       if(pad<1){
         myResults.Update();
+        ArrowXNDC = (gPad->XtoPad(scaleExpectation*expected[i]) - gPad->GetUxmin())/(gPad->GetUxmax() - gPad->GetUxmin());
+        if(ArrowXNDC<.5)
+          expValue.SetX1NDC(.5);
+        else
+          expValue.SetX1NDC(.17);
+
+        expValue.SetY1NDC(1-aStyle->GetStatH()-.17);
+        expValue.SetX2NDC(expValue.GetX1NDC()+.33);
+        expValue.SetY2NDC(expValue.GetY1NDC()+.1);
+
+
+        expValue.AddText(expValueString.str().c_str());
+        expValue.Print();
+        expValue.DrawClone();
+        
         anArrow.DrawArrow(gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymin(),
                           gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymax(),0.03,"<|");
-        //        myResults.Update();
-        expValue.SetX1NDC(gPad->GetXlowNDC()+(0.5*gPad->GetWNDC()));
-        expValue.SetY1NDC(gPad->GetYlowNDC()+ (1.4*gPad->GetHNDC()));
-        expValue.SetX2NDC(gPad->GetXlowNDC()+(1.5*gPad->GetWNDC()));
-        expValue.SetY2NDC(gPad->GetYlowNDC()+ (1.6*gPad->GetHNDC()));
-        expValue.AddText(expValueString.str().c_str());
-        //std::cout << expValueString.str().c_str() << std::endl;
-        //expValue.Draw();
       }
-      //myResults.Update();
     }
   }
   myResults.Update();
   myResults.Print(".eps");
 
-    // ----- DRAW SIGMA RESULTS IN ONE PAD ----- 
+    // ----- DRAW MEAN RESULTS IN ONE PAD ----- 
   std::string name = conf.p_outputfile;
   name += "_means";
   TCanvas MeanCanvas(name.c_str(),"",3000,1000);
@@ -449,11 +460,27 @@ int main(int argc, char* argv[])
   for (int i = 0; i < m_results.size(); ++i,pad++)
   {
     MeanCanvas.cd(pad);
-    // if(i<1){
+    expValue.Clear();
+    expValueString.str("");
+    expValueString <</* "expected:\t"<<*/ (scaleExpectation*expected[i]) << " #pm " << (scaleExpectation*expectedErrors[i]);
     m_results[i][0]->Draw();
-      MeanCanvas.Update();
-      anArrow.DrawArrow(gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymin(),
-                        gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymax(),0.03,"<|");
+    MeanCanvas.Update();
+    ArrowXNDC = (gPad->XtoPad(scaleExpectation*expected[i]) - gPad->GetUxmin())/(gPad->GetUxmax() - gPad->GetUxmin());
+    if(ArrowXNDC<.5)
+      expValue.SetX1NDC(.5);
+    else
+      expValue.SetX1NDC(.17);
+    
+    expValue.SetY1NDC(1-aStyle->GetStatH()-.17);
+    expValue.SetX2NDC(expValue.GetX1NDC()+.33);
+    expValue.SetY2NDC(expValue.GetY1NDC()+.1);
+
+
+    expValue.AddText(expValueString.str().c_str());
+    expValue.Print();
+    expValue.DrawClone();
+    anArrow.DrawArrow(gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymin(),
+                      gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymax(),0.03,"<|");
     // }
     
     
@@ -469,20 +496,13 @@ int main(int argc, char* argv[])
   PullCanvas.Draw();
   PullCanvas.Divide(m_templates.size(),1);
   pad=1;
-  TPaveStats *stats=0;
+
   
   for (int i = 0; i < m_results.size(); ++i,pad++)
   {
     PullCanvas.cd(pad);
     m_results[i][2]->Draw();
     PullCanvas.Update();
-    stats = (TPaveStats*)m_results[i][2]->FindObject("stats");
-    if(stats){
-      stats->SetY2(gPad->GetUymax());
-      stats->SetY1(gPad->GetUymax()*.75);
-      stats->SetX2(gPad->GetUxmax());
-      stats->SetX1(gPad->GetUxmin()*.25);
-    }
   }
   PullCanvas.Update();
   PullCanvas.Print(".eps");
