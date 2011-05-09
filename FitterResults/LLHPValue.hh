@@ -52,7 +52,10 @@ public:
     m_pValue(0.),       
     m_pValueError(0.)  
   {
-    m_maxLLH = dynamic_cast<TH1*>(m_rscFile->Get("maxllh")) ;  
+    if(!m_rscFile->IsZombie()){
+      m_maxLLH = dynamic_cast<TH1*>(m_rscFile->Get("maxLLH")) ;  
+      m_maxLLH -> Scale(1/m_maxLLH->Integral());
+    }
   };
 
   /**
@@ -73,7 +76,10 @@ public:
     if(!m_rscFile->IsZombie())
       m_rscFile->Close();
     m_rscFile = TFile::Open(_rsc.c_str());
-    m_maxLLH = dynamic_cast<TH1*>(m_rscFile->Get("maxllh")) ;  
+    if(!m_rscFile->IsZombie()){
+      m_maxLLH = dynamic_cast<TH1*>(m_rscFile->Get("maxllh")) ;  
+      m_maxLLH -> Scale(1/m_maxLLH->Integral());
+    }
   };
   
 

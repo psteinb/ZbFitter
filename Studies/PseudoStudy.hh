@@ -194,7 +194,7 @@ public:
     m_templateTH1s(_templates.size(),0),
     m_total(0),
     m_resultTH1s(),
-    m_maxLLH(new TH1D("maxLLH",";max(logLH);N",100,-100,0)),
+    m_maxLLH(new TH1D("maxLLH",";max(logLH);N",200,-400,0)),
     m_threads(_thr),
     m_iterations(_iters),
     m_TRand3(),
@@ -219,8 +219,6 @@ public:
       name += "_pseudo";
       m_templateTH1s[i] = dynamic_cast<TH1*>(_templates.at(i)->Clone(name.c_str()));
     }
-
-    //m_maxLLH->SetBit(TH1::kCanRebin);
 
     setupTotalTemplates();
     
@@ -463,7 +461,7 @@ public:
       else{
         name << "_success";
         preparePlots(name.str(),histoResult,llhResult);
-        if(i % 500 == 0 ){
+        if(i % 5000 == 0 ){
           aFitter.printTo(histoResult);
           aFitter.printTo(llhResult);
         }

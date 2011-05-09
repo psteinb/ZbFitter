@@ -17,6 +17,7 @@
 #include "FitterInputs/NormalisationFunctors.hh"
 #include "FitterResults/HistoResult.hh"
 #include "FitterResults/LLHResult.hh"
+#include "FitterResults/LLHPValue.hh"
 #include "FitterResults/Chi2Result.hh"
 #include "functions/BinnedEML.hh"
 #include "AtlasStyle.h"
@@ -34,6 +35,7 @@ public:
   std::string p_configFile;
   std::string p_fitEngine;
   std::string p_fitMode  ;
+  std::string p_rscFile  ;
 
   std::string p_dataTitle  ;
   std::string p_tempTitle  ;
@@ -60,6 +62,7 @@ RunnerConfig::RunnerConfig():
   p_configFile(""),
   p_fitEngine("Minuit2"),
   p_fitMode  ("Scan"),
+  p_rscFile  (""),
   p_dataTitle("data"),
   p_tempTitle("mcb,mcc,mcl"),
   p_msgLevel(3),
@@ -76,6 +79,7 @@ RunnerConfig::RunnerConfig(int inArgc, char** inArgv):
   p_configFile(""),
   p_fitEngine("Minuit2"),
   p_fitMode  ("Scan"),
+  p_rscFile  (""),
   p_dataTitle("data"),
   p_tempTitle("mcb,mcc,mcl"),
   p_msgLevel(3),
@@ -92,7 +96,7 @@ void RunnerConfig::parse(){
 
 
   int opt = 0;
-  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:r:E:M:D:T:h" ))!=-1 ){
+  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:r:E:M:D:P:T:h" ))!=-1 ){
     std::istringstream instream;
     std::ostringstream outstream;
     size_t found;
@@ -119,6 +123,10 @@ void RunnerConfig::parse(){
     case 'M':
       p_fitMode = std::string(optarg);
       break;
+    case 'P':
+      p_rscFile = std::string(optarg);
+      break;
+
     case 'm':
       instream.str(optarg);
       if( !(instream >> meta) ){
@@ -183,6 +191,7 @@ void RunnerConfig::printHelp(){
   std::cout << "\t -r <Count> Rebin Count to call on input histos " << std::endl;
   std::cout << "\t -E <TMinuitEngine> define fit engine" << std::endl;
   std::cout << "\t -M <TMinuitMode> define fit mode" << std::endl;
+  std::cout << "\t -P <rscFile location> file to read maxLLH for PValue from" << std::endl;
   std::cout << "\t -D <ObjectName> define data object to retrieve from root file" << std::endl;
   std::cout << "\t -T <ObjectName> define template (+systematics) object(s) to retrieve from root file" << std::endl;
   std::cout << "\t -h print this help" << std::endl;
@@ -202,6 +211,7 @@ void RunnerConfig::printConf(){
   std::cout << "[-t] N(threads) = "<< p_threads << std::endl;
   std::cout << "[-E] fitEngine = "<< p_fitEngine << std::endl;
   std::cout << "[-M] fitMode = "<< p_fitMode << std::endl;
+  std::cout << "[-P] rscFile = "<< p_rscFile << std::endl;
   std::cout << "[-r] rebin = "<< p_rebin << std::endl;
   std::cout << "[-D] dataTitle = "<< p_dataTitle << std::endl;
   std::cout << "[-T] tempTitle = "<< p_tempTitle << std::endl;
@@ -260,6 +270,7 @@ int main(int argc, char* argv[])
   name = conf.p_outputfile;
   name += "_LLH";
   FitterResults::AbsResult* lresult = new FitterResults::LLHResult(0,conf.p_msgLevel,name);
+  FitterResults::AbsResult* presult = new FitterResults::LLHPValue(0,conf.p_msgLevel,name,conf.p_rscFile);
 
   // ----- FitterCore ------
   core::FitCore<functions::BinnedEML,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>,FitterResults::AbsResult> fitter(input);
@@ -278,6 +289,8 @@ int main(int argc, char* argv[])
     fitter.fit(false);
   
   fitter.printTo(hresult);
+  if(conf.p_rscFile.size())
+    fitter.printTo(presult);
 
   //clean-up
   delete lresult;
