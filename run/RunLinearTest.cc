@@ -224,7 +224,7 @@ public:
 
     for (size_t i = _range.begin(); i < _range.end(); ++i)
     {
-      std::cout << ">>>"<< __FILE__ << ":" << __LINE__ << "\t do work\n";
+      std::cout << ">>>"<< __FILE__ << ":" << __LINE__ << "\t do work "<< i <<"\n";
       try{
         metaWorkers.at(i).experiment();
       }

@@ -138,6 +138,16 @@ void ConfLinearTest::parse(){
         p_nIter = meta;
       }
       break;
+    case 't':
+      instream.str(optarg);
+      if( !(instream >> meta) ){
+        std::cerr << "RunFitter \t invalid argument format for [-t]" << std::endl;
+        p_threads = 1;
+      }
+      else{
+        p_threads = meta;
+      }
+      break;
 
     case 's':
       instream.str(optarg);
@@ -177,6 +187,7 @@ void ConfLinearTest::printHelp(){
   std::cout << "\t -c <bar.env> set TEnv style config file" << std::endl;
   std::cout << "\t -m set message level (0=VERBOSE,..,2=INFO,..,5=ERROR)" << std::endl;
   std::cout << "\t -t <num> number of threads to use " << std::endl;
+  std::cout << "\t -i <num> number of iteratios per step " << std::endl;
   std::cout << "\t -r <Count> Rebin Count to call on input histos " << std::endl;
   std::cout << "\t -E <TMinuitEngine> define fit engine" << std::endl;
   std::cout << "\t -M <TMinuitMode> define fit mode" << std::endl;
@@ -201,6 +212,7 @@ void ConfLinearTest::printConf(){
   std::cout << "[-E] fitEngine = "<< p_fitEngine << std::endl;
   std::cout << "[-M] fitMode = "<< p_fitMode << std::endl;
   std::cout << "[-r] rebin = "<< p_rebin << std::endl;
+  std::cout << "[-i] iter = "<< p_nIter << std::endl;
   std::cout << "[-D] dataTitle = "<< p_dataTitle << std::endl;
   std::cout << "[-T] tempTitle = "<< p_tempTitle << std::endl;
   std::cout << "[-s] stepSize = "<< p_stepsize << std::endl;
