@@ -100,5 +100,10 @@ void core::MinimizerConfiguration::configureMinimizer(ROOT::Math::Minimizer* _mi
       continue;
     }
     
+    if(!(itItr->lowConstrain) && !(itItr->highConstrain)){
+      _minim->SetVariable(i,itItr->Name,itItr->Start,itItr->Step);
+      // std::cout << "setting "<<i<<" high constrained\n" ;
+      continue;
+    }
   }
 }

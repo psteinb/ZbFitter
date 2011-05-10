@@ -22,20 +22,16 @@ double functions::BinnedEMLFraction::getLogTerm(const short& _bin,const double& 
   //double binWidth = m_templates.at(0).getHisto()->GetBinWidth(1);
   double value =0;  
 
-  for (short i=0; i < this->getNumberOfParameters()-1; ++i)
+  for (short i=0; i < this->getNumberOfParameters()/*-1*/; ++i)
   {
 
     value+=((getParameterValue(i))*(m_templates.at(i).getContent()->at(_bin))*_totalExpect);
 
   }
 
-  double last = std::accumulate(getParameters()->begin(), 
-                                getParameters()->begin()+this->getNumberOfParameters()-1,
-                                1.,
-                                std::minus<double>());
 
-  value+=((last)*(m_templates.at(this->getNumberOfParameters()-1).getContent()->at(_bin))*_totalExpect);
-
+  //  value+=((last)*(m_templates.at(this->getNumberOfParameters()-1).getContent()->at(_bin))*_totalExpect);
+  
   if(value)
     return std::log(value);
   else
@@ -47,8 +43,18 @@ double functions::BinnedEMLFraction::operator()(const double* _values ){
   
 
   
-  setParameters(_values);
+  double meta[this->getNumberOfParameters()];
+  std::copy(_values, 
+            _values+this->getNumberOfParameters(),
+            meta);
+
+  double lastParameter = std::accumulate(_values, 
+                                         _values+this->getNumberOfParameters()-1,
+                                         1.,
+                                         std::minus<double>());
+  meta[this->getNumberOfParameters()-1] = lastParameter;
   
+  setParameters(meta);
 
   double sumOfParameters = std::accumulate(getParameters()->begin(), 
 					   getParameters()->end(),
@@ -58,8 +64,8 @@ double functions::BinnedEMLFraction::operator()(const double* _values ){
   for (int i = 0; i < m_templates.size(); ++i)
   {
     totPrediction += std::accumulate(m_templates.at(i).getContent()->begin(), 
-                                    m_templates.at(i).getContent()->end(),
-                                    0.);
+                                     m_templates.at(i).getContent()->end(),
+                                     0.);
   }
   
 

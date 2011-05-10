@@ -438,7 +438,6 @@ int main(int argc, char* argv[])
 
 
         expValue.AddText(expValueString.str().c_str());
-        expValue.Print();
         expValue.DrawClone();
         
         anArrow.DrawArrow(gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymin(),
@@ -477,7 +476,7 @@ int main(int argc, char* argv[])
 
 
     expValue.AddText(expValueString.str().c_str());
-    expValue.Print();
+
     expValue.DrawClone();
     anArrow.DrawArrow(gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymin(),
                       gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymax(),0.03,"<|");
