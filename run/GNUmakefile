@@ -1,7 +1,7 @@
 PACKAGE = FitRunner
 
-CXXFLAGS=-I$(SRC) -I$(HOME)/bin/atlasstyle-trunk -I$(TBB_INC) 
+CXXFLAGS=-I$(SRC) -I$(HOME)/bin/atlasstyle-trunk #-I$(TBB_INC) 
 
-BINLINKFLAGS = -L$(LIBDIR) -I$(TBB_INC) -L$(TBB_LIB) -lTcore -lTfunctions -lTFitterInputs -lTFitterResults 
+BINLINKFLAGS = -L$(LIBDIR) -lTcore -lTfunctions -lTFitterInputs -lTFitterResults -ltbb #-I$(TBB_INC) #-L$(TBB_LIB)
 
 include $(SRC)/GNUmakefiles/GNUmakefile

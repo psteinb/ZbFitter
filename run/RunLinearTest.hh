@@ -85,31 +85,29 @@ public:
 class ExperimentPerformer
 {
   ConfLinearTest m_configuration;
+  double m_scale;
 
 public:
-  std::vector<std::vector<double> > m_means;
-  std::vector<std::vector<double> > m_sigmas;
+  std::vector<double> m_means;
+  std::vector<double> m_sigmas;
 
-  ExperimentPerformer( const ConfLinearTest& _configuration, const int& iters=0):
-    m_means(iters),
-    m_sigmas(iters),
-    m_configuration(_configuration)
+  ExperimentPerformer( const ConfLinearTest& _configuration, const double& _scale=1.):
+    m_means(),
+    m_sigmas(),
+    m_configuration(_configuration),
+    m_scale(_scale)
   {
-    for (int i = 0; i < iters; ++i)
-    {
-      m_means[i].reserve(3);
-      m_sigmas[i].reserve(3);
-    }
   };
 
   ExperimentPerformer( const ExperimentPerformer& _other):
     m_means(_other.m_means),
     m_sigmas(_other.m_sigmas),
-    m_configuration(_other.m_configuration)
+    m_configuration(_other.m_configuration),
+    m_scale(_other.m_scale)
   {};
   virtual ~ExperimentPerformer(){};
 
-  void operator()(const tbb::blocked_range<double>& ) const ;
+  void experiment()  ;
 
 };
 

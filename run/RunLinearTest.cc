@@ -18,6 +18,7 @@
 
 //TBB
 #include "tbb/parallel_for.h"
+#include "tbb/blocked_range.h"
 
 //ROOT
 #include "TROOT.h"
@@ -132,13 +133,22 @@
 //   aPseudoStudy.experiment();
 
 // }
-void ExperimentPerformer::operator()(const tbb::blocked_range<double>& _range ) const{
+// void ExperimentPerformer::operator()(const tbb::blocked_range<double>& _range )  {
   
-  tbb::blocked_range<double>::const_iterator rItr = _range.begin();
-  tbb::blocked_range<double>::const_iterator rEnd = _range.end();
-  for (;rItr!=rEnd; ++rItr)
-  {
-    scaleMCValue0 aScaler((*rItr));
+//   tbb::blocked_range<double>::const_iterator rItr = _range.begin();
+//   tbb::blocked_range<double>::const_iterator rEnd = _range.end();
+
+  
+//   for (;rItr!=rEnd; ++rItr)
+//   {
+//     operator()(rItr);
+//   }
+
+// }
+
+void ExperimentPerformer::experiment( )  {
+  
+  scaleMCValue0 aScaler(m_scale);
      // ----- INPUT ----- 
   FitterInputs::NormedTH1<FitterInputs::Norm2Unity>* input = new FitterInputs::NormedTH1<FitterInputs::Norm2Unity>();
   input->loadData(m_configuration.p_datadir.c_str(),m_configuration.p_dataTitle.c_str(),m_configuration.p_rebin);
@@ -164,6 +174,7 @@ void ExperimentPerformer::operator()(const tbb::blocked_range<double>& _range ) 
                  m_configuration.p_nIter
                  );
 
+  aPseudoStudy.setProtoCreator(aScaler);
   aPseudoStudy.setInput(input);
   aPseudoStudy.setFitterConfigFile(m_configuration.p_configFile);
   aPseudoStudy.setFitEngine(m_configuration.p_fitEngine);
@@ -173,23 +184,59 @@ void ExperimentPerformer::operator()(const tbb::blocked_range<double>& _range ) 
   aPseudoStudy.experiment();
 
   std::vector<std::vector<TH1*> > m_results(m_templates.size());
-  std::vector<double> means(m_templates.size());
-  std::vector<double> sigmas(m_templates.size());
+  m_means.reserve(m_templates.size());
+  m_sigmas.reserve(m_templates.size());
   for (int i = 0; i < m_templates.size(); ++i)
   {
     aPseudoStudy.getResultsOfParameter(i,m_results[i]);
-    means.push_back(m_results[i][0]->GetMean());
-    sigmas.push_back(m_results[i][1]->GetMean());
+    this->m_means.push_back(m_results[i][0]->GetMean());
+    this->m_sigmas.push_back(m_results[i][1]->GetMean());
   }
-
-  this->m_means.push_back(means);
-  this->m_sigmas.push_back(sigmas);
 
   delete m_data;
   delete input;
-  }
+
 }
 
+class Conductor{
+
+  std::vector<ExperimentPerformer> m_workers;
+
+public:
+
+  Conductor(const Conductor& _rhs):
+    m_workers(_rhs.m_workers)
+  {}
+
+  Conductor(const std::vector<ExperimentPerformer>& _workers):
+    m_workers(_workers)
+  {}
+
+  // void operator()(const ExperimentPerformer& _performer){
+    
+  //   _performer.experiment();
+
+  // }
+
+  void operator()(const tbb::blocked_range<size_t>& _range) const {
+
+    std::vector<ExperimentPerformer> metaWorkers = m_workers;
+
+    for (size_t i = _range.begin(); i < _range.end(); ++i)
+    {
+      std::cout << ">>>"<< __FILE__ << ":" << __LINE__ << "\t do work\n";
+      try{
+        metaWorkers.at(i).experiment();
+      }
+      catch(std::exception& exc)
+      {
+        std::cout << "## index " << i << " worker does not exist\n ";
+      }
+    }
+    
+  }
+
+};
 
 int main(int argc, char* argv[])
 {
@@ -210,47 +257,53 @@ int main(int argc, char* argv[])
 
   int numCalls = int(2./conf.p_stepsize)-1;
 
+  //setup steps
   std::vector<double> steps(numCalls);
   std::generate(steps.begin(),steps.end(),StepValueGenerator(conf.p_stepsize));
 
+  //setup workers
+  std::vector<ExperimentPerformer> workers;
+  workers.reserve(steps.size());
+  for (int i = 0; i < steps.size(); ++i)
+  {
+    ExperimentPerformer meta(conf,steps.at(i));
+    workers.push_back(meta);
+  }
+
+  //do parallel job
   int grainsize = numCalls/conf.p_threads;
-  
-  ExperimentPerformer aPerformer(conf,numCalls);
-  tbb::blocked_range<double> runRange(conf.p_stepsize,2.,conf.p_stepsize);
+  tbb::blocked_range<size_t> runRange(0,steps.size(),grainsize);
   tbb::parallel_for(runRange,
-                    aPerformer
+                    Conductor(workers)
                     );
 
   TGraphErrors bGraph(numCalls);
   TGraphErrors cGraph(numCalls);
   TGraphErrors lGraph(numCalls);
-  tbb::blocked_range<double>::const_iterator rItr = runRange.begin();
-  tbb::blocked_range<double>::const_iterator rEnd = runRange.end();
+  std::vector<ExperimentPerformer>::const_iterator rItr = workers.begin();
+  std::vector<ExperimentPerformer>::const_iterator rEnd = workers.end();
   for (short idx = 0;rItr!=rEnd; ++rItr,idx++)
   {
     try{
-      bGraph.SetPoint(i+1,(*rItr),aPerformer.m_means.at(idx)[0]);
-      cGraph.SetPoint(i+1,(*rItr),aPerformer.m_means.at(idx)[1]);
-      lGraph.SetPoint(i+1,(*rItr),aPerformer.m_means.at(idx)[2]);
+      bGraph.SetPoint(idx+1,steps.at(idx),rItr->m_means.at(0));
+      // cGraph.SetPoint(idx+1,steps.at(idx),rItr->m_means.at(1));
+      // lGraph.SetPoint(idx+1,steps.at(idx),rItr->m_means.at(2));
     }
     catch(std::exception& ex){
       std::cerr << __FILE__ <<":" << __LINE__ << "\t"<<idx << " does not exist in aPerformer.m_means\n";
     }
     
     try{
-      bGraph.SetPointError(i+1,(conf.p_stepsize/2),aPerformer.m_sigmas.at(idx)[0]);
-      cGraph.SetPointError(i+1,(conf.p_stepsize/2),aPerformer.m_sigmas.at(idx)[1]);
-      lGraph.SetPointError(i+1,(conf.p_stepsize/2),aPerformer.m_sigmas.at(idx)[2]);
+      bGraph.SetPoint(idx+1,steps.at(idx),rItr->m_sigmas.at(0));
+      // cGraph.SetPoint(idx+1,steps.at(idx),rItr->m_sigmas.at(1));
+      // lGraph.SetPoint(idx+1,steps.at(idx),rItr->m_sigmas.at(2));
     }
     catch(std::exception& ex){
       std::cerr << __FILE__ <<":" << __LINE__ << "\t"<<idx << " does not exist in aPerformer.m_means\n";
     }
   }
 
-  TCanvas aCanvas("RunLinearTest","",800,600);
-  aCanvas.Clear();
-  aCanvas.Draw();
-  
+  bGraph.Print("all");
 
   return 0; 
    
