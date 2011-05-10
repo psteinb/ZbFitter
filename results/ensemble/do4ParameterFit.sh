@@ -1,0 +1,4 @@
+ RunPseudoExperiments.exe -M Migrad -d $SRC/AlpgenZeeJetVertexMassByFlav.root -c $SRC/results/ensemble/BinnedEML.4params.env -D "DataFixed" -T "MC_Signal_B,MC_Signal_C,MC_Signal_L,Top" -o UCL.15k_ee_4p -i 15000 -r 5 > UCL.15k_ee_4p.log 2>&1 &
+ RunPseudoExperiments.exe -M Migrad -d $SRC/AlpgenZmumuJetVertexMassByFlav.root -c $SRC/results/ensemble/BinnedEML.4params.env -D "DataFixed" -T "MC_Signal_B,MC_Signal_C,MC_Signal_L,Top" -o UCL.15k_mm_4p -i 15000 -r 5 > UCL.15k_mm_4p.log 2>&1 &
+ RunPseudoExperiments.exe -M Migrad -d $SRC/Saclay_mumu.root -c $SRC/results/ensemble/BinnedEML.4params.env -D "data" -T "mcb,mcc,mcl,ttbarScaled" -o Saclay.15k_mm_4p -i 15000 -r 5 > Saclay.15k_mm_4p.log 2>&1 &
+ RunPseudoExperiments.exe -M Migrad -d $SRC/Saclay_ee.root -c $SRC/results/ensemble/BinnedEML.4params.env -D "data" -T "mcb,mcc,mcl,ttbarScaled" -o Saclay.15k_ee_4p -i 15000 -r 5 > Saclay.15k_ee_4p.log 2>&1 &
