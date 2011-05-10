@@ -27,6 +27,7 @@ private:
   int m_numOfParameters;
   double m_chi2;
   int m_ndf;
+  double m_chi2prob;
 
 
   void cleanUp(){
@@ -36,7 +37,7 @@ private:
     //     delete m_inputHistos[i];
     // }
     m_inputHistos.clear();
-    delete m_dataHisto;m_dataHisto=0;
+    //    delete m_dataHisto;m_dataHisto=0;
   }
 
   void setupParameters(){
@@ -46,9 +47,12 @@ private:
   }
   
   void setupInputHistos(){
+    TH1* metaTemplate = 0;
     for (int i = 0; i < m_numOfParameters; ++i)
     {
-      m_inputHistos.push_back(dynamic_cast<TH1*>(getFunction()->getTemplate(i)->getHisto()->Clone(appendToNameString<int>(i).c_str())));
+      metaTemplate = dynamic_cast<TH1*>(getFunction()->getTemplate(i)->getHisto()->Clone(appendToNameString<int>(i).c_str()));
+      metaTemplate->Scale(1./metaTemplate->Integral());
+      m_inputHistos.push_back(metaTemplate);
     }
     m_dataHisto = dynamic_cast<TH1*>(getFunction()->getData()->getHisto()->Clone(appendToNameString<std::string>("_data").c_str()));
   }
@@ -93,8 +97,8 @@ public:
   
 
   virtual void print ( );
-
-
+  
+  virtual void calculate( );
 
   void setFileName(const std::string& _name){
     m_filename = _name;
@@ -104,9 +108,10 @@ public:
       m_filenameCore = m_filename;
   }
 
-  void getResult(double& _chi2,double& _ndf){
+  void getResult(double& _chi2,double& _ndf,double& _prob){
     _chi2 = m_chi2;
     _ndf = m_ndf;
+    _prob = m_chi2prob;
   };
 };
 }; // end of package namespace

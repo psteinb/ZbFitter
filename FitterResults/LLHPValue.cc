@@ -27,13 +27,13 @@ void FitterResults::LLHPValue::calculate(){
   integrationBoundsForMaxLLH(minValue,lowBound,highBound);
   
   double lowIntErr = 0;
-  double lowInt = m_maxLLH->IntegralAndError(0,lowBound,lowIntErr);
+  double lowInt = m_maxLLH->IntegralAndError(m_maxLLH->GetXaxis()->GetFirst(),lowBound,lowIntErr);
   
   double highIntErr = 0;
   double highInt = m_maxLLH->IntegralAndError(highBound,m_maxLLH->GetXaxis()->GetLast(),highIntErr);
 
-  m_pValue = highInt + lowInt;
-  m_pValueError = TMath::Sqrt((lowIntErr*lowIntErr) + (highIntErr*highIntErr));
+  m_pValue = (highInt + lowInt)/m_maxLLH->Integral();
+  m_pValueError = TMath::Sqrt((lowIntErr*lowIntErr) + (highIntErr*highIntErr))/m_maxLLH->Integral();
 
   //std::cout << "pValue Analysis\n\tp: "<<m_pValue << " +/- " << m_pValueError << std::endl;
 }

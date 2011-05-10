@@ -40,11 +40,20 @@ void FitterResults::HistoResult::print(){
   treatInputHistosForResult();
   
   THStack newStack(appendToNameString<std::string>("_stack").c_str(),"");
+  TH1* sumOfTemplates = dynamic_cast<TH1*>(m_inputHistos[0]->Clone("sumOfTemplates")); 
+  sumOfTemplates->Reset("MICE");
+  sumOfTemplates->ResetStats();
+
   for (int i = 0; i < m_numOfParameters; ++i)
   {
     newStack.Add(m_inputHistos[i]);
+    sumOfTemplates->Add(m_inputHistos[i]);
   }
-  
+
+  //---------------- Make a modified Pearsons Chi2 Test ---------------- 
+  sumOfTemplates->Chi2Test(m_dataHisto,"WUP");
+
+
   TCanvas myC(m_filename.c_str(),"",2400,1200);
   myC.Clear();
   myC.Draw();

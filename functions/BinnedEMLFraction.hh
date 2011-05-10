@@ -1,5 +1,5 @@
-#ifndef BINNEDEML_H
-#define BINNEDEML_H
+#ifndef BINNEDEMLFRACTION_H
+#define BINNEDEMLFRACTION_H
 #include "functions/AbsFittingFunction.hh"
 
 

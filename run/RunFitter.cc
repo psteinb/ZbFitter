@@ -20,6 +20,7 @@
 #include "FitterResults/LLHPValue.hh"
 #include "FitterResults/Chi2Result.hh"
 #include "functions/BinnedEML.hh"
+#include "functions/BinnedEMLFraction.hh"
 #include "AtlasStyle.h"
 //small class
 class RunnerConfig {
@@ -259,8 +260,7 @@ int main(int argc, char* argv[])
     m_data->Print("all");
     delete m_data;
   }
-  // ----- Templates ----- 
-  functions::BinnedEML fcn;
+
   
   // ----- Results ------
   //FIXME: create different names for both outputs!
@@ -271,9 +271,15 @@ int main(int argc, char* argv[])
   name += "_LLH";
   FitterResults::AbsResult* lresult = new FitterResults::LLHResult(0,conf.p_msgLevel,name);
   FitterResults::AbsResult* presult = new FitterResults::LLHPValue(0,conf.p_msgLevel,name,conf.p_rscFile);
+  FitterResults::AbsResult* chi2result = new FitterResults::Chi2Result(0,conf.p_msgLevel,name);
 
   // ----- FitterCore ------
+  #ifdef __FRACTIONS__
+  core::FitCore<functions::BinnedEMLFraction,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>,FitterResults::AbsResult> fitter(input);
+  #else
   core::FitCore<functions::BinnedEML,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>,FitterResults::AbsResult> fitter(input);
+  #endif
+
   fitter.configureFromFile(conf.p_configFile);
   fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
   fitter.configureKeyWithValue("Mode",conf.p_fitMode);
@@ -291,7 +297,7 @@ int main(int argc, char* argv[])
   fitter.printTo(hresult);
   if(conf.p_rscFile.size())
     fitter.printTo(presult);
-
+  fitter.printTo(chi2result);
   //clean-up
   delete lresult;
   delete hresult;

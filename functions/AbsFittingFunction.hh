@@ -75,6 +75,17 @@ namespace functions {
       m_templates(),
       m_templatesSys()
     {};
+    
+     AbsFittingFunction( const AbsFittingFunction& _rhs):
+      m_parameters(_rhs.m_parameters),
+      m_parametersUp(_rhs.m_parametersUp),
+      m_parametersDown(_rhs.m_parametersDown),
+      m_nParameters(_rhs.m_nParameters),
+      m_input(_rhs.m_input),
+      m_data(_rhs.m_data),
+      m_templates(_rhs.m_templates),
+      m_templatesSys(_rhs.m_templatesSys)
+    {};
 
     virtual ~AbsFittingFunction(){};
 

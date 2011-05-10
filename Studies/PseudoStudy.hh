@@ -488,15 +488,15 @@ public:
             m_sigmas[i].Fill(TMath::Abs(std::max(TMath::Abs(m_fitErrorsDown[i]),m_fitErrorsUp[i])));
             
           if(m_fitValues[i]>(expValue))
-            pullSigma  = TMath::Sqrt((m_fitErrorsDown[i]*m_fitErrorsDown[i]) - (expError*expError));
+            pullSigma  = TMath::Abs(m_fitErrorsDown[i]);
           else
-            pullSigma = TMath::Sqrt((m_fitErrorsUp[i]*m_fitErrorsUp[i]) - (expError*expError));
+            pullSigma = TMath::Abs(m_fitErrorsUp[i]);
 
           }
           else{
             nMinosFailed++;
             m_sigmas[i].Fill(fitError);
-            pullSigma = TMath::Sqrt((fitError*fitError) - (expError*expError));
+            pullSigma = fitError;
           }
 
           // if(m_fitValues[i]>(expectationScale*m_expectedValues[i]))
@@ -508,7 +508,7 @@ public:
 
 
           pullValues[i] = (m_fitValues[i] - (expValue))/(pullSigma);
-          MigradPullValues[i] = (m_fitValues[i] - (m_expectedValues[i]))/(pullSigma);
+          MigradPullValues[i] = (m_fitValues[i] - (m_expectedValues[i]))/(fitError);
 
           // std::cout << "fit results: "<< totalSmearedData <<" (" <<totalData <<")\n"
           //           << i << ": (fit)\t" << m_fitValues[i] << " +/- " << pullSigma << " (Migrad: "<< aFitter.getMinimizer()->Errors()[i] <<")\n"
