@@ -484,7 +484,15 @@ public:
           expError = m_expectedErrors[i];
           expValue = m_expectedValues[i];
 
-          if(TMath::Abs(m_fitErrorsStatus.at(i))<10){
+          bool MinosSuccess = false;
+          try{
+            MinosSuccess = TMath::Abs(m_fitErrorsStatus.at(i))<10;
+          }
+          catch(std::exception& exc){
+            MinosSuccess = true;
+          }
+
+          if(MinosSuccess){
             m_sigmas[i].Fill(TMath::Abs(std::max(TMath::Abs(m_fitErrorsDown[i]),m_fitErrorsUp[i])));
             
           if(m_fitValues[i]>(expValue))

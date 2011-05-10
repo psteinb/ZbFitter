@@ -41,7 +41,7 @@ private:
   }
 
   void setupParameters(){
-    m_numOfParameters = getMinimizer()->NDim();
+    m_numOfParameters = std::max(getMinimizer()->NDim(),getMinimizer()->NFree());
     cleanUp();
     m_inputHistos.reserve(m_numOfParameters);
   }

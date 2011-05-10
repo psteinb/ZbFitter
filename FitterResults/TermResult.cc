@@ -15,7 +15,7 @@ void FitterResults::TermResult::print(){
 
   const double *xs = getMinimizer()->X();
   const double *xErrors = getMinimizer()->Errors();
-  int nParameters = getMinimizer()->NDim();
+  int nParameters = std::max(getMinimizer()->NFree(),getMinimizer()->NDim());
 
   double up=0.;
   double down=0.;
