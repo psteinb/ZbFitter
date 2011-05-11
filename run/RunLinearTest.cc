@@ -143,6 +143,35 @@
 //   }
 
 // }
+void ExperimentPerformer::createExpectedValuesFromTemplates(){
+
+  m_expected.clear();
+  m_expected.resize(m_templates.size(),0.);
+
+  std::vector<double> integrals(m_templates.size(),0.);
+  std::vector<double> errors(m_templates.size(),0.);
+  double total = 0.;
+  for (int i = 0; i < m_templates.size(); ++i)
+  {
+    integrals[i] = m_templates[i]->IntegralAndError(m_templates[i]->GetXaxis()->GetFirst(),
+                                                   m_templates[i]->GetXaxis()->GetLast(),
+                                                   errors[i]
+                                                   );
+    total += integrals[i];
+  }
+
+  double dataIntegral = m_data->Integral();
+
+  for (int i = 0; i < m_templates.size(); ++i)
+  {
+    if(i<1)
+      m_expected[i] = (integrals[i]/total)*dataIntegral*m_scale;
+    else
+      m_expected[i] = (integrals[i]/total)*dataIntegral;
+    std::cout << m_scale<< "x, expected value ["<<i <<"]\t"<<m_expected[i] <<std::endl;
+  }
+
+}
 
 void ExperimentPerformer::prepare( )  {
   // ----- INPUT ----- 
@@ -153,14 +182,7 @@ void ExperimentPerformer::prepare( )  {
   input->getTemplatesDeepCopy(m_templates);
   m_data =  input->getDataDeepCopy();
 
-  m_expected.resize(m_templates.size(),1.);
-  for (int i = 0; i < m_templates.size(); ++i)
-  {
-    if(i<1)
-      m_expected[i] = m_scale*m_templates[i]->Integral();
-    else
-      m_expected[i] = 1.*m_templates[i]->Integral();
-  }
+  this->createExpectedValuesFromTemplates();
 
   scaleMCByValue aScaler(m_scale);
   // dummy values here for they are only important for the pulls
@@ -281,6 +303,7 @@ void printResults(const std::vector<TGraphErrors*>& _results, const ConfLinearTe
   {
     aCanvas.cd(i);
     gStyle->SetOptFit(1112);
+    _results[i-1]->SetMaximum(1.75*(_results[i-1]->GetMaximum()));
     _results[i-1]->Draw("AP+");
     _results[i-1]->Fit(fitline,"R");
     // aCanvas.Update();
@@ -353,14 +376,14 @@ int main(int argc, char* argv[])
 
   for (short idx = 0;rItr!=rEnd; ++rItr,idx++)
   {
-   
+    (*rItr)->print();
     try{
       for (int i = 0; i < results.size(); ++i)
       {
         results.at(i)->SetPoint(idx+1,steps.at(idx),(*rItr)->m_means.at(i));
         resultsNormedY.at(i)->SetPoint(idx+1,steps.at(idx),(*rItr)->m_means.at(i));
-        if(!(steps.at(idx)!=1.))
-          unscaledValue[i] = (*rItr)->m_means.at(i);
+        // if(!(steps.at(idx)!=1.))
+        //   unscaledValue[i] = (*rItr)->m_means.at(i);
       }
     }
     catch(std::exception& ex){
@@ -388,6 +411,7 @@ int main(int argc, char* argv[])
      double yError = 0;
      double yValueRel = 0;
      double yErrorRel = 0;
+     double maxY = 0;
      for (int i = 1; i < (resultsNormedY[idx]->GetN()); ++i)
      {
        resultsNormedY[idx]->GetPoint(i,xValue,yValue);
@@ -399,7 +423,9 @@ int main(int argc, char* argv[])
 
        resultsNormedY[idx]->SetPoint(i,xValue,yValueRel);
        resultsNormedY[idx]->SetPointError(i,resultsNormedY[idx]->GetErrorX(i),yErrorRel);
+       maxY = std::max(yValueRel,maxY);
      }
+     resultsNormedY[idx]->SetMaximum(maxY);
    }
 
    printResults(resultsNormedY,conf,"_relLinear");

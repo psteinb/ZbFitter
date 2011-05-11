@@ -103,7 +103,7 @@ class ExperimentPerformer
   TH1* m_data;
   PseudoStudy<scaleMCByValue,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEML>*  m_PseudoStudy;
 
-
+  void createExpectedValuesFromTemplates();
 public:
   std::vector<double> m_means;
   std::vector<double> m_sigmas;
@@ -155,11 +155,30 @@ public:
   
   void print() const{
     std::cout << "ExperimentPerformer at "<<m_scale
-              << "\n\tfound means: " << m_means.size()
-              << "\n\tfound sigmas: " << m_sigmas.size() << "\n";
+              << "\n\tfound means: " << m_means.size() << "\n\t";
+    for (int i = 0; i < m_means.size(); ++i)
+    {
+      std::cout <<  m_means[i] << ", ";
+    }
+
+    std::cout <<  "\n"
+              << "\n\tfound sigmas: " << m_sigmas.size() << "\n\t";
+
+    for (int i = 0; i < m_sigmas.size(); ++i)
+    {
+      std::cout <<  m_sigmas[i] << ", ";
+    }
+    std::cout << "\nexpected values\n\t";
+    for (int i = 0; i < m_expected.size(); ++i)
+    {
+      std::cout <<  m_expected[i] << ", ";
+    }
+    std::cout <<  "\n";
   };
 
   void prepare();
+  
+
 };
 
 #endif
