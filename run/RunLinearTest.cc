@@ -181,6 +181,9 @@ void ExperimentPerformer::prepare( )  {
 
   input->getTemplatesDeepCopy(m_templates);
   m_data =  input->getDataDeepCopy();
+  if(m_configuration.p_dataScale!=1.)
+    m_data->Scale(m_configuration.p_dataScale);
+
 
   this->createExpectedValuesFromTemplates();
 
@@ -303,7 +306,8 @@ void printResults(const std::vector<TGraphErrors*>& _results, const ConfLinearTe
   {
     aCanvas.cd(i);
     gStyle->SetOptFit(1112);
-    _results[i-1]->SetMaximum(1.75*(_results[i-1]->GetMaximum()));
+    if(_results[i-1]->GetMaximum()>0)
+      _results[i-1]->SetMaximum(1.75*(_results[i-1]->GetMaximum()));
     _results[i-1]->Draw("AP+");
     _results[i-1]->Fit(fitline,"R");
     // aCanvas.Update();

@@ -26,6 +26,7 @@ public:
   int         p_nIter;
   bool        p_giveHelp;
   double      p_stepsize;
+  double      p_dataScale;
   
   ConfLinearTest():
   m_argc(0),m_argv(0),
@@ -41,7 +42,8 @@ public:
   p_rebin(1),
   p_nIter(1),
   p_giveHelp(false),
-  p_stepsize(.2)
+  p_stepsize(.2),
+  p_dataScale(1.)
 {};
 
   ConfLinearTest(int , char**);
@@ -67,7 +69,8 @@ ConfLinearTest::ConfLinearTest(int inArgc, char** inArgv):
   p_rebin(1),
   p_nIter(1),
   p_giveHelp(false),
-  p_stepsize(.2)
+  p_stepsize(.2),
+  p_dataScale(1.)
 {
 
   parse();
@@ -78,7 +81,7 @@ void ConfLinearTest::parse(){
 
 
   int opt = 0;
-  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:r:i:E:M:D:T:s:h" ))!=-1 ){
+  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:r:i:E:M:D:T:P:s:h" ))!=-1 ){
     std::istringstream instream;
     std::ostringstream outstream;
     size_t found;
@@ -148,6 +151,17 @@ void ConfLinearTest::parse(){
         p_threads = meta;
       }
       break;
+    case 'P':
+      instream.str(optarg);
+      if( !(instream >> dmeta) ){
+        std::cerr << "RunFitter \t invalid argument format for [-P]" << std::endl;
+        p_dataScale = 1;
+      }
+      else{
+        p_dataScale = dmeta;
+      }
+
+      break;
 
     case 's':
       instream.str(optarg);
@@ -192,6 +206,7 @@ void ConfLinearTest::printHelp(){
   std::cout << "\t -E <TMinuitEngine> define fit engine" << std::endl;
   std::cout << "\t -M <TMinuitMode> define fit mode" << std::endl;
   std::cout << "\t -D <ObjectName> define data object to retrieve from root file" << std::endl;
+  std::cout << "\t -P <scale> scale data per experiment by <scale>" << std::endl;
   std::cout << "\t -T <ObjectName> define template (+systematics) object(s) to retrieve from root file" << std::endl;
   std::cout << "\t -s <step size> define step size to go from 0 .. 1 of the b fraction" << std::endl;
   std::cout << "\t -h print this help" << std::endl;
@@ -211,6 +226,7 @@ void ConfLinearTest::printConf(){
   std::cout << "[-t] N(threads) = "<< p_threads << std::endl;
   std::cout << "[-E] fitEngine = "<< p_fitEngine << std::endl;
   std::cout << "[-M] fitMode = "<< p_fitMode << std::endl;
+  std::cout << "[-P] dataScale = "<< p_dataScale << std::endl;
   std::cout << "[-r] rebin = "<< p_rebin << std::endl;
   std::cout << "[-i] iter = "<< p_nIter << std::endl;
   std::cout << "[-D] dataTitle = "<< p_dataTitle << std::endl;
