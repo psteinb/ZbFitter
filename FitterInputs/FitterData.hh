@@ -11,6 +11,7 @@
 #include "TH1D.h"
 
 
+
 namespace FitterInputs {
 
   
@@ -50,7 +51,10 @@ public:
     m_sumError(0.),
     m_weights(),
     m_histo(0)
-  {};
+  {
+    
+    TH1::AddDirectory(kFALSE);
+  };
 
   virtual ~FitterData(){
     // delete m_histo;

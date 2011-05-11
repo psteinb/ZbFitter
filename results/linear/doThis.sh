@@ -1,1 +1,2 @@
-RunLinearTest.exe -M Migrad -d ./extractedSV0.root -c $SRC/functions/SimpleMaxLLH.env -D "data_muid" -T "z_muid_trueB,z_muid_trueC,z_muid_trueL" -o migrad.muid.root
+RunLinearTest.exe -M Migrad -d $SRC/Saclay_ee.root   -c $SRC/results/linear/BinnedEML.2params.env -D "data" -T "mcb,mccpl" -o Saclay_2p_ee -i 100 -r 5
+RunLinearTest.exe -M Migrad -d $SRC/Saclay_mumu.root -c $SRC/results/linear/BinnedEML.2params.env -D "data" -T "mcb,mccpl" -o Saclay_2p_mm -i 100 -r 5

@@ -23,7 +23,10 @@
 //ROOT
 #include "TROOT.h"
 #include "TString.h"
-#include "TRegexp.h"
+#include "TLine.h"
+#include "TObjArray.h"
+#include "TObjString.h"
+#include "TF1.h"
 #include "TGraphErrors.h"
 #include "TCanvas.h"
 #include "AtlasStyle.h"
@@ -146,28 +149,41 @@
 
 // }
 
-void ExperimentPerformer::experiment( )  {
-  
-  scaleMCValue0 aScaler(m_scale);
-     // ----- INPUT ----- 
+void ExperimentPerformer::prepare( )  {
+  // ----- INPUT ----- 
   FitterInputs::NormedTH1<FitterInputs::Norm2Unity>* input = new FitterInputs::NormedTH1<FitterInputs::Norm2Unity>();
   input->loadData(m_configuration.p_datadir.c_str(),m_configuration.p_dataTitle.c_str(),m_configuration.p_rebin);
   input->loadTemplates(m_configuration.p_datadir.c_str(),m_configuration.p_tempTitle.c_str(),m_configuration.p_rebin);
 
-  std::vector<TH1*> m_templates;
   input->getTemplatesDeepCopy(m_templates);
-  TH1* m_data =  input->getDataDeepCopy();
+  m_data =  input->getDataDeepCopy();
 
+  m_expected.resize(m_templates.size(),1.);
+  for (int i = 0; i < m_templates.size(); ++i)
+  {
+    if(i<1)
+      m_expected[i] = m_scale*m_templates[i]->Integral();
+    else
+      m_expected[i] = 1.*m_templates[i]->Integral();
+  }
+
+  delete input;
+
+}
+
+void ExperimentPerformer::experiment( )  {
+  
+  scaleMCByValue aScaler(m_scale);
+   
    // ----- EXPECTED VALUES ----- 
   // dummy values here for they are only important for the pulls
-  std::vector<double> expected          (m_templates.size(),1.);
-  std::vector<double> expectedErrors    (m_templates.size(),0.);
+  std::vector<double> expectedErrors    (m_templates.size(),1.);
   
 
    // ----- PSEUDO EXPERIMENTS ----- 
-  PseudoStudy<scaleMCValue0,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEML>  
+  PseudoStudy<scaleMCByValue,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEML>  
     aPseudoStudy(m_templates,
-                 expected,
+                 m_expected,
                  expectedErrors,
                  (m_data->Integral()),
                  m_configuration.p_threads,
@@ -175,12 +191,12 @@ void ExperimentPerformer::experiment( )  {
                  );
 
   aPseudoStudy.setProtoCreator(aScaler);
-  aPseudoStudy.setInput(input);
+  //aPseudoStudy.setInput(input);
   aPseudoStudy.setFitterConfigFile(m_configuration.p_configFile);
   aPseudoStudy.setFitEngine(m_configuration.p_fitEngine);
   aPseudoStudy.setFitMode(m_configuration.p_fitMode);
-  aPseudoStudy.setVerbosity(5);
-  aPseudoStudy.setBaseName(m_configuration.p_outputfile);
+  aPseudoStudy.setVerbosity(m_configuration.p_msgLevel);
+  aPseudoStudy.setBaseName(this->m_outname);
   aPseudoStudy.experiment();
 
   std::vector<std::vector<TH1*> > m_results(m_templates.size());
@@ -193,14 +209,12 @@ void ExperimentPerformer::experiment( )  {
     this->m_sigmas.push_back(m_results[i][1]->GetMean());
   }
 
-  delete m_data;
-  delete input;
-
+ 
 }
 
 class Conductor{
 
-  std::vector<ExperimentPerformer> m_workers;
+  std::vector<ExperimentPerformer*>* m_workers;
 
 public:
 
@@ -208,7 +222,7 @@ public:
     m_workers(_rhs.m_workers)
   {}
 
-  Conductor(const std::vector<ExperimentPerformer>& _workers):
+  Conductor(std::vector<ExperimentPerformer*>* _workers):
     m_workers(_workers)
   {}
 
@@ -220,13 +234,13 @@ public:
 
   void operator()(const tbb::blocked_range<size_t>& _range) const {
 
-    std::vector<ExperimentPerformer> metaWorkers = m_workers;
+    std::vector<ExperimentPerformer*>* metaWorkers = m_workers;
 
     for (size_t i = _range.begin(); i < _range.end(); ++i)
     {
       std::cout << ">>>"<< __FILE__ << ":" << __LINE__ << "\t do work "<< i <<"\n";
       try{
-        metaWorkers.at(i).experiment();
+        metaWorkers->at(i)->experiment();
       }
       catch(std::exception& exc)
       {
@@ -237,6 +251,57 @@ public:
   }
 
 };
+
+void setupResults(std::vector<TGraphErrors*>& _results, const ConfLinearTest& _config, const int& _size){
+  
+  TString templates = _config.p_tempTitle.c_str();
+  TObjArray* templateItems = templates.Tokenize(",");
+  
+  _results.reserve(templateItems->GetEntries());
+  TGraphErrors* meta = 0;
+  for (int i = 0; i < _results.capacity(); ++i)
+  {
+    TString Name =  dynamic_cast<TObjString*>(templateItems->At(i))->GetString();
+    Name.Append("_lin");
+    TString Title =  dynamic_cast<TObjString*>(templateItems->At(i))->GetString();
+    Title.Append(";scale;fitted ");
+    Title.Append(dynamic_cast<TObjString*>(templateItems->At(i))->GetString().Data());
+    meta = new TGraphErrors(_size);
+
+    meta->SetName(Name.Data());
+    meta->SetTitle(Title.Data());
+    _results.push_back(meta);
+  }
+  delete templateItems;
+}
+
+void printResults(const std::vector<TGraphErrors*>& _results, const ConfLinearTest& _config, const std::string _name){
+
+  TString Canvas = _config.p_outputfile.c_str();
+  Canvas.Append(_name.c_str());
+  TCanvas aCanvas(Canvas.Data(),"linear tests",3000,1000);
+  aCanvas.Clear();
+  aCanvas.Draw();
+  aCanvas.Divide(_results.size(),1);
+
+  TF1* fitline = new TF1("line","[0]*x+[1]",_results[0]->GetXaxis()->GetXmin(),_results[0]->GetXaxis()->GetXmax());
+
+  TLine aLine;
+  
+  for (int i = 1; i < _results.size()+1; ++i)
+  {
+    aCanvas.cd(i);
+    gStyle->SetOptFit(1112);
+    _results[i-1]->Draw("AP+");
+    _results[i-1]->Fit(fitline,"R");
+    // aCanvas.Update();
+    // aLine.DrawLine(gPad->GetUxmin(),gPad->GetUymin(),
+    //                gPad->GetUxmax(),gPad->GetUymax());
+  }
+  aCanvas.Update();
+  aCanvas.Print(".eps");
+  
+}
 
 int main(int argc, char* argv[])
 {
@@ -262,49 +327,95 @@ int main(int argc, char* argv[])
   std::generate(steps.begin(),steps.end(),StepValueGenerator(conf.p_stepsize));
 
   //setup workers
-  std::vector<ExperimentPerformer> workers;
+  std::vector<ExperimentPerformer*> workers;
   workers.reserve(steps.size());
+  ExperimentPerformer* meta =0;
+  std::vector<double> unscaledValue;
   for (int i = 0; i < steps.size(); ++i)
   {
-    ExperimentPerformer meta(conf,steps.at(i));
+    meta = new ExperimentPerformer(conf,steps.at(i));
+    meta->prepare();
     workers.push_back(meta);
+    if(!(steps.at(i)!=1.)){
+      unscaledValue.assign(meta->m_expected.begin(),meta->m_expected.end());
+    }
   }
 
   //do parallel job
   int grainsize = numCalls/conf.p_threads;
   tbb::blocked_range<size_t> runRange(0,steps.size(),grainsize);
   tbb::parallel_for(runRange,
-                    Conductor(workers)
+                    Conductor(&workers)
                     );
 
-  TGraphErrors bGraph(numCalls);
-  TGraphErrors cGraph(numCalls);
-  TGraphErrors lGraph(numCalls);
-  std::vector<ExperimentPerformer>::const_iterator rItr = workers.begin();
-  std::vector<ExperimentPerformer>::const_iterator rEnd = workers.end();
+  
+  std::vector<TGraphErrors*> results;
+  setupResults(results,conf,numCalls);
+
+  std::vector<TGraphErrors*> resultsNormedY;
+  setupResults(resultsNormedY,conf,numCalls);
+
+  // TGraphErrors bGraph(numCalls);
+  // TGraphErrors cGraph(numCalls);
+  // TGraphErrors lGraph(numCalls);
+  std::vector<ExperimentPerformer*>::const_iterator rItr = workers.begin();
+  std::vector<ExperimentPerformer*>::const_iterator rEnd = workers.end();
+  
+
   for (short idx = 0;rItr!=rEnd; ++rItr,idx++)
   {
+   
     try{
-      bGraph.SetPoint(idx+1,steps.at(idx),rItr->m_means.at(0));
-      // cGraph.SetPoint(idx+1,steps.at(idx),rItr->m_means.at(1));
-      // lGraph.SetPoint(idx+1,steps.at(idx),rItr->m_means.at(2));
+      for (int i = 0; i < results.size(); ++i)
+      {
+        results.at(i)->SetPoint(idx+1,steps.at(idx),(*rItr)->m_means.at(i));
+        resultsNormedY.at(i)->SetPoint(idx+1,steps.at(idx),(*rItr)->m_means.at(i));
+        if(!(steps.at(idx)!=1.))
+          unscaledValue[i] = (*rItr)->m_means.at(i);
+      }
     }
     catch(std::exception& ex){
       std::cerr << __FILE__ <<":" << __LINE__ << "\t"<<idx << " does not exist in aPerformer.m_means\n";
     }
     
     try{
-      bGraph.SetPoint(idx+1,steps.at(idx),rItr->m_sigmas.at(0));
-      // cGraph.SetPoint(idx+1,steps.at(idx),rItr->m_sigmas.at(1));
-      // lGraph.SetPoint(idx+1,steps.at(idx),rItr->m_sigmas.at(2));
+      for (int i = 0; i < results.size(); ++i)
+      {
+        results.at(i)->SetPointError(idx+1,conf.p_stepsize/2.,(*rItr)->m_sigmas.at(i));
+        resultsNormedY.at(i)->SetPointError(idx+1,conf.p_stepsize/2.,(*rItr)->m_sigmas.at(i));
+      }
     }
     catch(std::exception& ex){
       std::cerr << __FILE__ <<":" << __LINE__ << "\t"<<idx << " does not exist in aPerformer.m_means\n";
     }
   }
 
-  bGraph.Print("all");
 
+
+   for (short idx = 0;idx<resultsNormedY.size();idx++)
+   {
+     double xValue = 0;
+     double yValue = 0;
+     double yError = 0;
+     double yValueRel = 0;
+     double yErrorRel = 0;
+     for (int i = 1; i < (resultsNormedY[idx]->GetN()); ++i)
+     {
+       resultsNormedY[idx]->GetPoint(i,xValue,yValue);
+       yError = resultsNormedY[idx]->GetErrorY(i);
+       yValueRel = yValue/float(unscaledValue[idx]);
+       yErrorRel = yError/float(unscaledValue[idx]);
+       std::cout << i << "\t" << resultsNormedY[idx]->GetName() << "\t" 
+                 << xValue << ": "<<yValue<<"("<<unscaledValue[idx] << " => "<< yValueRel <<")\n";
+
+       resultsNormedY[idx]->SetPoint(i,xValue,yValueRel);
+       resultsNormedY[idx]->SetPointError(i,resultsNormedY[idx]->GetErrorX(i),yErrorRel);
+     }
+   }
+
+   printResults(resultsNormedY,conf,"_relLinear");
+   printResults(results,conf,"_absLinear");
+  
   return 0; 
    
 

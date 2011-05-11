@@ -51,10 +51,12 @@ private:
     for (int i = 0; i < m_numOfParameters; ++i)
     {
       metaTemplate = dynamic_cast<TH1*>(getFunction()->getTemplate(i)->getHisto()->Clone(appendToNameString<int>(i).c_str()));
+      metaTemplate->SetDirectory(0);
       metaTemplate->Scale(1./metaTemplate->Integral());
       m_inputHistos.push_back(metaTemplate);
     }
     m_dataHisto = dynamic_cast<TH1*>(getFunction()->getData()->getHisto()->Clone(appendToNameString<std::string>("_data").c_str()));
+    m_dataHisto->SetDirectory(0);
   }
   
   template<typename T>
@@ -86,7 +88,7 @@ public:
       m_filenameCore = m_filename.substr(0,m_filename.find_last_of("."));
     else
       m_filenameCore = m_filename;
-
+    TH1::AddDirectory(kFALSE);
   };
 
   /**

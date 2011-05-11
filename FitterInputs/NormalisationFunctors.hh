@@ -24,7 +24,8 @@ public:
   TH1* total = dynamic_cast<TH1*>(_templates.front()->Clone(totalName.c_str()));
   total->Reset("MICE");
   total->ResetStats();
-  
+  total->SetDirectory(0);
+
   //add all up
   std::vector<TH1*>::iterator histItr = _templates.begin();
   std::vector<TH1*>::iterator histEnd = _templates.end();

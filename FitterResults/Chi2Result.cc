@@ -60,8 +60,7 @@ void FitterResults::Chi2Result::calculate(){
     }
     else
     {
-      if(!data)
-        emptyBins++;
+      emptyBins++;
     }
 
   }

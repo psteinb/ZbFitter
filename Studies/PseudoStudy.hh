@@ -18,6 +18,7 @@
 #include "TRandom3.h"
 #include "TMath.h"
 #include "TH1D.h"
+#include "TCanvas.h"
 #include "Math/Minimizer.h"
 
 template<
@@ -58,6 +59,8 @@ class PseudoStudy{
   std::vector<double> m_fitErrorsUp;
   std::vector<double> m_fitErrorsDown;
   std::vector<int>    m_fitErrorsStatus;
+  std::vector<TCanvas*>    m_resultCanvas;
+  
 
   bool m_doPanicPrint;
   int m_verbosity;
@@ -138,16 +141,18 @@ class PseudoStudy{
   void setupTotalTemplates(){
 
     m_total = dynamic_cast<TH1*>(m_templateTH1s.front()->Clone("total"));
+    m_total->SetDirectory(0);
     m_total->Reset("MICE");
     m_total->ResetStats();
     
-    ProtoCreator creator;
-    creator(m_total,m_templateTH1s);
+    //ProtoCreator creator;
+    m_creator(m_total,m_templateTH1s);
     
   };  
 
   void prepareData(TH1*& _data=0){
     _data = (TH1*)m_templateTH1s[0]->Clone("data");
+    _data->SetDirectory(0);
     _data->Reset("MICE");
     _data->ResetStats();
   };
@@ -184,7 +189,7 @@ public:
               const int& _thr=1,
               const int& _iters=5000
               ):
-    m_input(0),
+    m_input(new InputT()),
     m_fitter(),
     m_creator(),
     m_fitConfigFile(""),       
@@ -210,7 +215,8 @@ public:
     m_fitErrorsDown(_templates.size(),0.),
     m_fitErrorsStatus(_templates.size(),0.),
     m_doPanicPrint(false),
-    m_verbosity(2)
+    m_verbosity(2),
+    m_resultCanvas(3)
   {
     //create deep copies!
     for (int i = 0; i < _templates.size(); ++i)
@@ -218,23 +224,32 @@ public:
       std::string name = _templates.at(i)->GetName();
       name += "_pseudo";
       m_templateTH1s[i] = dynamic_cast<TH1*>(_templates.at(i)->Clone(name.c_str()));
+      m_templateTH1s[i]->SetDirectory(0);
     }
 
-    setupTotalTemplates();
+    
     
     setupResults(_templates.size());
   };
 
-  // ~PseudoStudy(){
-  //   delete m_maxLLH;m_maxLLH=0;
-  // }
+   ~PseudoStudy(){
+     delete m_input;
+     
+   }
 
   //setter
   void setFitEngine( const std::string& _engine){m_fitEngine = _engine;};
   void setFitMode( const std::string& _mode){m_fitMode = _mode;};
   void setProtoCreator(const ProtoCreator& _creator){m_creator = _creator;};
   void setFitterConfigFile(const std::string& _file){m_fitConfigFile = _file;};
-  void setInput(InputT* _input=0){m_input = _input;};
+  void setInput(InputT* _input=0){
+    if(m_input){
+      delete m_input;
+      m_input = 0;
+    }
+      
+    m_input = _input;
+  };
   void setPanicPrint(const bool& _value=false){m_doPanicPrint = _value;};
   void setVerbosity(const int& _value=3){m_verbosity = _value;};
   void setBaseName(const std::string& _value){m_baseName = _value;};
@@ -363,9 +378,11 @@ public:
 
   void experiment(){
     
-    if(!m_input){
-            std::cerr << __FILE__ << ":"<< __LINE__ <<"\t input data object pointer nil\n";
-      return;}
+    // if(!m_input){
+    //         std::cerr << __FILE__ << ":"<< __LINE__ <<"\t input data object pointer nil\n";
+    //   return;}
+
+    setupTotalTemplates();
 
     FitterResults::HistoResult* histoResult = new FitterResults::HistoResult();
     FitterResults::TermResult* termResult = new FitterResults::TermResult();

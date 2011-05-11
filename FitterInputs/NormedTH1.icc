@@ -14,6 +14,7 @@ FitterInputs::NormedTH1<NormFunc>::NormedTH1 ( ):
 {
   m_files.reserve(4);
   m_templates.reserve(3);
+  TH1::AddDirectory(false);
 }
 
 template<typename NormFunc>
@@ -50,21 +51,28 @@ void FitterInputs::NormedTH1<NormFunc>::loadData (const std::string& _fileName, 
     error<< __FILE__ << ":"<< __LINE__ << "\t File name or histo name not filled " << _fileName.c_str() << "("<< _histoNames.c_str() <<")\n";
     throw std::invalid_argument(error.str());
   }
+  
+  std::ostringstream objError;
+  std::ostringstream fileError;
+  objError<< __FILE__ << ":"<< __LINE__ << "\t histo named "<< _histoNames.c_str() <<" not found in " << _fileName.c_str() <<")\n";
+  fileError<< __FILE__ << ":"<< __LINE__ << "\t file named "<< _fileName.c_str() <<" NOT FOUND\n";
 
   if(openFile(_fileName)){
     m_data = dynamic_cast<TH1*>(openFile(_fileName)->Get(_histoNames.c_str()));
-    m_data->Sumw2();
-    if(_rebin!=1){
-      m_data->Rebin(_rebin);
+    if(m_data){
+      m_data->Sumw2();
+      if(_rebin!=1){
+        m_data->Rebin(_rebin);
+      }
     }
+    
   }
   else
-    throw std::runtime_error("file not found");
+    throw std::runtime_error(fileError.str().c_str());
 
   if(!m_data){
-    std::ostringstream error;
-    error<< __FILE__ << ":"<< __LINE__ << "\t histo named "<< _histoNames.c_str() <<" not found in " << _fileName.c_str() <<")\n";
-    throw std::runtime_error(error.str());
+    
+    throw std::runtime_error(objError.str());
   }
   
   
@@ -98,15 +106,13 @@ void FitterInputs::NormedTH1<NormFunc>::loadTemplatesFromOneFile (const std::str
   {
     aHistName = dynamic_cast<TObjString*>(Histo->At(i))->GetString();
     metaObject = dynamic_cast<TH1*>(fileObject->Get(aHistName.Data()));
-    //against strange UCL TH1F histos
-    if(metaObject)
-      metaObject->SetName(aHistName.Data());
-
-    metaObject->Sumw2();
-    if(_rebin!=1)
-      metaObject->Rebin(_rebin);
 
     if(metaObject){
+      metaObject->SetName(aHistName.Data());
+      metaObject->Sumw2();
+      if(_rebin!=1)
+        metaObject->Rebin(_rebin);
+
       m_templates.push_back(metaObject);
       std::cout << "NormedTH1::loadTemplatesFromOneFile\t" << "loaded " << m_templates.back()->GetName() << " from " << _fileNames << std::endl;
     }
@@ -315,7 +321,9 @@ void FitterInputs::NormedTH1<NormFunc>::getTemplatesDeepCopy(std::vector<TH1*>& 
   {
     name = m_templates.at(i)->GetName();
     name += "_new";
-    _templates.push_back(dynamic_cast<TH1*>(m_templates.at(i)->Clone(name.c_str())));
+    TH1* meta = dynamic_cast<TH1*>(m_templates.at(i)->Clone(name.c_str()));
+    meta->SetDirectory(0);
+    _templates.push_back(meta);
   }
 
 }

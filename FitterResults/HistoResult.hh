@@ -48,11 +48,15 @@ private:
   };
 
   void setupInputHistos(){
+    TH1* meta = 0;
     for (int i = 0; i < m_numOfParameters; ++i)
     {
-      m_inputHistos.push_back(dynamic_cast<TH1*>(getFunction()->getTemplate(i)->getHisto()->Clone(appendToNameString<int>(i).c_str())));
+      meta = dynamic_cast<TH1*>(getFunction()->getTemplate(i)->getHisto()->Clone(appendToNameString<int>(i).c_str()));
+      meta->SetDirectory(0);
+      m_inputHistos.push_back(meta);
     }
     m_dataHisto = dynamic_cast<TH1*>(getFunction()->getData()->getHisto()->Clone(appendToNameString<std::string>("_data").c_str()));
+    m_dataHisto->SetDirectory(0);
   }
 
   void treatInputHistosForResult(){
@@ -98,7 +102,7 @@ public:
     m_resultsSymErrors(0),
     m_numOfParameters(0)
   {
-
+    TH1::AddDirectory(kFALSE);
   };
 
   /**

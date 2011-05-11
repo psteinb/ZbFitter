@@ -17,6 +17,8 @@
 #include "TObjString.h"
 #include "TObjArray.h"
 
+
+
 namespace FitterInputs {
 
   struct TFileNameCompare : std::binary_function<TFile*,std::string,bool>{
@@ -129,7 +131,9 @@ namespace FitterInputs {
 
     TH1* getDataDeepCopy(){
       std::string name = m_data->GetName();name+="_new";
-      return dynamic_cast<TH1*>(m_data->Clone(name.c_str()));
+      TH1* value = dynamic_cast<TH1*>(m_data->Clone(name.c_str()));
+      value->SetDirectory(0);
+      return value;
     };
 
     /**

@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <sstream>
+
 // #include "stdio.h"
 // #include "unistd.h"
 
@@ -50,13 +52,17 @@ public:
     
 };
 
-struct scaleMCValue0
+struct scaleMCByValue
 {
   double m_scale;
 
 public:
-  scaleMCValue0(const double& _scale=1.):
+  scaleMCByValue(const double& _scale=1.):
     m_scale(_scale){};
+  
+  scaleMCByValue(const scaleMCByValue& _rhs):
+    m_scale(_rhs.m_scale){};
+
 
   void operator()(TH1* _total, const std::vector<TH1*>& _input){
 
@@ -86,29 +92,67 @@ class ExperimentPerformer
 {
   ConfLinearTest m_configuration;
   double m_scale;
+  std::string m_outname;
+  std::vector<TH1*> m_templates;
+  TH1* m_data;
+
+
 
 public:
   std::vector<double> m_means;
   std::vector<double> m_sigmas;
+  std::vector<double> m_expected      ;
 
-  ExperimentPerformer( const ConfLinearTest& _configuration, const double& _scale=1.):
+  ExperimentPerformer( const ConfLinearTest& _configuration, 
+                       const double& _scale=1.
+                       ):
     m_means(),
     m_sigmas(),
     m_configuration(_configuration),
-    m_scale(_scale)
+    m_scale(_scale),
+    m_outname(),
+    m_templates(),
+    m_data(0),
+    m_expected ()
   {
+    std::ostringstream name(_configuration.p_outputfile);
+    name << "_step"<<_scale;
+    m_outname = name.str();
   };
 
   ExperimentPerformer( const ExperimentPerformer& _other):
     m_means(_other.m_means),
     m_sigmas(_other.m_sigmas),
     m_configuration(_other.m_configuration),
-    m_scale(_other.m_scale)
-  {};
-  virtual ~ExperimentPerformer(){};
+    m_scale(_other.m_scale),
+    m_outname(_other.m_outname),
+    m_templates(_other.m_templates),
+    m_data(_other.m_data),
+    m_expected(_other.m_expected)
+  {
+    std::cout << _other.m_outname << "COPIED\n";
+  };
+
+  virtual ~ExperimentPerformer(){
+
+    delete m_data;
+    for (int i = 0; i < m_templates.size(); ++i)
+    {
+      delete m_templates[i];
+    }
+    m_templates.clear();
+
+  };
 
   void experiment()  ;
+  
+  void print() const{
+    std::cout << "ExperimentPerformer at "<<m_scale
+              << "\n\tfound means: " << m_means.size()
+              << "\n\tfound sigmas: " << m_sigmas.size() << "\n";
+  };
 
+  void prepare();
 };
 
 #endif
