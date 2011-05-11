@@ -103,23 +103,23 @@ class PseudoStudy{
       expSigmaDown = 0.;
       expSigmaUp = 1.*(m_expectedValues.at(i));
 
-      m_pulls[i] = TH1D(addItemToText<int>("pull_par",i).c_str(),"pull",50,-5,5);
+      m_pulls[i] = TH1D(addItemToText<int>("pull_par",i).c_str(),"pull",80,-8,8);
       m_pulls[i].GetXaxis()->SetTitle(addItemToText<int>("pull: ",i).c_str());
-      m_pulls[i].SetBit(TH1::kCanRebin);
+      //m_pulls[i].SetBit(TH1::kCanRebin);
 
-      m_MigradPulls[i] = TH1D(addItemToText<int>("Migrad_pull_par",i).c_str(),"pull",50,-5,5);
+      m_MigradPulls[i] = TH1D(addItemToText<int>("Migrad_pull_par",i).c_str(),"pull",80,-8,8);
       m_MigradPulls[i].GetXaxis()->SetTitle(addItemToText<int>("pull: ",i).c_str());
-      m_MigradPulls[i].SetBit(TH1::kCanRebin);
+      //m_MigradPulls[i].SetBit(TH1::kCanRebin);
 
       m_means[i] = TH1D(addItemToText<int>("mean_par",i).c_str(),"mean fitted",
                         80,expMeanDown,expMeanUp);
       m_means[i].GetXaxis()->SetTitle(addItemToText<int>("fitted: ",i).c_str());
-      m_means[i].SetBit(TH1::kCanRebin);
+      //m_means[i].SetBit(TH1::kCanRebin);
 
       m_sigmas[i] = TH1D(addItemToText<int>("sigma_par",i).c_str(),"sigma fitted",
                          80,expSigmaDown,expSigmaUp);
       m_sigmas[i].GetXaxis()->SetTitle(addItemToText<int>("fitted error: ",i).c_str());
-      m_sigmas[i].SetBit(TH1::kCanRebin);
+      //m_sigmas[i].SetBit(TH1::kCanRebin);
     }
 
 
@@ -468,6 +468,8 @@ public:
         if(m_doPanicPrint){
           name << "_failed";
           preparePlots(name.str(),histoResult,llhResult);
+          
+            
           if(m_verbosity<3){
             aFitter.printTo(histoResult);
             aFitter.printTo(llhResult);
@@ -478,7 +480,7 @@ public:
       else{
         name << "_success";
         preparePlots(name.str(),histoResult,llhResult);
-        if(i % 5000 == 0 ){
+        if(i % 5000 == 0 && m_verbosity<6){
           aFitter.printTo(histoResult);
           aFitter.printTo(llhResult);
         }

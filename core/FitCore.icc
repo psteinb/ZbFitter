@@ -6,7 +6,8 @@ template <class Fcn, class Scr, class Res>
 void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
   
   if(isConfigured("Engine") && isConfigured("Mode"))
-    m_minimizer = ROOT::Math::Factory::CreateMinimizer(m_configMap["Engine"], m_configMap["Mode"]);
+    m_minimizer = new ROOT::Minuit2::Minuit2Minimizer(m_configMap["Mode"].c_str()); 
+  //ROOT::Math::Factory::CreateMinimizer(m_configMap["Engine"], m_configMap["Mode"]);
   else{
     throw std::runtime_error("FitCore::setupMachinery for neither engine nor mode was configured");
   }

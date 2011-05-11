@@ -11,6 +11,7 @@
 #include "Math/Factory.h"
 #include "Math/Functor.h"
 #include "Math/Minimizer.h"
+#include "Minuit2/Minuit2Minimizer.h"
 
 #include "TStopwatch.h"
 #include "TEnv.h"

@@ -9,12 +9,7 @@
 #include <iostream>
 #include <exception>
 
-#include "core/FitCore.hh"
-#include "FitterInputs/NormedTH1.hh"
-#include "FitterInputs/NormalisationFunctors.hh"
-#include "FitterResults/HistoResult.hh"
-#include "functions/BinnedEML.hh"
-#include "Studies/PseudoStudy.hh"
+
 
 //TBB
 #include "tbb/parallel_for.h"
@@ -167,44 +162,38 @@ void ExperimentPerformer::prepare( )  {
       m_expected[i] = 1.*m_templates[i]->Integral();
   }
 
-  delete input;
+  scaleMCByValue aScaler(m_scale);
+  // dummy values here for they are only important for the pulls
+  std::vector<double> expectedErrors    (m_templates.size(),1.);
+  
+  m_PseudoStudy = new PseudoStudy<scaleMCByValue,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEML>(
+                                                                                                                          m_templates,m_expected,expectedErrors,
+                                                                                                                          (m_data->Integral()),m_configuration.p_threads,
+                                                                                                                          m_configuration.p_nIter
+                                                                                                                          );
 
+   m_PseudoStudy->setProtoCreator(aScaler);
+   //m_PseudoStudy->setInput(input);
+   m_PseudoStudy->setFitterConfigFile(m_configuration.p_configFile);
+   m_PseudoStudy->setFitEngine(m_configuration.p_fitEngine);
+   m_PseudoStudy->setFitMode(m_configuration.p_fitMode);
+   m_PseudoStudy->setVerbosity(m_configuration.p_msgLevel);
+   m_PseudoStudy->setBaseName(this->m_outname);
+
+   delete input;
 }
 
 void ExperimentPerformer::experiment( )  {
   
-  scaleMCByValue aScaler(m_scale);
-   
-   // ----- EXPECTED VALUES ----- 
-  // dummy values here for they are only important for the pulls
-  std::vector<double> expectedErrors    (m_templates.size(),1.);
-  
-
-   // ----- PSEUDO EXPERIMENTS ----- 
-  PseudoStudy<scaleMCByValue,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEML>  
-    aPseudoStudy(m_templates,
-                 m_expected,
-                 expectedErrors,
-                 (m_data->Integral()),
-                 m_configuration.p_threads,
-                 m_configuration.p_nIter
-                 );
-
-  aPseudoStudy.setProtoCreator(aScaler);
-  //aPseudoStudy.setInput(input);
-  aPseudoStudy.setFitterConfigFile(m_configuration.p_configFile);
-  aPseudoStudy.setFitEngine(m_configuration.p_fitEngine);
-  aPseudoStudy.setFitMode(m_configuration.p_fitMode);
-  aPseudoStudy.setVerbosity(m_configuration.p_msgLevel);
-  aPseudoStudy.setBaseName(this->m_outname);
-  aPseudoStudy.experiment();
+  // ----- PSEUDO EXPERIMENTS ----- 
+  m_PseudoStudy->experiment();
 
   std::vector<std::vector<TH1*> > m_results(m_templates.size());
   m_means.reserve(m_templates.size());
   m_sigmas.reserve(m_templates.size());
   for (int i = 0; i < m_templates.size(); ++i)
   {
-    aPseudoStudy.getResultsOfParameter(i,m_results[i]);
+    m_PseudoStudy->getResultsOfParameter(i,m_results[i]);
     this->m_means.push_back(m_results[i][0]->GetMean());
     this->m_sigmas.push_back(m_results[i][1]->GetMean());
   }

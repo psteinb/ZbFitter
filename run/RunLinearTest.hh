@@ -32,6 +32,12 @@
 // #include "TCanvas.h"
 
 #include "run/ConfLinearTest.hh"
+#include "core/FitCore.hh"
+#include "FitterInputs/NormedTH1.hh"
+#include "functions/BinnedEML.hh"
+#include "Studies/PseudoStudy.hh"
+#include "FitterInputs/NormalisationFunctors.hh"
+#include "FitterResults/HistoResult.hh"
 
 struct StepValueGenerator
 {
@@ -95,7 +101,7 @@ class ExperimentPerformer
   std::string m_outname;
   std::vector<TH1*> m_templates;
   TH1* m_data;
-
+  PseudoStudy<scaleMCByValue,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEML>*  m_PseudoStudy;
 
 
 public:
@@ -113,7 +119,8 @@ public:
     m_outname(),
     m_templates(),
     m_data(0),
-    m_expected ()
+    m_expected (),
+    m_PseudoStudy(0)
   {
     std::ostringstream name(_configuration.p_outputfile);
     name << "_step"<<_scale;
