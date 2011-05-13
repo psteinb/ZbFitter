@@ -60,11 +60,12 @@ namespace core {
     //config file
     std::string m_configFile;
     TEnv        m_environment;
-
+    
     //minos errors
     std::vector<int>    m_minosStatus		;
     std::vector<double> m_minosUp		;
     std::vector<double> m_minosDown		;
+    int m_parameter2omit;
 
     void printConfig ( )
     {
@@ -100,7 +101,8 @@ namespace core {
       m_environment(),
       m_minosStatus(),
       m_minosUp(),
-      m_minosDown()
+      m_minosDown(),
+      m_parameter2omit(-1)
     {};
     /**
      * Empty Destructor
@@ -149,7 +151,7 @@ namespace core {
       m_fcn = _function;
     }
 
-
+    void setParameterToOmit(const int& _idx){ m_parameter2omit = _idx;}
     /**
      * @return bool
      * @param  _name

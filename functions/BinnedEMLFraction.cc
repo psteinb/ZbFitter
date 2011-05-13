@@ -17,7 +17,7 @@ functions::BinnedEMLFraction::BinnedEMLFraction ( ) :
 
 functions::BinnedEMLFraction::~BinnedEMLFraction( ) { }
 
-double functions::BinnedEMLFraction::getLogTerm(const short& _bin,const double& _totalExpect){
+double functions::BinnedEMLFraction::getLogTerm(const short& _bin,const double& _total){
 
   //double binWidth = m_templates.at(0).getHisto()->GetBinWidth(1);
   double value =0;  
@@ -25,12 +25,14 @@ double functions::BinnedEMLFraction::getLogTerm(const short& _bin,const double& 
   for (short i=0; i < this->getNumberOfParameters()/*-1*/; ++i)
   {
 
-    value+=((getParameterValue(i))*(m_templates.at(i).getContent()->at(_bin))*_totalExpect);
+    value+=((getParameterValue(i))*(m_templates.at(i).getContent()->at(_bin))*_total);
 
   }
 
 
-  //  value+=((last)*(m_templates.at(this->getNumberOfParameters()-1).getContent()->at(_bin))*_totalExpect);
+  double last = getParameters()->back();
+
+  value+=((last)*(m_templates.back().getContent()->at(_bin))*_total);
   
   if(value)
     return std::log(value);
@@ -56,22 +58,12 @@ double functions::BinnedEMLFraction::operator()(const double* _values ){
   
   setParameters(meta);
 
-  double sumOfParameters = std::accumulate(getParameters()->begin(), 
-					   getParameters()->end(),
-					   0.);
-
-  double totPrediction = 0;
-  for (int i = 0; i < m_templates.size(); ++i)
-  {
-    totPrediction += std::accumulate(m_templates.at(i).getContent()->begin(), 
-                                     m_templates.at(i).getContent()->end(),
+  double totalData = std::accumulate(m_data.getContent()->begin(), 
+                                     m_data.getContent()->end(),
                                      0.);
-  }
-  
 
-  
   //the likelihood function
-  double logLHValue = totPrediction;
+  double logLHValue = totalData;
   
   
   
@@ -81,7 +73,7 @@ double functions::BinnedEMLFraction::operator()(const double* _values ){
   double sumOverAllBins = 0.;
   for (short bin = 0; dataItr!=dataEnd; ++dataItr,++bin)
   {
-    sumOverAllBins += ((*dataItr)*this->getLogTerm(bin,totPrediction));
+    sumOverAllBins += ((*dataItr)*this->getLogTerm(bin,totalData));
   }
   
   logLHValue += (-1.*(sumOverAllBins));
@@ -90,7 +82,7 @@ double functions::BinnedEMLFraction::operator()(const double* _values ){
   //according to the TMinuit2 manual, one may instead double the LLH to get correct errors
   logLHValue *= 2;
 
-#ifdef __DEBUG_EML__  
+#ifdef __DEBUG__  
   std::cout << "for parameters: \t";
   std::copy(getParameters()->begin(),
             getParameters()->end(),

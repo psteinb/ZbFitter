@@ -66,7 +66,7 @@ struct  MinimConfigItem
       return false;
   }
 
-  void print(){
+  void print() const {
     std::cout << "MinimConfigItem\t"<< Name << "\t" << Start << ", " << Step
               << ((isFixed()) ? " fixed " : " ") << " "
               << ((lowConstrain) ? LowLimit : -999. ) << " "
@@ -126,6 +126,16 @@ public:
 
     loadItemsFromMap();
   };
+
+  void print(){
+    std::cout << __FILE__ << "\n";
+    std::vector<MinimConfigItem>::const_iterator itItr = m_items.begin();
+    std::vector<MinimConfigItem>::const_iterator itEnd = m_items.end();
+
+    for (short i =0; itItr!=itEnd; ++itItr,i++)
+      (*itItr).print();
+  
+  }
 
 };
 

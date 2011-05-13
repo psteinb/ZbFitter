@@ -44,6 +44,7 @@ class PseudoStudy{
 
   int m_threads;
   int m_iterations;
+  int m_omitParameter;
   TRandom3 m_TRand3;
 
   std::vector<TH1D> m_pulls;
@@ -202,6 +203,7 @@ public:
     m_maxLLH(new TH1D("maxLLH",";max(logLH);N",200,-400,0)),
     m_threads(_thr),
     m_iterations(_iters),
+    m_omitParameter(-1),
     m_TRand3(),
     m_pulls(_templates.size()),
     m_MigradPulls(_templates.size()),
@@ -253,6 +255,7 @@ public:
   void setPanicPrint(const bool& _value=false){m_doPanicPrint = _value;};
   void setVerbosity(const int& _value=3){m_verbosity = _value;};
   void setBaseName(const std::string& _value){m_baseName = _value;};
+  void setParameterToOmit(const int& _idx){m_omitParameter = _idx;};
 
   //getters
   void getResultsOfParameter(const int& _idx,std::vector<TH1*>& _results){
@@ -312,7 +315,9 @@ public:
       std::cout << rItr->GetName() << "("<< rItr->GetEntries()<<") "
                 <<"mean: " << rItr->GetMean()
                 <<", rms: " << rItr->GetRMS()
-                <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() << std::endl;
+                <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() 
+                <<", u/o: " << rItr->GetBinContent(0) << "/" <<   rItr->GetBinContent(rItr->GetNbinsX()+1)
+                << std::endl;
       rItr->Write();
     }
 
@@ -322,9 +327,11 @@ public:
     for (; rItr!=rEnd; ++rItr)
     {
         std::cout << rItr->GetName() << "("<< rItr->GetEntries()<<") "
-                <<"mean: " << rItr->GetMean()
-                <<", rms: " << rItr->GetRMS()
-                <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() << std::endl;
+                  <<"mean: " << rItr->GetMean()
+                  <<", rms: " << rItr->GetRMS()
+                  <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() 
+                  <<", u/o: " << rItr->GetBinContent(0) << "/" <<   rItr->GetBinContent(rItr->GetNbinsX()+1)
+                  << std::endl;
         rItr->Write();
     }
 
@@ -336,7 +343,9 @@ public:
       std::cout << rItr->GetName() << "("<< rItr->GetEntries()<<") "
                 <<"mean: " << rItr->GetMean()
                 <<", rms: " << rItr->GetRMS()
-                <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() << std::endl;
+                <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax()
+                <<", u/o: " << rItr->GetBinContent(0) << "/" <<   rItr->GetBinContent(rItr->GetNbinsX()+1)
+                << std::endl;
       rItr->Write();
 
     }
@@ -452,6 +461,7 @@ public:
       aFitter.configureFromFile(m_fitConfigFile);
       aFitter.configureKeyWithValue("Engine",m_fitEngine);
       aFitter.configureKeyWithValue("Mode",m_fitMode);
+      aFitter.setParameterToOmit(2);
       aFitter.setupMachinery();
 
       //run the fitter on data from the input file

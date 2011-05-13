@@ -11,7 +11,7 @@
 #include "FitterInputs/NormalisationFunctors.hh"
 #include "FitterInputs/NormedTH1.hh"
 #include "FitterResults/HistoResult.hh"
-#include "functions/BinnedEML.hh"
+#include "functions/BinnedEMLFraction.hh"
 #include "Studies/PseudoStudy.hh"
 
 #include "TString.h"
@@ -78,7 +78,7 @@ void createExpectedValuesFromTemplates(const std::vector<TH1*>& _templates,
 
   for (int i = 0; i < _templates.size(); ++i)
   {
-    _expected[i] = (integrals[i]/total)*_dataIntegral;
+    _expected[i] = (integrals[i]/total);
     _errors[i] = (errors[i]/total)*_expected[i];
     std::cout << "expected value ["<<i <<"]\t"<<_expected[i]<<" +/- "<<_errors[i] <<std::endl;
   }
@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
 
    // ----- PSEUDO EXPERIMENTS ----- 
   double scaleExpectation = TMath::Abs(conf.p_dataScale);
-  PseudoStudy<defaultMCValues,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEML>  
+  PseudoStudy<defaultMCValues,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEMLFraction>  
     aPseudoStudy(m_templates,
                  expected,
                  expectedErrors,
@@ -157,6 +157,8 @@ int main(int argc, char* argv[])
   aPseudoStudy.setFitMode(conf.p_fitMode);
   aPseudoStudy.setVerbosity(conf.p_msgLevel);
   aPseudoStudy.setBaseName(conf.p_outputfile);
+  aPseudoStudy.setParameterToOmit(2);
+
   if(conf.p_msgLevel<3)
     aPseudoStudy.setPanicPrint(true);
   aPseudoStudy.experiment();

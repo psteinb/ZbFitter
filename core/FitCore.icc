@@ -30,7 +30,7 @@ void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
   
   // Set the free variables to be minimized!
   m_paramConfiguration.configureMinimizer(m_minimizer);
-
+  
   /////////////////////////////////////////
   /// load data/templates to Likelihood function
   /////////////////////////////////////////
@@ -46,6 +46,7 @@ int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   //loadDataToFunction();
 
   if(_verbose){
+    m_paramConfiguration.print();
     m_fcn.print();
     m_minimizer->SetPrintLevel(2002);
     //m_fcn.printTemplates();
