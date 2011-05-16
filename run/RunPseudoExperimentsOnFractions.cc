@@ -157,7 +157,6 @@ int main(int argc, char* argv[])
   aPseudoStudy.setFitMode(conf.p_fitMode);
   aPseudoStudy.setVerbosity(conf.p_msgLevel);
   aPseudoStudy.setBaseName(conf.p_outputfile);
-  aPseudoStudy.setParameterToOmit(2);
 
   if(conf.p_msgLevel<3)
     aPseudoStudy.setPanicPrint(true);

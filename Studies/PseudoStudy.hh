@@ -44,7 +44,7 @@ class PseudoStudy{
 
   int m_threads;
   int m_iterations;
-  int m_omitParameter;
+
   TRandom3 m_TRand3;
 
   std::vector<TH1D> m_pulls;
@@ -181,6 +181,23 @@ class PseudoStudy{
     }
   };
 
+
+  void createScaledData(TH1* _data=0,
+                        const double& _integral=1.){
+
+    if(!_data){
+      std::cerr << __FILE__ << ":"<< __LINE__ <<"\t data histo pointer nil\n";
+      return ;}
+
+    
+
+    _data->Reset("MICE");
+    _data->ResetStats();
+    _data->FillRandom(m_total,_integral);
+    
+    return ;
+  }
+
 public:
   
   PseudoStudy(const std::vector<TH1*>& _templates,
@@ -203,7 +220,6 @@ public:
     m_maxLLH(new TH1D("maxLLH",";max(logLH);N",200,-400,0)),
     m_threads(_thr),
     m_iterations(_iters),
-    m_omitParameter(-1),
     m_TRand3(),
     m_pulls(_templates.size()),
     m_MigradPulls(_templates.size()),
@@ -255,7 +271,6 @@ public:
   void setPanicPrint(const bool& _value=false){m_doPanicPrint = _value;};
   void setVerbosity(const int& _value=3){m_verbosity = _value;};
   void setBaseName(const std::string& _value){m_baseName = _value;};
-  void setParameterToOmit(const int& _idx){m_omitParameter = _idx;};
 
   //getters
   void getResultsOfParameter(const int& _idx,std::vector<TH1*>& _results){
@@ -369,21 +384,7 @@ public:
 
   };
   
-  void createScaledData(TH1* _data=0,
-                        const double& _integral=1.){
-
-    if(!_data){
-      std::cerr << __FILE__ << ":"<< __LINE__ <<"\t data histo pointer nil\n";
-      return ;}
-
-    
-
-    _data->Reset("MICE");
-    _data->ResetStats();
-    _data->FillRandom(m_total,_integral);
-    
-    return ;
-  }
+  
 
   void experiment(){
     
@@ -404,14 +405,13 @@ public:
       m_total->Print("all");
     }
       
-    std::vector<double> pullValues(m_templateTH1s.size(),0.);
-
-    std::vector<double> MigradPullValues(m_templateTH1s.size(),0.);
+    
 
     TH1* m_data=0;
     prepareData(m_data);
 
     int status = 0;
+    int numParameters = m_templateTH1s.size();
     int nNon0Status = 0;
     int nMinosFailed = 0;
 
@@ -425,6 +425,12 @@ public:
     double fitValue=0.;
     double pullSigma=0.;
     
+    std::vector<double> pullValues(numParameters,0.);
+    std::vector<double> MigradPullValues(numParameters,0.);
+
+    std::vector<double> fitSymmErrors(numParameters,0.);
+    m_fitValues.clear();m_fitValues.reserve(numParameters);
+    fitSymmErrors.clear();fitSymmErrors.reserve(numParameters);
     for (int i = 0; i < (m_iterations); ++i)
     {
       //flush the name
@@ -461,7 +467,6 @@ public:
       aFitter.configureFromFile(m_fitConfigFile);
       aFitter.configureKeyWithValue("Engine",m_fitEngine);
       aFitter.configureKeyWithValue("Mode",m_fitMode);
-      aFitter.setParameterToOmit(2);
       aFitter.setupMachinery();
 
       //run the fitter on data from the input file
@@ -501,13 +506,20 @@ public:
         //collect the errors
         aFitter.getMinosErrorSet(m_fitErrorsStatus,m_fitErrorsDown,m_fitErrorsUp);
 
+        std::copy(aFitter.getFitResults()->begin()      ,
+                  aFitter.getFitResults()->end()        ,
+                  m_fitValues.begin());
+
+        std::copy(aFitter.getFitSymmetricErrors()->begin()      ,
+                  aFitter.getFitSymmetricErrors()->end()        ,
+                  fitSymmErrors.begin());
+
         //collect the results
         m_maxLLH->Fill(aFitter.getMinimizer()->MinValue());
         double pullSigma = 0.;
-        for (int i = 0; i < m_templateTH1s.size(); ++i)
+        for (int i = 0; i < numParameters; ++i)
         {
-          m_fitValues[i] = aFitter.getMinimizer()->X()[i];
-          fitError = aFitter.getMinimizer()->Errors()[i];
+         
           m_means[i].Fill(m_fitValues[i]);
 
           expError = m_expectedErrors[i];
@@ -532,16 +544,9 @@ public:
           }
           else{
             nMinosFailed++;
-            m_sigmas[i].Fill(fitError);
-            pullSigma = fitError;
+            m_sigmas[i].Fill(fitSymmErrors[i]);
+            pullSigma = fitSymmErrors[i];
           }
-
-          // if(m_fitValues[i]>(expectationScale*m_expectedValues[i]))
-          //   pullSigma  = TMath::Abs(m_fitErrorsDown[i]);
-          // else
-          //   pullSigma = TMath::Abs(m_fitErrorsUp[i]);
-          
-          
 
 
           pullValues[i] = (m_fitValues[i] - (expValue))/(pullSigma);

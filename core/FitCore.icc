@@ -87,6 +87,10 @@ int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   }
   
   this->runMinos();
+  this->collectResults();
+  if(m_paramConfiguration.getNumberOfParametersConfigured()!=m_paramConfiguration.getNumberOfParameters())
+    this->calculateOmittedParameters();
+    
   return value;
 }
 
@@ -108,15 +112,15 @@ void core::FitCore<Fcn,Scr,Res>::printTo(Res* _result=0){
 template <class Fcn, class Scr, class Res>
 void core::FitCore<Fcn,Scr,Res>::runMinos(){
 
-  m_minosStatus   .resize(m_fcn.getNumberOfParameters(),0);
-  m_minosUp       .resize(m_fcn.getNumberOfParameters(),0);
-  m_minosDown     .resize(m_fcn.getNumberOfParameters(),0);
+  m_minosStatus   .resize(m_paramConfiguration.getNumberOfParameters(),0);
+  m_minosUp       .resize(m_paramConfiguration.getNumberOfParameters(),0);
+  m_minosDown     .resize(m_paramConfiguration.getNumberOfParameters(),0);
   bool minosStatus = false;
   double dUp = 0;
   double dDown = 0;
   int iStatus = 0;
 
-  for (int i = 0; i < m_fcn.getNumberOfParameters(); ++i)
+  for (int i = 0; i < m_paramConfiguration.getNumberOfParametersConfigured(); ++i)
   {
     minosStatus = false;
     minosStatus = m_minimizer->GetMinosError(i,dDown,dUp,iStatus);
@@ -135,6 +139,38 @@ void core::FitCore<Fcn,Scr,Res>::runMinos(){
   }
 
 }
+
+template <class Fcn, class Scr, class Res>
+void core::FitCore<Fcn,Scr,Res>::calculateOmittedParameters(){
+  /////////////////////////////////////////
+  /// FIXME: for now, this method assumes that all parameters add up to one and that runMinos was called before
+  /////////////////////////////////////////
+  //define the last parameter
+  double last = std::accumulate(m_fitResults.begin(),
+                                m_fitResults.end(),
+                                1.,
+                                std::minus<double>()
+                                );
+  m_fitResults[m_paramConfiguration.getNumberOfParameters()-1] = last;
+
+  double lastError2Up = 0;
+  double lastError2Down = 0;
+  double lastError2Symm = 0;
+  int lastStatus = 0;
+  for (int i = 0; i < m_paramConfiguration.getNumberOfParametersConfigured(); ++i)
+  {
+    lastError2Up   += (m_minosUp[i]*m_minosUp[i]);
+    lastError2Down += (m_minosDown[i]*m_minosDown[i]);
+    lastError2Symm += ((m_fitSymmErrors[i]*m_fitSymmErrors[i]));
+    lastStatus += TMath::Abs(m_minosStatus[i]);
+  }
+
+  m_minosStatus.push_back(      lastStatus);
+  m_minosUp.push_back(          TMath::Sqrt(lastError2Up  ));
+  m_minosDown.push_back(        TMath::Sqrt(lastError2Down));
+  m_fitSymmErrors.push_back(    TMath::Sqrt(lastError2Symm));
+
+};
 //  
 // Methods
 //  

@@ -7,11 +7,14 @@
 #include <map>
 #include <vector>
 #include <stdexcept>
+#include <numeric>
 
 #include "Math/Factory.h"
 #include "Math/Functor.h"
 #include "Math/Minimizer.h"
 #include "Minuit2/Minuit2Minimizer.h"
+#include "TMath.h"
+
 
 #include "TStopwatch.h"
 #include "TEnv.h"
@@ -63,9 +66,11 @@ namespace core {
     
     //minos errors
     std::vector<int>    m_minosStatus		;
+    std::vector<double> m_fitResults		;
+    std::vector<double> m_fitSymmErrors		;
     std::vector<double> m_minosUp		;
     std::vector<double> m_minosDown		;
-    int m_parameter2omit;
+
 
     void printConfig ( )
     {
@@ -84,6 +89,25 @@ namespace core {
 
     void runMinos();
 
+    void calculateOmittedParameters();
+
+    void collectResults(){
+      m_fitResults.clear();
+      m_fitResults.reserve(m_paramConfiguration.getNumberOfParameters());
+
+      m_fitSymmErrors.clear();
+      m_fitSymmErrors.reserve(m_paramConfiguration.getNumberOfParameters());
+
+      std::copy(m_minimizer->X(),
+                m_minimizer->X()+m_paramConfiguration.getNumberOfParametersConfigured(),
+                m_fitResults.begin());
+      
+      std::copy(m_minimizer->Errors(),
+                m_minimizer->Errors()+m_paramConfiguration.getNumberOfParametersConfigured(),
+                m_fitSymmErrors.begin());
+
+    };
+
   public:
 
 
@@ -100,9 +124,10 @@ namespace core {
       m_configFile(""),
       m_environment(),
       m_minosStatus(),
+      m_fitResults(),
+      m_fitSymmErrors(),
       m_minosUp(),
-      m_minosDown(),
-      m_parameter2omit(-1)
+      m_minosDown()
     {};
     /**
      * Empty Destructor
@@ -151,7 +176,6 @@ namespace core {
       m_fcn = _function;
     }
 
-    void setParameterToOmit(const int& _idx){ m_parameter2omit = _idx;}
     /**
      * @return bool
      * @param  _name
@@ -267,6 +291,14 @@ namespace core {
       
 
 
+    }
+
+    const std::vector<double>* getFitResults() const{
+      return &m_fitResults;
+    }
+
+    const std::vector<double>* getFitSymmetricErrors() const{
+      return &m_fitSymmErrors;
     }
 
   };

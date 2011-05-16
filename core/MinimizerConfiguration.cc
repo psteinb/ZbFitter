@@ -60,9 +60,12 @@ void core::MinimizerConfiguration::loadItemsFromMap(){
       }
     }
     m_items.push_back(metaConfigItem);
-    //metaConfigItem.print();
+    itemsTotal++;
+    if(!metaConfigItem.omitMeFromFit)
+      itemsToConfigure++;
   }
-
+  
+  
 }
 
 
@@ -73,6 +76,12 @@ void core::MinimizerConfiguration::configureMinimizer(ROOT::Math::Minimizer* _mi
 
   for (short i =0; itItr!=itEnd; ++itItr,i++)
   {
+    if(itItr->omitMeFromFit){
+      itItr->print();
+      std::cout << "==> omitted from fit\n";
+      continue;
+    }
+
     if(itItr->isFixed()){
       _minim->SetFixedVariable(i,itItr->Name,itItr->Start);
       // std::cout << "setting "<<i<<" fixed\n" ;

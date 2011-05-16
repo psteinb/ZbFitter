@@ -18,6 +18,8 @@ struct  MinimConfigItem
   double LowLimit;
   double HighLimit;
   std::string Name;
+  bool omitMeFromFit;
+  bool omitSet;
   
   MinimConfigItem():
     Start(1.),
@@ -26,7 +28,9 @@ struct  MinimConfigItem
     highConstrain(false),
     LowLimit(0.),
     HighLimit(100.),
-    Name("Parameter")
+    Name("Parameter"),
+    omitMeFromFit(false),
+    omitSet(false)
   {};
 
   void setItem(const std::string& _key, const std::string& _value){
@@ -55,6 +59,12 @@ struct  MinimConfigItem
       HighLimit = string2double(_value);
       highConstrain = true;
     }
+    
+    if(tKey.Contains("omit",TString::kIgnoreCase) && !omitSet){
+      omitMeFromFit = true;
+      omitSet= true;
+    }
+
 
      
   }
@@ -67,10 +77,15 @@ struct  MinimConfigItem
   }
 
   void print() const {
-    std::cout << "MinimConfigItem\t"<< Name << "\t" << Start << ", " << Step
-              << ((isFixed()) ? " fixed " : " ") << " "
-              << ((lowConstrain) ? LowLimit : -999. ) << " "
-              << ((highConstrain) ? HighLimit : +999. ) << "\n";
+    std::cout << "MinimConfigItem\t"<< Name << "\t" << Start << ", " << Step;
+      if(!omitMeFromFit)
+        std::cout    << ((isFixed()) ? " fixed " : " ") << " "
+                     << ((lowConstrain) ? LowLimit : -999. ) << " "
+                     << ((highConstrain) ? HighLimit : +999. ) << " ";
+      else
+        std::cout    << " omitted from fit";
+
+    std::cout  << "\n";
    }
 
   double string2double( const std::string& _value){
@@ -100,12 +115,17 @@ class MinimizerConfiguration
 
   void determineItemsFromMap();
   void loadItemsFromMap();
+  
+  int itemsToConfigure;
+  int itemsTotal;
 
 public:
   MinimizerConfiguration():
     m_config(),
     m_items(),
-    m_names()
+    m_names(),
+    itemsToConfigure(0),
+    itemsTotal(0)
   {};
 
   virtual ~MinimizerConfiguration(){};
@@ -136,6 +156,10 @@ public:
       (*itItr).print();
   
   }
+
+
+  int getNumberOfParametersConfigured(){return itemsToConfigure;};
+  int getNumberOfParameters(){return itemsTotal;};
 
 };
 
