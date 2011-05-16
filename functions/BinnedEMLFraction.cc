@@ -22,7 +22,7 @@ double functions::BinnedEMLFraction::getLogTerm(const short& _bin,const double& 
   //double binWidth = m_templates.at(0).getHisto()->GetBinWidth(1);
   double value =0;  
 
-  for (short i=0; i < this->getNumberOfParameters()/*-1*/; ++i)
+  for (short i=0; i < (this->getNumberOfParameters()-1); ++i)
   {
 
     value+=((getParameterValue(i))*(m_templates.at(i).getContent()->at(_bin))*_total);
@@ -30,7 +30,10 @@ double functions::BinnedEMLFraction::getLogTerm(const short& _bin,const double& 
   }
 
 
-  double last = getParameters()->back();
+  double last = std::accumulate(getParameters()->begin(), 
+                                getParameters()->begin()+this->getNumberOfParameters()-1,
+                                1.,
+                                std::minus<double>());
 
   value+=((last)*(m_templates.back().getContent()->at(_bin))*_total);
   
@@ -45,25 +48,25 @@ double functions::BinnedEMLFraction::operator()(const double* _values ){
   
 
   
-  double meta[this->getNumberOfParameters()];
-  std::copy(_values, 
-            _values+this->getNumberOfParameters(),
-            meta);
+  // double meta[this->getNumberOfParameters()];
+  // std::copy(_values, 
+  //           _values+this->getNumberOfParameters(),
+  //           meta);
 
-  double lastParameter = std::accumulate(_values, 
-                                         _values+this->getNumberOfParameters()-1,
-                                         1.,
-                                         std::minus<double>());
-  meta[this->getNumberOfParameters()-1] = lastParameter;
+  // double lastParameter = std::accumulate(_values, 
+  //                                        _values+this->getNumberOfParameters()-1,
+  //                                        1.,
+  //                                        std::minus<double>());
+  // meta[this->getNumberOfParameters()-1] = lastParameter;
   
-  setParameters(meta);
+  setParameters(_values);
 
   double totalData = std::accumulate(m_data.getContent()->begin(), 
                                      m_data.getContent()->end(),
                                      0.);
 
   //the likelihood function
-  double logLHValue = totalData;
+  double logLHValue = 0.;
   
   
   
