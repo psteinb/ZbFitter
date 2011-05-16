@@ -83,6 +83,9 @@ namespace core {
       }
     }
 
+    void print() const;
+
+
     void loadDataToFunction(){
       m_fcn.setupFromInput(m_resources);
     };
@@ -93,10 +96,10 @@ namespace core {
 
     void collectResults(){
       m_fitResults.clear();
-      m_fitResults.reserve(m_paramConfiguration.getNumberOfParameters());
+      m_fitResults.resize(m_paramConfiguration.getNumberOfParameters(),0.);
 
       m_fitSymmErrors.clear();
-      m_fitSymmErrors.reserve(m_paramConfiguration.getNumberOfParameters());
+      m_fitSymmErrors.resize(m_paramConfiguration.getNumberOfParameters(),0.);
 
       std::copy(m_minimizer->X(),
                 m_minimizer->X()+m_paramConfiguration.getNumberOfParametersConfigured(),

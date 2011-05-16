@@ -73,13 +73,7 @@ int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   /////////////////////////////////////////
   if( m_result ){
     printTo(m_result);
-    
   }
-  else{
-    if(_verbose){
-      m_minimizer->PrintResults();
-    }
-  }  
   
   if(_verbose){
   std::cout << "FitCore::fit \t  CpuTime = \t"<< std::setw(10) << std::setprecision(6)<< watch.CpuTime() << "\n";
@@ -91,6 +85,10 @@ int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   if(m_paramConfiguration.getNumberOfParametersConfigured()!=m_paramConfiguration.getNumberOfParameters())
     this->calculateOmittedParameters();
     
+  if(_verbose){
+    this->print();
+  }
+  
   return value;
 }
 
@@ -108,6 +106,27 @@ void core::FitCore<Fcn,Scr,Res>::printTo(Res* _result=0){
   else
     throw std::runtime_error("FitCore::printTo AbsResult pointer invalid");
 }
+
+template <class Fcn, class Scr, class Res>
+void core::FitCore<Fcn,Scr,Res>::print() const{
+  
+  std::vector<double>::const_iterator resItr = m_fitResults.begin();
+  std::vector<double>::const_iterator resEnd = m_fitResults.end();
+  std::cout << "FitResults :\t\n";
+  for (short par=0;resItr!=resEnd;++resItr,par++)
+  {
+    
+    std::cout << m_paramConfiguration.getNames()->at(par) << ":\t" <<  (*resItr);
+    if(TMath::Abs(m_minosStatus[par])<10){
+      std::cout << " + " << m_minosUp[par] << " - " <<  TMath::Abs(m_minosDown[par]);
+    }
+    else
+      std::cout << " +/- " << m_fitSymmErrors[par];
+    std::cout << "\n";
+  }
+  
+}
+
 
 template <class Fcn, class Scr, class Res>
 void core::FitCore<Fcn,Scr,Res>::runMinos(){
@@ -146,12 +165,13 @@ void core::FitCore<Fcn,Scr,Res>::calculateOmittedParameters(){
   /// FIXME: for now, this method assumes that all parameters add up to one and that runMinos was called before
   /////////////////////////////////////////
   //define the last parameter
+  int lastIdx = m_paramConfiguration.getNumberOfParameters()-1;
   double last = std::accumulate(m_fitResults.begin(),
                                 m_fitResults.end(),
                                 1.,
                                 std::minus<double>()
                                 );
-  m_fitResults[m_paramConfiguration.getNumberOfParameters()-1] = last;
+  m_fitResults[lastIdx] = last;
 
   double lastError2Up = 0;
   double lastError2Down = 0;
@@ -165,10 +185,10 @@ void core::FitCore<Fcn,Scr,Res>::calculateOmittedParameters(){
     lastStatus += TMath::Abs(m_minosStatus[i]);
   }
 
-  m_minosStatus.push_back(      lastStatus);
-  m_minosUp.push_back(          TMath::Sqrt(lastError2Up  ));
-  m_minosDown.push_back(        TMath::Sqrt(lastError2Down));
-  m_fitSymmErrors.push_back(    TMath::Sqrt(lastError2Symm));
+  m_minosStatus[lastIdx] = lastStatus;
+  m_minosUp[lastIdx] = TMath::Sqrt(lastError2Up  );
+  m_minosDown[lastIdx] = -1*TMath::Sqrt(lastError2Down);
+  m_fitSymmErrors[lastIdx] = TMath::Sqrt(lastError2Symm);
 
 };
 //  

@@ -135,6 +135,13 @@ public:
       m_names = _names;
   };
 
+  const std::vector<std::string>* getNames() const {
+    if(m_names.size())
+      return &m_names;
+    else
+      0;
+  };
+
   void configureMinimizer(ROOT::Math::Minimizer*);
 
   void init(const std::map<std::string,std::string>& _map,const std::vector<std::string>& _names){
