@@ -19,6 +19,7 @@ public:
 
   std::string p_dataTitle  ;
   std::string p_tempTitle  ;
+  std::string p_protoTitle  ;
 
   int         p_msgLevel;
   int         p_threads;
@@ -36,6 +37,7 @@ public:
   p_fitMode  ("Scan"),
   p_dataTitle("data"),
   p_tempTitle("mcb,mcc,mcl"),
+  p_protoTitle(""),
   p_msgLevel(3),
   p_threads(1),
   p_rebin(1),
@@ -62,6 +64,7 @@ ConfPseudoExperiment::ConfPseudoExperiment(int inArgc, char** inArgv):
   p_fitMode  ("Scan"),
   p_dataTitle("data"),
   p_tempTitle("mcb,mcc,mcl"),
+  p_protoTitle(""),
   p_msgLevel(3),
   p_threads(1),
   p_rebin(1),
@@ -78,7 +81,7 @@ void ConfPseudoExperiment::parse(){
 
 
   int opt = 0;
-  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:r:i:E:M:D:T:P:h" ))!=-1 ){
+  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:r:i:E:M:D:T:P:p:h" ))!=-1 ){
     std::istringstream instream;
     std::ostringstream outstream;
     size_t found;
@@ -94,6 +97,10 @@ void ConfPseudoExperiment::parse(){
     case 'T':
       p_tempTitle = std::string(optarg);
       break;
+    case 'p':
+      p_protoTitle = std::string(optarg);
+      break;
+
     case 'o':
       p_outputfile = std::string(optarg);
       break;
@@ -193,6 +200,7 @@ void ConfPseudoExperiment::printHelp(){
   std::cout << "\t -D <ObjectName> define data object to retrieve from root file" << std::endl;
   std::cout << "\t -P <scale> scale data per experiment by <scale>" << std::endl;
   std::cout << "\t -T <ObjectName> define template (+systematics) object(s) to retrieve from root file" << std::endl;
+  std::cout << "\t -p <ObjectName> define proto object(s) to retrieve from root file" << std::endl;
   std::cout << "\t -s <step size> define step size to go from 0 .. 1 of the b fraction" << std::endl;
   std::cout << "\t -h print this help" << std::endl;
   std::cout << std::endl;
@@ -216,6 +224,7 @@ void ConfPseudoExperiment::printConf(){
   std::cout << "[-i] iter = "<< p_nIter << std::endl;
   std::cout << "[-D] dataTitle = "<< p_dataTitle << std::endl;
   std::cout << "[-T] tempTitle = "<< p_tempTitle << std::endl;
+  std::cout << "[-p] protoTitle = "<< p_protoTitle << std::endl;
   
   
 }

@@ -15,6 +15,7 @@
 #include "Studies/PseudoStudy.hh"
 
 #include "TString.h"
+#include "TObjString.h"
 #include "TRegexp.h"
 #include "TGraphErrors.h"
 #include "TCanvas.h"
@@ -28,9 +29,57 @@
 #include "AtlasStyle.h"
 
 
-struct defaultMCValues
+class MCValues
 {
+  bool externalProtoFunctions;
+  std::vector<TH1*> m_functions;
+  std::vector<std::string> m_histoNames;
+  TFile* m_file;
   
+  void loadHistoNamesFromString(const std::string& _text=""){
+    
+    TString content = _text.c_str();
+    TObjArray* tokens = content.Tokenize(",");
+    m_histoNames.clear();
+    m_histoNames.reserve(tokens->GetEntries());
+    for (int i = 0; i < tokens->GetEntries(); ++i)
+    {
+      m_histoNames.push_back(dynamic_cast<TObjString*>(tokens->At(i))->GetString().Data());
+    }
+  }
+  
+public:
+  MCValues(const std::string& _file="",const std::string& _text=""):
+    externalProtoFunctions(!_text.empty()),
+    m_functions(),
+    m_histoNames(),
+    m_file(TFile::Open(_file.c_str()))
+  {
+    loadHistoNamesFromString(_text);
+    m_functions.clear();
+    m_functions.reserve(m_histoNames.size());
+    TH1* meta = 0;
+    for (int i = 0; i < m_histoNames.size(); ++i)
+    {
+      meta = 0;
+      if(m_file && !m_file->IsZombie()){
+        std::string name = m_histoNames[i];
+        name += "_proto";
+        meta = dynamic_cast<TH1*>(m_file->Get(m_histoNames[i].c_str())->Clone(name.c_str()));
+        meta->SetDirectory(0);
+      }
+      if (meta)
+      {
+        m_functions.push_back(meta);
+      }
+        
+      
+    }
+  }
+
+  const std::vector<TH1*>* getProtoFunctions(){
+    return &m_functions;
+  }
 
   void operator()(TH1* _total, const std::vector<TH1*>& _input){
 
@@ -38,10 +87,13 @@ struct defaultMCValues
       _total->Reset("MICE");
       _total->ResetStats();}
     
-
+    bool equalInputs = _input.size()==m_functions.size();
     for (int i = 0; i < _input.size(); ++i)
     {
-      _total->Add(_input[i]);
+      if(externalProtoFunctions && equalInputs)
+        _total->Add(m_functions[i]);
+      else
+        _total->Add(_input[i]);
     }
     
   };
@@ -132,17 +184,30 @@ int main(int argc, char* argv[])
   input->getTemplatesDeepCopy(m_templates);
   TH1* m_data =  input->getDataDeepCopy();
 
-   // ----- EXPECTED VALUES ----- 
+   
+
+  // ------- proto functions -----
+  MCValues aProtoMaker(conf.p_datadir.c_str(),conf.p_protoTitle);
+  std::vector<TH1*> m_protoFunctions(aProtoMaker.getProtoFunctions()->begin(),
+                                     aProtoMaker.getProtoFunctions()->end());
+
+  // ----- EXPECTED VALUES ----- 
   std::vector<double> expected          ;
   std::vector<double> expectedErrors    ;
+  if(conf.p_protoTitle.empty())
   createExpectedValuesFromTemplates(m_templates,
                                     expected,          
                                     expectedErrors,
                                     m_data->Integral()*TMath::Abs(conf.p_dataScale));
-
+  else
+    createExpectedValuesFromTemplates(m_protoFunctions,
+                                      expected,          
+                                      expectedErrors,
+                                      m_data->Integral()*TMath::Abs(conf.p_dataScale));
    // ----- PSEUDO EXPERIMENTS ----- 
+
   double scaleExpectation = TMath::Abs(conf.p_dataScale);
-  PseudoStudy<defaultMCValues,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEMLFraction>  
+  PseudoStudy<MCValues,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEMLFraction>  
     aPseudoStudy(m_templates,
                  expected,
                  expectedErrors,
@@ -152,6 +217,7 @@ int main(int argc, char* argv[])
                  );
 
   aPseudoStudy.setInput(input);
+  aPseudoStudy.setProtoCreator(aProtoMaker);
   aPseudoStudy.setFitterConfigFile(conf.p_configFile);
   aPseudoStudy.setFitEngine(conf.p_fitEngine);
   aPseudoStudy.setFitMode(conf.p_fitMode);
