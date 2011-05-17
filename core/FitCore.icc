@@ -105,9 +105,25 @@ int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
 template <class Fcn, class Scr, class Res>
 void core::FitCore<Fcn,Scr,Res>::printTo(Res* _result=0){
   if(_result){
+
     _result->setMinimizer(dynamic_cast<ROOT::Math::Minimizer*>(m_minimizer));
-    _result->setFunction(dynamic_cast< Fcn* >(&m_fcn));
+    _result->setFunction(dynamic_cast<functions::AbsFittingFunction*>(&m_fcn));
+    _result->setResults(m_fitResults);
+    _result->setSymmErrors(m_fitSymmErrors);
     _result->setMinosResults(m_minosStatus,m_minosUp,m_minosDown);
+    //this is ugly, but I didn't want to change the api too much
+    std::vector<std::string> names(m_paramConfiguration.getConfiguredNames()->begin(),
+                                   m_paramConfiguration.getConfiguredNames()->end());
+    _result->setParameterNames(names);
+
+    //this is a crude method to determine which object was used for Fcn
+    //but I didn't consider using sizeof so elegant
+    double sum = std::accumulate(m_fitResults.begin(),m_fitResults.end());
+    sum *= 1/(m_fitResults.size());
+    if (sum<1.)
+      _result->doFractions(true);
+
+    //do printing
     _result->print();
     
   }

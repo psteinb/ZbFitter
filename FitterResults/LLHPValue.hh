@@ -29,6 +29,8 @@ private:
   double m_pValue       ;
   double m_pValueError  ;
 
+  TH1* createIntegralOverlay(const int& _start=1);
+
 public:
 
   // Constructors/Destructors
@@ -54,7 +56,7 @@ public:
   {
     if(!m_rscFile->IsZombie()){
       m_maxLLH = dynamic_cast<TH1*>(m_rscFile->Get("maxLLH")) ;  
-      //m_maxLLH -> Scale(1/m_maxLLH->Integral());
+    
     }
   };
 
@@ -81,15 +83,6 @@ public:
       m_maxLLH->Sumw2();
       //m_maxLLH -> Scale(1/m_maxLLH->Integral());
     }
-  };
-  
-
-  void integrationBoundsForMaxLLH(const double& _value, int& _low, int& _high){
-    int maxBin = m_maxLLH->GetMaximumBin();
-    int diff = TMath::Abs(maxBin-m_maxLLH->GetXaxis()->FindBin(_value));
-    
-    _low = maxBin - diff;
-    _high = maxBin + diff;
   };
 
   void calculate();

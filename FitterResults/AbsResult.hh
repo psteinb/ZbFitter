@@ -2,6 +2,10 @@
 #ifndef ABSRESULT_H
 #define ABSRESULT_H
 #include "Math/Minimizer.h"
+#include "functions/AbsFittingFunction.hh"
+
+#include "TH1.h"
+
 
 class TObject;
 
@@ -17,10 +21,17 @@ namespace FitterResults {
 class AbsResult
 {
   ROOT::Math::Minimizer* m_minimizer;
-  functions::AbsFittingFunction* m_function;
-  std::vector<double> m_minosUp;
-  std::vector<double> m_minosDown;
-  std::vector<int>    m_minosStatus;
+   functions::AbsFittingFunction* m_function;
+
+  bool m_doFractions;
+  int m_numOfParameters;
+  std::vector<std::string>      m_parameterNames	;
+  std::vector<double> 		m_fitResults		;
+  std::vector<double> 		m_fitSymmErrors		;
+  std::vector<double> 		m_minosUp		;
+  std::vector<double> 		m_minosDown		;
+  std::vector<int>    		m_minosStatus		;
+  std::vector<TH1*>    		m_templatesScaled	;
 
 protected:
   
@@ -30,26 +41,79 @@ public:
   AbsResult( ROOT::Math::Minimizer* _min=0) : 
     m_minimizer(_min),
     m_function(0),
+    m_doFractions(false),
+    m_numOfParameters(0),
+    m_parameterNames(),        
+    m_fitResults(),            
+    m_fitSymmErrors(),         
     m_minosUp(),    
     m_minosDown(),  
-    m_minosStatus()
+    m_minosStatus(),
+    m_templatesScaled()
   {};
 
   //we don't take owner ship, we just want to read values
   ~AbsResult(){};
 
-  //getter/setter for minimizer
-  void setMinimizer( ROOT::Math::Minimizer* _min=0){m_minimizer = _min;};
-   ROOT::Math::Minimizer* getMinimizer(){ return m_minimizer;};
-
-  //getter/setter for function
-  void setFunction( functions::AbsFittingFunction* _min=0){m_function = _min;};
-   functions::AbsFittingFunction* getFunction(){ return m_function;};
-
   /**
      print method to save all results to disc / print them to the screen / ...
    */
   virtual void print ( ) = 0;
+
+  /**
+     utility method to scale all templates to the fitted values
+   */
+  virtual void setupHistos();
+
+  /////////////////////////////////////////
+  /// getter/setters
+
+  //setter for minimizer
+  void setMinimizer( ROOT::Math::Minimizer* _min=0){m_minimizer = _min;};
+  //getter for minimizer
+  ROOT::Math::Minimizer* getMinimizer(){ return m_minimizer;};
+
+  //setter for function
+  void setFunction( functions::AbsFittingFunction* _new=0){m_function = _new;};
+  //getter for function
+  functions::AbsFittingFunction* getFunction(){ return m_function;};
+
+
+  void setResults(const std::vector<double>& _new){
+    m_fitResults = _new;
+    m_numOfParameters = m_fitResults.size();
+  }
+
+  void setSymmErrors(const std::vector<double>& _new){
+    m_fitSymmErrors = _new;
+  }
+
+  void setParameterNames(const std::vector<std::string>& _new){
+    m_parameterNames = _new;
+  }
+
+  const std::vector<double>* getResults() const {
+    return &m_fitResults;
+  }
+
+  const std::vector<double>* getSymmErrors() const {
+    return &m_fitSymmErrors;
+  }
+
+  const std::vector<std::string>* getParameterNames() const {
+    return &m_parameterNames;
+  }
+  
+  const std::vector<TH1*>* getScaledTemplateHistograms() const {
+    return &m_templatesScaled;
+  }
+
+  int getNumberOfParameters() const {
+    return m_numOfParameters;
+  }
+
+  void doFractions(const bool& _value=true){m_doFractions = _value;};
+  bool isFractionFit() const {return m_doFractions;};
   
   void setMinosResults(const std::vector<int>& _status,
                   const std::vector<double>& _up,

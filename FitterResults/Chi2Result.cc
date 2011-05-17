@@ -22,14 +22,11 @@ void FitterResults::Chi2Result::calculate(){
     std::cerr << __FILE__ <<":"<< __LINE__ <<"\t no function given!\n";
     return;
   }
-
-  setupParameters();
+  m_dataHisto = getFunction()->getData()->getHisto();
   
-  setupInputHistos();
-
-  const double *xs = getMinimizer()->X();
-  const double *xErrors = getMinimizer()->Errors();
   
+  setupHistos();
+
 
   //real work starts here [REFACTOR!]
   //goal: calculate a chi2 over the bins fitted
@@ -39,23 +36,39 @@ void FitterResults::Chi2Result::calculate(){
   double exp = 0;
   double uncert = 0;
   int emptyBins = 0;
-  bool allTemplatesZero = false;
+
+  double fitted =0;
+  double fittedSymmError =0;
+  double scaledSymmError =0;
+
+  double dataIntegral = m_dataHisto->Integral();
+
   for (int i = 1; i < m_dataHisto->GetNbinsX(); ++i)
   {
     data = m_dataHisto->GetBinContent(i);
     exp = 0.;
     uncert = 0.;
-    allTemplatesZero = true;
-    for (int p = 0; i < m_numOfParameters; ++i)
+
+    for (int p = 0; i < getNumberOfParameters(); ++i)
     {
-      exp += xs[p]*m_inputHistos[p]->GetBinContent(i);
-      uncert += (xErrors[p]*xErrors[p])*(m_inputHistos[p]->GetBinContent(i)*m_inputHistos[p]->GetBinContent(i));
-      uncert += (xs[p]*xs[p])*(m_inputHistos[p]->GetBinError(i)*m_inputHistos[p]->GetBinError(i));
+      fitted = getResults()->at(p);
+      fittedSymmError = getSymmErrors()->at(p);
+      scaledSymmError = (fittedSymmError/fitted)*getScaledTemplateHistograms()->at(p)->GetBinContent(i);
+      exp += getScaledTemplateHistograms()->at(p)->GetBinContent(i);
+
+      if(isFractionFit()){
+        uncert += scaledSymmError*scaledSymmError*dataIntegral*dataIntegral;
+      }
+      else{
+        uncert += scaledSymmError*scaledSymmError;
+      }
+
+
     }
-    allTemplatesZero = exp;
+
     
     if(exp){
-      m_chi2+= ((data-exp)*(data-exp))/(exp);
+      m_chi2+= ((data-exp)*(data-exp))/(uncert);
       
     }
     else

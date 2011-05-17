@@ -22,50 +22,22 @@ private:
   int m_verbosity;
   std::string m_filename;
   std::string m_filenameCore;
-  std::vector<TH1*> m_inputHistos;
-  TH1* m_dataHisto;
-  int m_numOfParameters;
+
+  const TH1* m_dataHisto;
+
   double m_chi2;
   int m_ndf;
   double m_chi2prob;
 
-
-  void cleanUp(){
-    // for (int i = 0; i < m_inputHistos.size(); ++i)
-    // {
-    //   if(m_inputHistos[i])
-    //     delete m_inputHistos[i];
-    // }
-    m_inputHistos.clear();
-    //    delete m_dataHisto;m_dataHisto=0;
-  }
-
-  void setupParameters(){
-    m_numOfParameters = std::max(getMinimizer()->NDim(),getMinimizer()->NFree());
-    cleanUp();
-    m_inputHistos.reserve(m_numOfParameters);
-  }
   
-  void setupInputHistos(){
-    TH1* metaTemplate = 0;
-    for (int i = 0; i < m_numOfParameters; ++i)
-    {
-      metaTemplate = dynamic_cast<TH1*>(getFunction()->getTemplate(i)->getHisto()->Clone(appendToNameString<int>(i).c_str()));
-      metaTemplate->SetDirectory(0);
-      metaTemplate->Scale(1./metaTemplate->Integral());
-      m_inputHistos.push_back(metaTemplate);
-    }
-    m_dataHisto = dynamic_cast<TH1*>(getFunction()->getData()->getHisto()->Clone(appendToNameString<std::string>("_data").c_str()));
-    m_dataHisto->SetDirectory(0);
-  }
   
-  template<typename T>
-  std::string appendToNameString(const T& _value){
-    std::ostringstream text;
-    text.str(m_filename);
-    text << _value;
-    return text.str();
-  }
+  // template<typename T>
+  // std::string appendToNameString(const T& _value){
+  //   std::ostringstream text;
+  //   text.str(m_filename);
+  //   text << _value;
+  //   return text.str();
+  // }
 
 public:
 
@@ -95,8 +67,6 @@ public:
    * Empty Destructor
    */
   virtual ~Chi2Result ( ){};
-
-  
 
   virtual void print ( );
   

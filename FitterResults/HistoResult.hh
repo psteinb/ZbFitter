@@ -23,58 +23,35 @@ private:
   int m_verbosity;
   std::string m_filename;
   std::string m_filenameCore;
-  std::vector<TH1*> m_inputHistos;
   TH1* m_dataHisto;
-  const double* m_results;
-  const double* m_resultsSymErrors;
-  int m_numOfParameters;
 
-  void cleanUp(){
-    // for (int i = 0; i < m_inputHistos.size(); ++i)
-    // {
-    //   if(m_inputHistos[i])
-    //     delete m_inputHistos[i];
-    // }
-    m_inputHistos.clear();
-    delete m_dataHisto;m_dataHisto=0;
-  }
-
-  void setupParameters(){
-    m_numOfParameters = std::max(getMinimizer()->NDim(),getMinimizer()->NFree());
-    cleanUp();
-    m_inputHistos.reserve(m_numOfParameters);
-    m_results = getMinimizer()->X();
-    m_resultsSymErrors = getMinimizer()->Errors();
-  };
-
-  void setupInputHistos(){
-    TH1* meta = 0;
-    for (int i = 0; i < m_numOfParameters; ++i)
-    {
-      meta = dynamic_cast<TH1*>(getFunction()->getTemplate(i)->getHisto()->Clone(appendToNameString<int>(i).c_str()));
-      meta->SetDirectory(0);
-      m_inputHistos.push_back(meta);
-    }
-    m_dataHisto = dynamic_cast<TH1*>(getFunction()->getData()->getHisto()->Clone(appendToNameString<std::string>("_data").c_str()));
-    m_dataHisto->SetDirectory(0);
-  }
 
   void treatInputHistosForResult(){
     int color = 2;
-    for (int i = 0; i < m_numOfParameters; ++i,color++)
+    for (int i = 0; i < getNumberOfParameters(); ++i,color++)
     {
-      m_inputHistos[i]->Scale(m_results[i]/m_inputHistos[i]->Integral());
-      m_inputHistos[i]->SetFillColor(color);
-      m_inputHistos[i]->SetLineColor(color);
-      m_inputHistos[i]->SetMarkerColor(color);
+      getScaledTemplateHistograms()->at(i)->SetFillColor(color);
+      getScaledTemplateHistograms()->at(i)->SetLineColor(color);
+      getScaledTemplateHistograms()->at(i)->SetMarkerColor(color);
     }
   }
 
   void joinHistosToFile(TFile* _file=0){
     if(_file && !(_file->IsZombie())){
-      for (int i = 0; i < m_numOfParameters; ++i)
+      TH1* meta=0;
+      for (int i = 0; i < getNumberOfParameters(); ++i)
       {
-        m_inputHistos[i]->SetDirectory(_file->GetDirectory("/"));
+        std::string dirname = getScaledTemplateHistograms()->at(i)->GetDirectory()->GetPath();
+        if(dirname.empty())
+          getScaledTemplateHistograms()->at(i)->SetDirectory(_file->GetDirectory("/"));
+        else{
+          std::cout << __FILE__ << ":" << __LINE__ << "histo named ("<<getScaledTemplateHistograms()->at(i)->GetName() << ") already has a file, cloning it!\n" ;
+          std::string newname = getScaledTemplateHistograms()->at(i)->GetName();
+          newname += "_Result";
+          
+          meta = dynamic_cast<TH1*>(getScaledTemplateHistograms()->at(i)->Clone("newname"));
+          meta->SetDirectory(_file->GetDirectory("/"));
+        }
       }
     }
     else
@@ -96,11 +73,7 @@ public:
     AbsResult(_min),
     m_verbosity(_verb),
     m_filename(_text),
-    m_inputHistos(),
-    m_dataHisto(0),
-    m_results(0),
-    m_resultsSymErrors(0),
-    m_numOfParameters(0)
+    m_dataHisto(0)
   {
     TH1::AddDirectory(kFALSE);
   };
@@ -122,7 +95,7 @@ public:
     return text.str();
   }
 
-  std::string getParameterResult(const int&,double);
+  std::string getParameterResult(const int& _idx,const double& _norm=1.);
   
 
 

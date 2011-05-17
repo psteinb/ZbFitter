@@ -1,4 +1,5 @@
 #include "HistoResult.hh"
+#include <sstream>
 
 #include "TH1D.h"
 #include "TMath.h"
@@ -23,9 +24,10 @@ void FitterResults::HistoResult::print(){
     return;
   }
 
-  setupParameters();
-  
-  setupInputHistos();
+  m_dataHisto = dynamic_cast<TH1*>(getFunction()->getData()->getHisto()->Clone("Data"));
+  m_dataHisto->SetDirectory(0);
+
+  setupHistos();
 
   TFile* newFile=0;
   std::string name = m_filename;
@@ -40,17 +42,27 @@ void FitterResults::HistoResult::print(){
   treatInputHistosForResult();
   
   THStack newStack(appendToNameString<std::string>("_stack").c_str(),"");
-  
-  for (int i = 0; i < m_numOfParameters; ++i)
+  TH1* addedTemplates = (TH1*)getScaledTemplateHistograms()->front()->Clone("added");
+  addedTemplates->SetDirectory(0);
+  addedTemplates->Reset("MICE");
+  addedTemplates->ResetStats();
+
+  for (int i = 0; i < getNumberOfParameters(); ++i)
   {
-    newStack.Add(m_inputHistos[i]);
-    
+    newStack.Add(getScaledTemplateHistograms()->at(i));
+    addedTemplates->Add(getScaledTemplateHistograms()->at(i));
   }
 
+  //---------------- KOLMOGOROV ---------------- 
+  double ksProb = m_dataHisto->KolmogorovTest(addedTemplates,"D");
+  std::cout << "KOLMOGOROV prob = " << ksProb << std::endl;
+
+
+  //---------------- PLOTS ---------------- 
   TCanvas myC(m_filename.c_str(),"",2400,1200);
   myC.Clear();
   myC.Draw();
-  myC.Divide(m_numOfParameters,2);
+  myC.Divide(getNumberOfParameters(),2);
 
   //---------------- DATA and fitted MC histos ---------------- 
   myC.cd(1);
@@ -62,9 +74,9 @@ void FitterResults::HistoResult::print(){
   m_dataHisto->Draw("e1same");
   TLegend leg(0.6,0.7,0.92,0.92);
   leg.AddEntry(m_dataHisto,"data","lep");
-  for (int i = 0; i < m_numOfParameters; ++i)
+  for (int i = 0; i < getNumberOfParameters(); ++i)
   {
-    leg.AddEntry(m_inputHistos[i],getMinimizer()->VariableName(i).c_str(),"lep");
+    leg.AddEntry(getScaledTemplateHistograms()->at(i),getParameterNames()->at(i).c_str(),"lep");
   }
   leg.SetFillColor(kWhite);
   leg.SetLineColor(kWhite);
@@ -73,22 +85,36 @@ void FitterResults::HistoResult::print(){
   //---------------- RESUTLS ---------------- 
   myC.cd(2);
   TPaveText mtext(0.2,0.2,.9,.9,"ARC");
-  for (int i = 0; i < m_numOfParameters; ++i)
+  for (int i = 0; i < getNumberOfParameters(); ++i)
   {
-    mtext.AddText(getParameterResult(i,1.).c_str());
+    mtext.AddText(getParameterResult(i).c_str());
   }
   mtext.Draw();
+
+  if(isFractionFit()){
+    //---------------- RESULTS ON FRACTIONS ---------------- 
+    myC.cd(3);
+    TPaveText abstext(0.2,0.2,.9,.9,"ARC");
+    std::ostringstream label;
+    label.str("");
+    label << "data: " << m_dataHisto->Integral();
+    abstext.SetLabel(label.str().c_str());
+    for (int i = 0; i < getNumberOfParameters(); ++i)
+    {
+      abstext.AddText(getParameterResult(i,m_dataHisto->Integral()).c_str());
+    }
+    abstext.Draw();
+  }
   // myC.cd(3);
   // m_dataHisto->Draw();
 
   //---------------- TEMPLATES USED ---------------- 
-  int CanvasTot = m_numOfParameters*2;
-  int CanvasIdx = CanvasTot-m_numOfParameters+1;
-  for (int i = 0; i < (m_numOfParameters); ++i,CanvasIdx++)
+  int CanvasTot = getNumberOfParameters()*2;
+  int CanvasIdx = CanvasTot-getNumberOfParameters()+1;
+  for (int i = 0; i < (getNumberOfParameters()); ++i,CanvasIdx++)
   {
     myC.cd(CanvasIdx);
-    m_inputHistos[i]->Scale(1/m_inputHistos[i]->Integral());
-    m_inputHistos[i]->Draw();
+    getFunction()->getTemplate(i)->getHisto()->DrawCopy();
   }
     
   myC.Update();
@@ -98,16 +124,16 @@ void FitterResults::HistoResult::print(){
   newFile->Close();
 }
 
-std::string FitterResults::HistoResult::getParameterResult(const int& _idx, double _norm=1.){
+std::string FitterResults::HistoResult::getParameterResult(const int& _idx, const double& _norm){
   std::ostringstream _text;
   double centralValue = 0.;
-  if(_idx>=getFunction()->getNumberOfParameters()){
+  if(_idx>=getNumberOfParameters()){
     _text << ">> variable unknown <<";
 
   }
   else{
-    centralValue = _norm*getMinimizer()->X()[_idx];
-    _text << getMinimizer()->VariableName(_idx) << " : (";
+    centralValue = (getResults()->at(_idx))*_norm;
+    _text << getParameterNames()->at(_idx) << " : (";
     _text << centralValue;
 
     double Up=0;
@@ -115,7 +141,7 @@ std::string FitterResults::HistoResult::getParameterResult(const int& _idx, doub
     double rUp=0;
     double rDown=0;
 
-    double Error=getMinimizer()->Errors()[_idx];
+    double Error=getSymmErrors()->at(_idx);
     double relError = Error/centralValue;
     int minosStatus = 0;
     getMinosResultsForIndex(_idx,minosStatus,Up,Down);
@@ -126,7 +152,7 @@ std::string FitterResults::HistoResult::getParameterResult(const int& _idx, doub
        rUp = Up/centralValue;
        rDown = Down/centralValue;
 
-       _text << "^{" << centralValue*rUp << "}_{"<< centralValue*rDown << "})";
+       _text << "^{ " << centralValue*rUp << "}_{ "<< centralValue*rDown << "} )";
      }
   }
     
