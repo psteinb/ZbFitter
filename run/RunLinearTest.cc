@@ -33,7 +33,7 @@
 
 class Conductor{
 
-  std::vector<ExperimentPerformer*>* m_workers;
+  std::vector<BasePerformer*>* m_workers;
 
 public:
 
@@ -41,11 +41,11 @@ public:
     m_workers(_rhs.m_workers)
   {}
 
-  Conductor(std::vector<ExperimentPerformer*>* _workers):
+  Conductor(std::vector<BasePerformer*>* _workers):
     m_workers(_workers)
   {}
 
-  // void operator()(const ExperimentPerformer& _performer){
+  // void operator()(const BasePerformer& _performer){
     
   //   _performer.experiment();
 
@@ -53,7 +53,7 @@ public:
 
   void operator()(const tbb::blocked_range<size_t>& _range) const {
 
-    std::vector<ExperimentPerformer*>* metaWorkers = m_workers;
+    std::vector<BasePerformer*>* metaWorkers = m_workers;
 
     for (size_t i = _range.begin(); i < _range.end(); ++i)
     {
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
   std::generate(steps.begin(),steps.end(),StepValueGenerator(conf.p_stepsize));
 
   //setup workers
-  std::vector<ExperimentPerformer*> workers;
+  std::vector<BasePerformer*> workers;
   workers.reserve(steps.size());
   ExperimentPerformer* meta =0;
   std::vector<double> unscaledValue;
@@ -177,8 +177,8 @@ int main(int argc, char* argv[])
   // TGraphErrors bGraph(numCalls);
   // TGraphErrors cGraph(numCalls);
   // TGraphErrors lGraph(numCalls);
-  std::vector<ExperimentPerformer*>::const_iterator rItr = workers.begin();
-  std::vector<ExperimentPerformer*>::const_iterator rEnd = workers.end();
+  std::vector<BasePerformer*>::const_iterator rItr = workers.begin();
+  std::vector<BasePerformer*>::const_iterator rEnd = workers.end();
   
 
   for (short idx = 0;rItr!=rEnd; ++rItr,idx++)

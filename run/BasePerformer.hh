@@ -74,7 +74,9 @@ public:
     m_expected = _new;
   }
 
-
+  virtual void experiment() = 0 ;
+  virtual void print() const = 0;
+  virtual void prepare() = 0;
 };
 
 //small class
