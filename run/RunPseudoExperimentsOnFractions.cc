@@ -194,6 +194,7 @@ int main(int argc, char* argv[])
   // ----- EXPECTED VALUES ----- 
   std::vector<double> expected          ;
   std::vector<double> expectedErrors    ;
+
   if(conf.p_protoTitle.empty())
   createExpectedValuesFromTemplates(m_templates,
                                     expected,          
