@@ -68,22 +68,30 @@ int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   value = m_minimizer->Status();
 
   
-  /////////////////////////////////////////
-  /// present results
-  /////////////////////////////////////////
-  if( m_result ){
-    printTo(m_result);
-  }
   
   if(_verbose){
   std::cout << "FitCore::fit \t  CpuTime = \t"<< std::setw(10) << std::setprecision(6)<< watch.CpuTime() << "\n";
   std::cout << "FitCore::fit \t  RealTime = \t"<< std::setw(10) << std::setprecision(4)<< watch.RealTime() << "\n";
   }
   
+  /////////////////////////////////////////
+  /// collect/treat results
+  /////////////////////////////////////////
   this->runMinos();
+
   this->collectResults();
+
+  
   if(m_paramConfiguration.getNumberOfParametersConfigured()!=m_paramConfiguration.getNumberOfParameters())
     this->calculateOmittedParameters();
+
+
+  /////////////////////////////////////////
+  /// present results
+  /////////////////////////////////////////
+  if( m_result ){
+    printTo(m_result);
+  }
     
   if(_verbose){
     this->print();
@@ -116,7 +124,7 @@ void core::FitCore<Fcn,Scr,Res>::print() const{
   for (short par=0;resItr!=resEnd;++resItr,par++)
   {
     
-    std::cout << m_paramConfiguration.getNames()->at(par) << ":\t" <<  (*resItr);
+    std::cout << m_paramConfiguration.getConfiguredNames()->at(par) << ":\t" <<  (*resItr);
     if(TMath::Abs(m_minosStatus[par])<10){
       std::cout << " + " << m_minosUp[par] << " - " <<  TMath::Abs(m_minosDown[par]);
     }
@@ -124,6 +132,7 @@ void core::FitCore<Fcn,Scr,Res>::print() const{
       std::cout << " +/- " << m_fitSymmErrors[par];
     std::cout << "\n";
   }
+  std::cout << "sum = " << std::accumulate(m_fitResults.begin(),m_fitResults.end(),0.);
   
 }
 
@@ -179,8 +188,8 @@ void core::FitCore<Fcn,Scr,Res>::calculateOmittedParameters(){
   int lastStatus = 0;
   for (int i = 0; i < m_paramConfiguration.getNumberOfParametersConfigured(); ++i)
   {
-    lastError2Up   += (m_minosUp[i]*m_minosUp[i]);
-    lastError2Down += (m_minosDown[i]*m_minosDown[i]);
+    lastError2Up   += (m_minosDown[i]*m_minosDown[i]);
+    lastError2Down += (m_minosUp[i]*m_minosUp[i]);
     lastError2Symm += ((m_fitSymmErrors[i]*m_fitSymmErrors[i]));
     lastStatus += TMath::Abs(m_minosStatus[i]);
   }

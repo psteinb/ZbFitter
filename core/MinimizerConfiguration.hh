@@ -112,6 +112,7 @@ class MinimizerConfiguration
   std::map<std::string,std::string> m_config;
   std::vector<MinimConfigItem> m_items;
   std::vector<std::string> m_names;
+  std::vector<std::string> m_namesConfigured;
 
   void determineItemsFromMap();
   void loadItemsFromMap();
@@ -124,6 +125,7 @@ public:
     m_config(),
     m_items(),
     m_names(),
+    m_namesConfigured(),
     itemsToConfigure(0),
     itemsTotal(0)
   {};
@@ -138,6 +140,13 @@ public:
   const std::vector<std::string>* getNames() const {
     if(m_names.size())
       return &m_names;
+    else
+      0;
+  };
+  
+  const std::vector<std::string>* getConfiguredNames() const {
+    if(m_namesConfigured.size())
+      return &m_namesConfigured;
     else
       0;
   };

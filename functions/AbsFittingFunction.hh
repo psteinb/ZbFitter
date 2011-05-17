@@ -125,6 +125,11 @@ namespace functions {
     virtual int getNumberOfParameters() const {return m_nParameters;};
     
     virtual double getParameterValue(const short& _idx) const {return m_parameters.at(_idx);};
+    virtual void setParameterValue(const short& _idx, double& _value)  {
+      if(_idx<m_parameters.size())
+        m_parameters[_idx] = _value;
+    };
+
     virtual void getParameterValueWithError(const short& _idx, double& _value, double& _valueUp, double& _valueDown) const {
       _value = m_parameters.at(_idx);
       _valueUp = m_parametersUp.at(_idx);

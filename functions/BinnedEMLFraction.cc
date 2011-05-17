@@ -35,6 +35,8 @@ double functions::BinnedEMLFraction::getLogTerm(const short& _bin,const double& 
                                 1.,
                                 std::minus<double>());
 
+  setParameterValue(this->getNumberOfParameters()-1,last);
+
   value+=((last)*(m_templates.back().getContent()->at(_bin))*_total);
   
   if(value)

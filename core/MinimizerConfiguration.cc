@@ -41,9 +41,13 @@ void core::MinimizerConfiguration::loadItemsFromMap(){
 
   std::map<std::string,std::string>::const_iterator mItr ;
   std::map<std::string,std::string>::const_iterator mEnd = m_config.end();
-  
+
+  m_namesConfigured.clear();
+  m_namesConfigured.reserve(m_names.size());
+
   m_items.clear();
   m_items.reserve(m_names.size());
+
   std::string metaString="";
   
   for (int nameIdx = 0; nameIdx < m_names.size(); ++nameIdx)
@@ -55,11 +59,12 @@ void core::MinimizerConfiguration::loadItemsFromMap(){
     {
       if(mItr->first.find(m_names[nameIdx])!=std::string::npos){
         metaString = mItr->first.substr(mItr->first.find_first_of(".")+1);
-        //std::cout << metaString << " - " << mItr->second << std::endl;
         metaConfigItem.setItem(metaString,mItr->second);
       }
     }
     m_items.push_back(metaConfigItem);
+    m_namesConfigured.push_back(metaConfigItem.Name);
+
     itemsTotal++;
     if(!metaConfigItem.omitMeFromFit)
       itemsToConfigure++;

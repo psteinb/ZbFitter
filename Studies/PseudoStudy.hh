@@ -395,7 +395,6 @@ public:
     setupTotalTemplates();
 
     FitterResults::HistoResult* histoResult = new FitterResults::HistoResult();
-    FitterResults::TermResult* termResult = new FitterResults::TermResult();
     FitterResults::LLHResult* llhResult = new FitterResults::LLHResult();
     std::ostringstream name;
 
@@ -489,7 +488,7 @@ public:
             aFitter.printTo(histoResult);
             aFitter.printTo(llhResult);
           }
-          aFitter.printTo(termResult);
+          
         }
       }
       else{
@@ -575,7 +574,6 @@ public:
     std::cout << nNon0Status<< "/" <<m_iterations << " = ("<< std::setprecision(2) <<irregulars <<" %) were irregular!\n";
     std::cout << nMinosFailed<< "/" <<m_iterations*m_templateTH1s.size() << " = ("<< std::setprecision(2) <<irregulars <<" %) where Minos failed!\n";
 
-    delete termResult;termResult=0;
     delete histoResult;histoResult=0;
     delete llhResult;llhResult=0;
    
