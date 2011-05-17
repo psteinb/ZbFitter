@@ -8,6 +8,8 @@
 #include <sstream>
 #include <iostream>
 #include <exception>
+#include <cmath>
+#include <algorithm>
 
 
 
@@ -28,6 +30,7 @@
 
 //implement the runner configuration
 #include "run/ExperimentPerformer.hh"
+#include "run/FractionExperimentPerformer.hh"
 #include "run/LinearTestFunctors.hh"
 
 
@@ -83,7 +86,7 @@ void setupResults(std::vector<TGraphErrors*>& _results, const ConfLinearTest& _c
     TString Name =  dynamic_cast<TObjString*>(templateItems->At(i))->GetString();
     Name.Append("_lin");
     TString Title =  dynamic_cast<TObjString*>(templateItems->At(i))->GetString();
-    Title.Append(";scale;fitted ");
+    Title.Append(";scale to vary b with;fitted ");
     Title.Append(dynamic_cast<TObjString*>(templateItems->At(i))->GetString().Data());
     meta = new TGraphErrors(_size);
 
@@ -104,15 +107,24 @@ void printResults(const std::vector<TGraphErrors*>& _results, const ConfLinearTe
   aCanvas.Divide(_results.size(),1);
 
   TF1* fitline = new TF1("line","[0]*x+[1]",_results[0]->GetXaxis()->GetXmin(),_results[0]->GetXaxis()->GetXmax());
-
+  fitline->SetParName(0,"a");
+  fitline->SetParName(1,"b");
   TLine aLine;
   
   for (int i = 1; i < _results.size()+1; ++i)
   {
     aCanvas.cd(i);
     gStyle->SetOptFit(1112);
+    
+    if(_name.find("rel")!=std::string::npos){
+      std::string name = _results[i-1]->GetYaxis()->GetTitle();
+      name+="/b(nominal)";
+      _results[i-1]->GetYaxis()->SetTitle(name.c_str());
+    }
+    
     if(_results[i-1]->GetMaximum()>0)
       _results[i-1]->SetMaximum(1.75*(_results[i-1]->GetMaximum()));
+    _results[i-1]->GetXaxis()->SetRangeUser(_config.p_scaleRange.first-_config.p_stepsize,_config.p_scaleRange.second+_config.p_stepsize);
     _results[i-1]->Draw("AP+");
     _results[i-1]->Fit(fitline,"R");
 
@@ -139,20 +151,32 @@ int main(int argc, char* argv[])
     if(conf.p_msgLevel)
       conf.printConf();
 
-  int numCalls = int(2./conf.p_stepsize)-1;
+  double LengthOfRange = conf.p_scaleRange.second - conf.p_scaleRange.first;
+  int numCalls = std::ceil(LengthOfRange/conf.p_stepsize) + 1;
 
   //setup steps
   std::vector<double> steps(numCalls);
-  std::generate(steps.begin(),steps.end(),StepValueGenerator(conf.p_stepsize));
+  StepValueGenerator generator(conf.p_stepsize,conf.p_scaleRange.first);
+  std::generate(steps.begin(),steps.end(),generator);
+  if(!std::count(steps.begin(),steps.end(),1.)){
+    //steps.reserve(steps.capacity()+1);
+    steps.push_back(1.);
+    std::sort(steps.begin(),steps.end());
+  }
+  
 
   //setup workers
   std::vector<BasePerformer*> workers;
   workers.reserve(steps.size());
-  ExperimentPerformer* meta =0;
+  BasePerformer* meta =0;
   std::vector<double> unscaledValue;
   for (int i = 0; i < steps.size(); ++i)
   {
-    meta = new ExperimentPerformer(conf,steps.at(i));
+    if(conf.p_doFractions)
+      meta = new FractionExperimentPerformer(conf,steps.at(i));
+    else
+      meta = new ExperimentPerformer(conf,steps.at(i));
+
     meta->prepare();
     workers.push_back(meta);
     if(!(steps.at(i)!=1.)){
@@ -174,9 +198,6 @@ int main(int argc, char* argv[])
   std::vector<TGraphErrors*> resultsNormedY;
   setupResults(resultsNormedY,conf,numCalls);
 
-  // TGraphErrors bGraph(numCalls);
-  // TGraphErrors cGraph(numCalls);
-  // TGraphErrors lGraph(numCalls);
   std::vector<BasePerformer*>::const_iterator rItr = workers.begin();
   std::vector<BasePerformer*>::const_iterator rEnd = workers.end();
   

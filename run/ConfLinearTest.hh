@@ -2,6 +2,10 @@
 #ifndef __CONFLINTEST__HH__
 #define __CONFLINTEST__HH__
 #include <string>
+#include <utility>
+#include "TString.h"
+#include "TObjArray.h"
+#include "TObjString.h"
 
 class ConfLinearTest {
 
@@ -26,8 +30,10 @@ public:
   int         p_nIter;
   bool        p_giveHelp;
   double      p_stepsize;
+  std::pair<double,double>      p_scaleRange;
   double      p_dataScale;
-  
+  bool        p_doFractions;
+
   ConfLinearTest():
   m_argc(0),m_argv(0),
   p_datadir("/some/path/"),
@@ -42,8 +48,10 @@ public:
   p_rebin(1),
   p_nIter(1),
   p_giveHelp(false),
-  p_stepsize(.2),
-  p_dataScale(1.)
+  p_stepsize(.25),
+  p_scaleRange(std::make_pair(0.5,1.5)),
+  p_dataScale(1.),
+  p_doFractions(false)
 {};
 
   ConfLinearTest(int , char**);
@@ -51,7 +59,25 @@ public:
   void printConf();
   void setOpt(int , char** );
   void parse();
-
+  std::pair<std::string,std::string> getCommaSeparatedPair(const std::string& _text){
+    if(_text.empty())
+      return std::make_pair(std::string(""),std::string(""));
+    else{
+      TString data = _text.c_str();
+      if(!data.Contains(","))
+        return std::make_pair(_text,std::string(""));
+      else{
+        // TObjArray* tokens = data.Tokenize(",");
+        // return std::make_pair(std::string(dynamic_cast<TObjString*>(tokens->At(0))->GetString().Data()),
+        //                       std::string(dynamic_cast<TObjString*>(tokens->At(1))->GetString().Data()));
+        size_t pos = _text.find(",");
+        std::string first = _text.substr(0,pos);
+        std::string second = _text.substr(pos+1);
+        return std::make_pair(first,second);
+      }
+    }
+    
+  };
 };
 
 //constructor with initialisation
@@ -69,8 +95,10 @@ ConfLinearTest::ConfLinearTest(int inArgc, char** inArgv):
   p_rebin(1),
   p_nIter(1),
   p_giveHelp(false),
-  p_stepsize(.2),
-  p_dataScale(1.)
+  p_stepsize(.25),
+  p_scaleRange(std::make_pair(.5,1.5)),
+  p_dataScale(1.),
+  p_doFractions(false)
 {
 
   parse();
@@ -81,8 +109,11 @@ void ConfLinearTest::parse(){
 
 
   int opt = 0;
-  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:r:i:E:M:D:T:P:s:h" ))!=-1 ){
+  while( (opt = getopt(m_argc, m_argv, "d:o:c:m:t:r:i:E:M:D:T:P:s:R:hF" ))!=-1 ){
+    std::string value = "";
+    std::pair<std::string,std::string> stringPair;
     std::istringstream instream;
+    std::istringstream altInstream;
     std::ostringstream outstream;
     size_t found;
     int meta=0;
@@ -174,6 +205,31 @@ void ConfLinearTest::parse(){
       }
 
       break;
+    case 'R':
+      value = optarg;
+      stringPair = getCommaSeparatedPair(value);
+      instream.str(stringPair.first);
+      if( !(instream >> dmeta) ){
+        std::cerr << "RunFitter \t invalid first argument format for [-r]" << std::endl;
+        p_scaleRange.first = 0;
+      }
+      else{
+        p_scaleRange.first = dmeta;
+      }
+      altInstream.str("");
+      altInstream.str(stringPair.second);
+      if( !(altInstream >> dmeta) ){
+        std::cerr << "RunFitter \t invalid second argument format for [-r]" << std::endl;
+        p_scaleRange.second = 0;
+      }
+      else{
+        p_scaleRange.second = dmeta;
+      }
+
+      break;
+    case 'F':
+      p_doFractions = true;
+      break;
     case 'h':
       p_giveHelp = true;
       printHelp();
@@ -186,6 +242,10 @@ void ConfLinearTest::parse(){
     }
 
   }
+
+  //root is not as thread safe as one thinks
+  if(p_threads>1)
+    p_msgLevel = 6;
   
 }
 
@@ -209,6 +269,8 @@ void ConfLinearTest::printHelp(){
   std::cout << "\t -P <scale> scale data per experiment by <scale>" << std::endl;
   std::cout << "\t -T <ObjectName> define template (+systematics) object(s) to retrieve from root file" << std::endl;
   std::cout << "\t -s <step size> define step size to go from 0 .. 1 of the b fraction" << std::endl;
+  std::cout << "\t -r <begin,end> define range to vary b fraction" << std::endl;
+  std::cout << "\t -F do fraction fit" << std::endl;
   std::cout << "\t -h print this help" << std::endl;
   std::cout << std::endl;
 
@@ -232,6 +294,8 @@ void ConfLinearTest::printConf(){
   std::cout << "[-D] dataTitle = "<< p_dataTitle << std::endl;
   std::cout << "[-T] tempTitle = "<< p_tempTitle << std::endl;
   std::cout << "[-s] stepSize = "<< p_stepsize << std::endl;
+  std::cout << "[-F] doFractions? = "<< ((p_doFractions) ? "yes" : "no") << std::endl;
+  std::cout << "[-r] scaleRange = ["<< p_scaleRange.first << ","<< p_scaleRange.second <<"]"<< std::endl;
   
 }
 

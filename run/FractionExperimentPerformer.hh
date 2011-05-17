@@ -168,7 +168,7 @@ void FractionExperimentPerformer::experiment( )  {
   {
     m_PseudoStudy->getResultsOfParameter(i,m_results[i]);
     metaMeans.push_back(m_results[i][0]->GetMean());
-    metaSigmas.push_back(m_results[i][1]->GetMeanError());
+    metaSigmas.push_back(m_results[i][1]->GetMean());
   }
 
   setMeans(metaMeans);
