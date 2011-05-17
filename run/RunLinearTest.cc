@@ -189,8 +189,6 @@ int main(int argc, char* argv[])
       {
         results.at(i)->SetPoint(idx+1,steps.at(idx),(*rItr)->getMeans()->at(i));
         resultsNormedY.at(i)->SetPoint(idx+1,steps.at(idx),(*rItr)->getMeans()->at(i));
-        // if(!(steps.at(idx)!=1.))
-        //   unscaledValue[i] = (*rItr)->getMeans()at(i);
       }
     }
     catch(std::exception& ex){
