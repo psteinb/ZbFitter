@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < m_results.size(); ++i,padStart+=3)
   {
     expValueString.str("");
-    expValueString <</* "expected:\t"<<*/ (scaleExpectation*expected[i]) << " #pm " << (scaleExpectation*expectedErrors[i]);
+    expValueString <</* "expected:\t"<<*/ (expected[i]) << " #pm " << (expectedErrors[i]);
     for (int pad = 0; pad < 3; ++pad)
     {
       currentPad= pad + padStart;
@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
       m_results[i][pad]->Draw("");
       if(pad<1){
         myResults.Update();
-        ArrowXNDC = (gPad->XtoPad(scaleExpectation*expected[i]) - gPad->GetUxmin())/(gPad->GetUxmax() - gPad->GetUxmin());
+        ArrowXNDC = (gPad->XtoPad(expected[i]) - gPad->GetUxmin())/(gPad->GetUxmax() - gPad->GetUxmin());
         if(ArrowXNDC<.5)
           expValue.SetX1NDC(.5);
         else
@@ -218,8 +218,8 @@ int main(int argc, char* argv[])
         expValue.AddText(expValueString.str().c_str());
         expValue.DrawClone();
         
-        anArrow.DrawArrow(gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymin(),
-                          gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymax(),0.03,"<|");
+        anArrow.DrawArrow(gPad->XtoPad(expected[i]),gPad->GetUymin(),
+                          gPad->XtoPad(expected[i]),gPad->GetUymax(),0.03,"<|");
       }
     }
   }
@@ -239,10 +239,10 @@ int main(int argc, char* argv[])
     MeanCanvas.cd(pad);
     expValue.Clear();
     expValueString.str("");
-    expValueString <</* "expected:\t"<<*/ (scaleExpectation*expected[i]) << " #pm " << (scaleExpectation*expectedErrors[i]);
+    expValueString <</* "expected:\t"<<*/ (expected[i]) << " #pm " << (expectedErrors[i]);
     m_results[i][0]->Draw();
     MeanCanvas.Update();
-    ArrowXNDC = (gPad->XtoPad(scaleExpectation*expected[i]) - gPad->GetUxmin())/(gPad->GetUxmax() - gPad->GetUxmin());
+    ArrowXNDC = (gPad->XtoPad(expected[i]) - gPad->GetUxmin())/(gPad->GetUxmax() - gPad->GetUxmin());
     if(ArrowXNDC<.5)
       expValue.SetX1NDC(.5);
     else
@@ -256,8 +256,8 @@ int main(int argc, char* argv[])
     expValue.AddText(expValueString.str().c_str());
 
     expValue.DrawClone();
-    anArrow.DrawArrow(gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymin(),
-                      gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymax(),0.03,"<|");
+    anArrow.DrawArrow(gPad->XtoPad(expected[i]),gPad->GetUymin(),
+                      gPad->XtoPad(expected[i]),gPad->GetUymax(),0.03,"<|");
     // }
     
     

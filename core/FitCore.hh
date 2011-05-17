@@ -305,6 +305,10 @@ namespace core {
       return &m_fitSymmErrors;
     }
 
+    const std::vector<std::string>* getParameterNames() const{
+      return m_paramConfiguration.getConfiguredNames();
+    }
+
   };
 }; // end of package namespace
 

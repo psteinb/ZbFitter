@@ -1,10 +1,9 @@
 #pragma once
-#ifndef __RUNLINTEST__HH__
-#define __RUNLINTEST__HH__
+#ifndef __LINEARTESTFUNCTORS__HH__
+#define __LINEARTESTFUNCTORS__HH__
 
 #include <iostream>
 #include "TROOT.h"
-
 #include "TH1.h"
 
 struct StepValueGenerator

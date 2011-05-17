@@ -157,26 +157,26 @@ class PseudoStudy{
     _data->ResetStats();
   };
   
-  void treatResultsFromMinimizer(ROOT::Math::Minimizer* _fitter){
+  void treatResultsFromMinimizer(const std::vector<std::string>* _names){
     std::vector<TH1D>::iterator rItr = m_means.begin()    ;
     std::vector<TH1D>::iterator rEnd = m_means.end()      ;
     for (short i = 0; rItr!=rEnd; ++rItr,i++)
     {
-      rItr->GetXaxis()->SetTitle(addItemToText<std::string>("fitted ",_fitter->VariableName(i)).c_str());
+      rItr->GetXaxis()->SetTitle(addItemToText<std::string>("fitted ",_names->at(i)).c_str());
     }
 
     rItr = m_sigmas.begin()    ;
     rEnd = m_sigmas.end()      ;
     for (short i = 0; rItr!=rEnd; ++rItr,i++)
     {
-      rItr->GetXaxis()->SetTitle(addItemToText<std::string>("#sigma ",_fitter->VariableName(i)).c_str());
+      rItr->GetXaxis()->SetTitle(addItemToText<std::string>("#sigma ",_names->at(i)).c_str());
     }
 
     rItr = m_pulls.begin()    ;
     rEnd = m_pulls.end()      ;
     for (short i = 0; rItr!=rEnd; ++rItr,i++)
     {
-      rItr->GetXaxis()->SetTitle(addItemToText<std::string>("pull ",_fitter->VariableName(i)).c_str());
+      rItr->GetXaxis()->SetTitle(addItemToText<std::string>("pull ",_names->at(i)).c_str());
     }
   };
 
@@ -567,7 +567,7 @@ public:
       m_data->ResetStats(); 
       
       if(i<1)
-        treatResultsFromMinimizer(aFitter.getMinimizer());
+        treatResultsFromMinimizer(aFitter.getParameterNames());
     }
     double irregulars = (nNon0Status/double(m_iterations))*100;
     std::cout << nNon0Status<< "/" <<m_iterations << " = ("<< std::setprecision(2) <<irregulars <<" %) were irregular!\n";
