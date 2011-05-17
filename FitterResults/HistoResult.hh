@@ -39,9 +39,14 @@ private:
   void joinHistosToFile(TFile* _file=0){
     if(_file && !(_file->IsZombie())){
       TH1* meta=0;
+      std::string dirname;
       for (int i = 0; i < getNumberOfParameters(); ++i)
       {
-        std::string dirname = getScaledTemplateHistograms()->at(i)->GetDirectory()->GetPath();
+        if(getScaledTemplateHistograms()->at(i)->GetDirectory())
+         dirname = getScaledTemplateHistograms()->at(i)->GetDirectory()->GetPath();
+        else
+          dirname = "";
+
         if(dirname.empty())
           getScaledTemplateHistograms()->at(i)->SetDirectory(_file->GetDirectory("/"));
         else{

@@ -21,6 +21,7 @@
 #include "THashList.h"
 
 #include "core/MinimizerConfiguration.hh"
+#include "functions/AbsFittingFunction.hh"
 
 
 

@@ -11,7 +11,6 @@
 #include "core/FitCore.hh"
 #include "FitterInputs/NormedTH1.hh"
 #include "FitterResults/HistoResult.hh"
-#include "FitterResults/TermResult.hh"
 #include "FitterResults/LLHResult.hh"
 #include "functions/SimpleMaxLLH.hh"
 
@@ -100,7 +99,7 @@ class PseudoStudy{
     for (int i = 0; i < _size; ++i)
     {
       expMeanDown = 0.*m_expectedValues.at(i);
-      expMeanUp = 1.5*(m_expectedValues.at(i));
+      expMeanUp = 2.*(m_expectedValues.at(i));
       expSigmaDown = 0.;
       expSigmaUp = 1.*(m_expectedValues.at(i));
 

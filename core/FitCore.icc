@@ -118,7 +118,7 @@ void core::FitCore<Fcn,Scr,Res>::printTo(Res* _result=0){
 
     //this is a crude method to determine which object was used for Fcn
     //but I didn't consider using sizeof so elegant
-    double sum = std::accumulate(m_fitResults.begin(),m_fitResults.end());
+    double sum = std::accumulate(m_fitResults.begin(),m_fitResults.end(),0.);
     sum *= 1/(m_fitResults.size());
     if (sum<1.)
       _result->doFractions(true);
@@ -136,7 +136,7 @@ void core::FitCore<Fcn,Scr,Res>::print() const{
   
   std::vector<double>::const_iterator resItr = m_fitResults.begin();
   std::vector<double>::const_iterator resEnd = m_fitResults.end();
-  std::cout << "FitResults :\t\n";
+  std::cout << "\nFitResults :\t\n";
   for (short par=0;resItr!=resEnd;++resItr,par++)
   {
     
@@ -148,7 +148,7 @@ void core::FitCore<Fcn,Scr,Res>::print() const{
       std::cout << " +/- " << m_fitSymmErrors[par];
     std::cout << "\n";
   }
-  std::cout << "sum = " << std::accumulate(m_fitResults.begin(),m_fitResults.end(),0.);
+  std::cout << "sum = " << std::accumulate(m_fitResults.begin(),m_fitResults.end(),0.) << "\n" << std::endl;
   
 }
 

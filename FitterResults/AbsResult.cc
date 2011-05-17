@@ -6,10 +6,10 @@ void FitterResults::AbsResult::setupHistos(){
     m_numOfParameters = m_fitResults.size();
 
   if(m_templatesScaled.size()){
-    for (int i = 0; i < m_templatesScaled.size(); ++i)
-    {
-      delete m_templatesScaled[i];
-    }
+    // for (int i = 0; i < m_templatesScaled.size(); ++i)
+    // {
+    //   delete m_templatesScaled[i];
+    // }
     m_templatesScaled.clear();
   }
   m_templatesScaled.reserve(m_numOfParameters);
