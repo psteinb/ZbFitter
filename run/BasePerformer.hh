@@ -2,8 +2,10 @@
 #ifndef __BASEPERFORMER__HH__
 #define __BASEPERFORMER__HH__
 
+#include <fstream>
 #include <iostream>
 #include <vector>
+#include "TString.h"
 
 
 class BasePerformer
@@ -77,6 +79,25 @@ public:
   virtual void experiment() = 0 ;
   virtual void print() const = 0;
   virtual void prepare() = 0;
+
+  std::string createScaledConfigFileString(const std::string& _file, const double& _id){
+    TString newName = _file.c_str();
+    int id = int(_id*100.);
+    TString toInsert = "_";
+    toInsert += id;
+    toInsert += ".env";
+    newName.ReplaceAll(".env",toInsert);
+
+    fstream test;
+    test.open(newName.Data(),std::ios::in);
+    if(test.is_open()){
+      test.close();
+      return newName.Data();}
+    else
+      return _file;
+
+    
+  }
 };
 
 //small class
