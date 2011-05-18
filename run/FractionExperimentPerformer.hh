@@ -101,7 +101,10 @@ void FractionExperimentPerformer::createExpectedValuesFromTemplates(){
                                                    m_templates[i]->GetXaxis()->GetLast(),
                                                    errors[i]
                                                    );
-    total += integrals[i];
+    if(i<1)
+      total += m_scale*integrals[i];
+    else
+      total += integrals[i];
   }
 
   double dataIntegral = m_data->Integral();

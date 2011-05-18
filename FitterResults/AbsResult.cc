@@ -25,9 +25,9 @@ void FitterResults::AbsResult::setupHistos(){
     metaTemplate = dynamic_cast<TH1*>(getFunction()->getTemplate(idx)->getHisto()->Clone(name.c_str()));
     metaTemplate->SetDirectory(0);
     if(m_doFractions)
-      metaTemplate->Scale((*resItr)*getFunction()->getData()->getHisto()->Integral());
+      metaTemplate->Scale((*resItr)*getFunction()->getData()->getHisto()->Integral()/metaTemplate->Integral());
     else
-      metaTemplate->Scale(*resItr);
+      metaTemplate->Scale((*resItr)/metaTemplate->Integral());
 
     m_templatesScaled.push_back(metaTemplate);
   }

@@ -270,7 +270,7 @@ int main(int argc, char* argv[])
   name = conf.p_outputfile;
   name += "_LLH";
   FitterResults::AbsResult* lresult = new FitterResults::LLHResult(0,conf.p_msgLevel,name);
-  FitterResults::AbsResult* presult = new FitterResults::LLHPValue(0,conf.p_msgLevel,name,conf.p_rscFile);
+  
   FitterResults::AbsResult* chi2result = new FitterResults::Chi2Result(0,conf.p_msgLevel,name);
 
   // ----- FitterCore ------
@@ -288,16 +288,18 @@ int main(int argc, char* argv[])
   
 
   if(conf.p_msgLevel<3){
+    FitterResults::AbsResult* presult = new FitterResults::LLHPValue(0,conf.p_msgLevel,name,conf.p_rscFile);
+    if(conf.p_rscFile.size())
+      fitter.printTo(presult);
     fitter.fit(true);
-    fitter.printTo(lresult);
+    fitter.printTo(chi2result);
   }
   else
     fitter.fit(false);
   
   fitter.printTo(hresult);
-  if(conf.p_rscFile.size())
-    fitter.printTo(presult);
-  fitter.printTo(chi2result);
+  fitter.printTo(lresult);
+
   //clean-up
   delete lresult;
   delete hresult;

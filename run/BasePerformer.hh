@@ -36,7 +36,7 @@ public:
       std::cout <<  m_means[i] << ", ";
     }
 
-    std::cout <<  "\n"
+    std::cout <<  "\t sum = " << std::accumulate(m_means.begin(),m_means.end(),0.) << "\n"
               << "\n\tfound sigmas: " << m_sigmas.size() << "\n\t";
 
     for (int i = 0; i < m_sigmas.size(); ++i)
@@ -48,7 +48,7 @@ public:
     {
       std::cout <<  m_expected[i] << ", ";
     }
-    std::cout <<  "\n";
+    std::cout <<  "\t sum = " << std::accumulate(m_expected.begin(),m_expected.end(),0.) << "\n";
     
   }
 

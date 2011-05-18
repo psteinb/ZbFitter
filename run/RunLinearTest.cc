@@ -121,9 +121,19 @@ void printResults(const std::vector<TGraphErrors*>& _results, const ConfLinearTe
       name+="/b(nominal)";
       _results[i-1]->GetYaxis()->SetTitle(name.c_str());
     }
+
+    if(_name.find("expect")!=std::string::npos){
+      _results[i-1]->GetXaxis()->SetTitle("expected b content");
+    }
     
     if(_results[i-1]->GetMaximum()>0)
-      _results[i-1]->SetMaximum(1.75*(_results[i-1]->GetMaximum()));
+      _results[i-1]->SetMaximum(2.*(_results[i-1]->GetMaximum()));
+    else{
+      double highest = std::max(_results[i-1]->GetY()[1],
+                                _results[i-1]->GetY()[(_results[i-1]->GetN()-1)]
+                                );
+      _results[i-1]->SetMaximum(2.*highest);
+    }
     _results[i-1]->GetXaxis()->SetRangeUser(_config.p_scaleRange.first-_config.p_stepsize,_config.p_scaleRange.second+_config.p_stepsize);
     _results[i-1]->Draw("AP+");
     _results[i-1]->Fit(fitline,"R");
@@ -195,6 +205,9 @@ int main(int argc, char* argv[])
   std::vector<TGraphErrors*> results;
   setupResults(results,conf,numCalls);
 
+  std::vector<TGraphErrors*> resultsVsExpected;
+  setupResults(resultsVsExpected,conf,numCalls);
+
   std::vector<TGraphErrors*> resultsNormedY;
   setupResults(resultsNormedY,conf,numCalls);
 
@@ -210,6 +223,7 @@ int main(int argc, char* argv[])
       {
         results.at(i)->SetPoint(idx+1,steps.at(idx),(*rItr)->getMeans()->at(i));
         resultsNormedY.at(i)->SetPoint(idx+1,steps.at(idx),(*rItr)->getMeans()->at(i));
+        resultsVsExpected.at(i)->SetPoint(idx+1,(*rItr)->getExpected()->at(0),(*rItr)->getMeans()->at(i));
       }
     }
     catch(std::exception& ex){
@@ -221,6 +235,7 @@ int main(int argc, char* argv[])
       {
         results.at(i)->SetPointError(idx+1,conf.p_stepsize/2.,(*rItr)->getSigmas()->at(i));
         resultsNormedY.at(i)->SetPointError(idx+1,conf.p_stepsize/2.,(*rItr)->getSigmas()->at(i));
+        resultsVsExpected.at(i)->SetPointError(idx+1,0,(*rItr)->getSigmas()->at(i));
       }
     }
     catch(std::exception& ex){
@@ -256,6 +271,7 @@ int main(int argc, char* argv[])
 
    printResults(resultsNormedY,conf,"_relLinear");
    printResults(results,conf,"_absLinear");
+   printResults(resultsVsExpected,conf,"_expectedLinear");
   
   return 0; 
    

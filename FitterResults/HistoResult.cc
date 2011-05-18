@@ -90,11 +90,11 @@ void FitterResults::HistoResult::print(){
     mtext.AddText(getParameterResult(i).c_str());
   }
   mtext.Draw();
-
+  TPaveText abstext(0.2,0.2,.9,.9,"ARC");
   if(isFractionFit()){
     //---------------- RESULTS ON FRACTIONS ---------------- 
     myC.cd(3);
-    TPaveText abstext(0.2,0.2,.9,.9,"ARC");
+    
     std::ostringstream label;
     label.str("");
     label << "data: " << m_dataHisto->Integral();
@@ -103,8 +103,9 @@ void FitterResults::HistoResult::print(){
     {
       abstext.AddText(getParameterResult(i,m_dataHisto->Integral()).c_str());
     }
-    abstext.Draw();
+    
   }
+  abstext.Draw();
   // myC.cd(3);
   // m_dataHisto->Draw();
 
@@ -132,27 +133,35 @@ std::string FitterResults::HistoResult::getParameterResult(const int& _idx, cons
 
   }
   else{
-    centralValue = (getResults()->at(_idx))*_norm;
+    centralValue = (getResults()->at(_idx));
     _text << getParameterNames()->at(_idx) << " : (";
-    _text << centralValue;
+    _text << centralValue*_norm;
 
     double Up=0;
     double Down=0;
-    double rUp=0;
-    double rDown=0;
 
     double Error=getSymmErrors()->at(_idx);
-    double relError = Error/centralValue;
+    double normError = TMath::Sqrt(_norm);
+
+    double symmError = Error;
+    if(_norm!=1.)
+      symmError = TMath::Sqrt((Error*Error*_norm) + (normError*normError*centralValue));
+
     int minosStatus = 0;
     getMinosResultsForIndex(_idx,minosStatus,Up,Down);
+    double minosDown = Down;
+    double minosUp = Up;
+    if(_norm!=1.){
+      minosDown = TMath::Sqrt((Down*Down*_norm) + (normError*normError*centralValue));
+      minosUp = TMath::Sqrt((Up*Up*_norm) + (normError*normError*centralValue));
+    }
+
     if(minosStatus<0){
-      _text << " +/- " << centralValue*relError << ")";
+      _text << " +/- " << symmError << ")";
      }
      else{
-       rUp = Up/centralValue;
-       rDown = Down/centralValue;
 
-       _text << "^{ " << centralValue*rUp << "}_{ "<< centralValue*rDown << "} )";
+       _text << "^{ " << minosUp << "}_{ "<< minosDown << "} )";
      }
   }
     
