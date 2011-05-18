@@ -152,8 +152,8 @@ std::string FitterResults::HistoResult::getParameterResult(const int& _idx, cons
     double minosDown = Down;
     double minosUp = Up;
     if(_norm!=1.){
-      minosDown = TMath::Sqrt((Down*Down*_norm) + (normError*normError*centralValue));
-      minosUp = TMath::Sqrt((Up*Up*_norm) + (normError*normError*centralValue));
+      minosDown = TMath::Sqrt((Down*Down*_norm*_norm) + (normError*normError*centralValue*centralValue));
+      minosUp = TMath::Sqrt((Up*Up*_norm*_norm) + (normError*normError*centralValue*centralValue));
     }
 
     if(minosStatus<0){
