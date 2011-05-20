@@ -115,6 +115,7 @@ void FitterResults::HistoResult::print(){
   for (int i = 0; i < (getNumberOfParameters()); ++i,CanvasIdx++)
   {
     myC.cd(CanvasIdx);
+    //    getFunction()->getTemplate(i)->getHisto()->SetLineColor(getScaledTemplateHistograms()->at(i)->GetLineColor());
     getFunction()->getTemplate(i)->getHisto()->DrawCopy();
   }
     

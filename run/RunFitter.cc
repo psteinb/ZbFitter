@@ -274,11 +274,9 @@ int main(int argc, char* argv[])
   FitterResults::AbsResult* chi2result = new FitterResults::Chi2Result(0,conf.p_msgLevel,name);
 
   // ----- FitterCore ------
-  #ifdef __FRACTIONS__
-  core::FitCore<functions::BinnedEMLFraction,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>,FitterResults::AbsResult> fitter(input);
-  #else
+
   core::FitCore<functions::BinnedEML,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>,FitterResults::AbsResult> fitter(input);
-  #endif
+
 
   fitter.configureFromFile(conf.p_configFile);
   fitter.configureKeyWithValue("Engine",conf.p_fitEngine);
