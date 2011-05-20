@@ -7,7 +7,7 @@ def combineHistos(_file2Write2=None,_plot1=None,_plot2=None):
     newMinX=min(_plot1.GetXaxis().GetXmin(),_plot2.GetXaxis().GetXmin())
     newMaxX=_plot1.GetXaxis().GetXmax() + _plot2.GetXaxis().GetXmax()
     Nbins = _plot1.GetNbinsX() + _plot2.GetNbinsX()
-    newName = "_".join([_plot1.GetName(),_plot2.GetName(),"_joined"])
+    newName = "_".join([_plot1.GetName(),"joined"])
 
     if _file2Write2.Get(newName).__nonzero__():
         return None
@@ -50,7 +50,8 @@ if __name__ == '__main__':
 
     file1 = ROOT.TFile(sys.argv[1])
     file2 = ROOT.TFile(sys.argv[2])
-    fileNew = ROOT.TFile(sys.argv[1].split("_")[0]+"_combined.root","RECREATE")
+    newName = sys.argv[1].rstrip(".root")+"_combined.root"
+    fileNew = ROOT.TFile(newName,"RECREATE")
 
     listOfNames = listObjectNames(file1)
     
