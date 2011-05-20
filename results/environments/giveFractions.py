@@ -28,7 +28,9 @@ if __name__ == '__main__':
     
     list2check = sys.argv[2].split(",")
     selectedNames = [ item for item in listOfNames if item in list2check ]
-
+    data = [ item for item in listOfNames if item.lower().count("data") ]
+    if data:
+        dataHisto = file1.Get(data[0])
 
     selectedObjects = [ file1.Get(item) for item in selectedNames if file1.Get(item).__nonzero__()]
 
@@ -36,6 +38,7 @@ if __name__ == '__main__':
     total = sum(integrals)
 
     for idx in range(len(selectedObjects)):
-        print "%10s: %.2f/%.2f\t= %.4f" % (selectedNames[idx],integrals[idx],total,float(integrals[idx]/total))
+        ratio = float(integrals[idx]/total)
+        print "%10s: %.2f/%.2f\t= %.4f [to data: %.2f]" % (selectedNames[idx],integrals[idx],total,ratio,ratio*dataHisto.Integral())
      
     file1.Close()

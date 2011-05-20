@@ -24,6 +24,7 @@
 #include "TPad.h"
 #include "TPaveStats.h"
 #include "TSystem.h"
+#include "TF1.h"
 
 #include "AtlasStyle.h"
 
@@ -107,9 +108,10 @@ int main(int argc, char* argv[])
   aStyle->SetStatW(.8);
   aStyle->SetStatH(0.15);
   aStyle->SetStatBorderSize(0.);
-  aStyle->SetPadTopMargin(0.2);
+  aStyle->SetPadTopMargin(0.22);
   //aStyle->SetHistTopMargin(0.3);
   aStyle->SetOptStat(2210);
+  //  aStyle->SetOptFit(1);
   gROOT->SetStyle("ATLAS");
   gROOT->ForceStyle();
 
@@ -267,17 +269,45 @@ int main(int argc, char* argv[])
     // ----- DRAW PULL RESULTS IN ONE PAD ----- 
   name = conf.p_outputfile;
   name += "_pulls";
-  TCanvas PullCanvas(name.c_str(),"",3000,1000);
+  TCanvas PullCanvas(name.c_str(),"",3000,1500);
   PullCanvas.Clear();
   PullCanvas.Draw();
   PullCanvas.Divide(m_templates.size(),1);
   pad=1;
-
-  
+  TF1* gaus = new TF1("MyGaus","gaus(0)",m_results[0][2]->GetXaxis()->GetXmin(),m_results[0][2]->GetXaxis()->GetXmax());
+  gaus->SetParameter(0,m_results[0][2]->GetEntries());
+  gaus->SetParameter(1,0.);
+  gaus->SetParameter(2,1.);
+  TPaveText fitValues;
+  fitValues.SetTextColor(kBlue);
+  fitValues.SetBorderSize(0.1);
+  fitValues.SetFillColor(kWhite);
+  std::ostringstream stream;
   for (int i = 0; i < m_results.size(); ++i,pad++)
   {
+    stream.str("");
+    fitValues.Clear();
     PullCanvas.cd(pad);
+
+    gPad->SetTopMargin(.2);
+    m_results[i][2]->SetStats(false);
     m_results[i][2]->Draw();
+    if(m_results[i][2]->GetEntries()>0){
+    m_results[i][2]->Fit(gaus,"VR+");
+    stream << "#mu :\t" << gaus->GetParameter(1) << " #pm " << gaus->GetParError(1);
+    fitValues.AddText(stream.str().c_str());
+    stream.str("");
+    stream << "#sigma :\t" << gaus->GetParameter(2) << " #pm " << gaus->GetParError(2);
+    fitValues.AddText(stream.str().c_str());
+    stream.str("");
+    stream << "chi2/NDF :\t" << gaus->GetChisquare() << " / " << gaus->GetNDF();
+    fitValues.AddText(stream.str().c_str());
+    fitValues.SetX1NDC(.15);
+    fitValues.SetX2NDC(.85);
+    fitValues.SetY1NDC(.82);
+    fitValues.SetY2NDC(.98);
+    fitValues.DrawClone();
+    }
     PullCanvas.Update();
   }
   PullCanvas.Update();
