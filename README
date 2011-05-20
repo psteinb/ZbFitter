@@ -1,0 +1,11 @@
+0) To setup the package
+   * setup root
+   * setup tbb
+   * source setANALpath in the parent directory of the package
+   * source $SRC/makeAll.sh (I was too lazy to implement recursive building in GNUmake)
+
+1) run the fits
+
+2) run pseudo experiments
+
+3) run linearity tests

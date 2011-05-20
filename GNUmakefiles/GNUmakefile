@@ -168,7 +168,7 @@ $(OBJSF) : $(OBJDIR)/%.o : %.F
 #BINLINKFLAGS can be set by client GNUmakefile to point to required shared libs
 #vpath %.so $(LIBDIR)
 %.exe: %.$(CXXSRCEXT)
-	@echo -e "Building executable $(BINDIR)/$@ from $^!\n"
+	echo "Building executable $(BINDIR)/$@ from $^!\n"
 	$(LD) $(EXTRALIBS) $(CXXFLAGS) $(GLIBS) $(BINLINKFLAGS) $^ $(XFLAGS)  $(BINDIR)/$@
 #vpath %.so
 
