@@ -59,14 +59,17 @@ void FitterResults::HistoResult::print(){
 
 
   //---------------- PLOTS ---------------- 
-  TCanvas myC(m_filename.c_str(),"",2400,600);
+  int NColumns = (isFractionFit()) ? 3 : 2;
+
+  TCanvas myC(m_filename.c_str(),"",NColumns*800,600);
   myC.Clear();
   myC.Draw();
-  myC.Divide(getNumberOfParameters(),1);
+  myC.Divide(/*getNumberOfParameters()*/NColumns,1);
 
   //---------------- DATA and fitted MC histos ---------------- 
   myC.cd(1);
-  newStack.SetMaximum(1.5*newStack.GetMaximum());
+  double highest = std::max(newStack.GetMaximum(),m_dataHisto->GetMaximum());
+  newStack.SetMaximum(1.5*highest);
   newStack.Draw("BAR");
   m_dataHisto->SetMarkerSize(1.5*m_dataHisto->GetMarkerSize());
   m_dataHisto->SetMarkerStyle(8);
@@ -103,9 +106,9 @@ void FitterResults::HistoResult::print(){
     {
       abstext.AddText(getParameterResult(i,m_dataHisto->Integral()).c_str());
     }
-    
+    abstext.Draw();
   }
-  abstext.Draw();
+  
   // myC.cd(3);
   // m_dataHisto->Draw();
 

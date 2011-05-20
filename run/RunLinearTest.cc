@@ -101,6 +101,10 @@ void printResults(const std::vector<TGraphErrors*>& _results, const ConfLinearTe
 
   TString Canvas = _config.p_outputfile.c_str();
   Canvas.Append(_name.c_str());
+  TString RFile = Canvas;
+  RFile.Append(".root");
+  TFile newFile(RFile.Data(),"RECREATE");
+
   TCanvas aCanvas(Canvas.Data(),"linear tests",3000,1000);
   aCanvas.Clear();
   aCanvas.Draw();
@@ -136,12 +140,22 @@ void printResults(const std::vector<TGraphErrors*>& _results, const ConfLinearTe
     }
     _results[i-1]->GetXaxis()->SetRangeUser(_config.p_scaleRange.first-_config.p_stepsize,_config.p_scaleRange.second+_config.p_stepsize);
     _results[i-1]->Draw("AP+");
+    if(_results[i-1]->GetY()[1]>_results[i-1]->GetY()[(_results[i-1]->GetN()-1)]){
+      fitline->SetParameter(0,-1);
+      fitline->SetParameter(1,5);
+    }
+    else{
+      fitline->SetParameter(0,1);
+      fitline->SetParameter(1,0);
+    }
+      
     _results[i-1]->Fit(fitline,"R");
+    _results[i-1]->Write(_results[i-1]->GetName());
 
   }
   aCanvas.Update();
   aCanvas.Print(".eps");
-  
+  newFile.Close();
 }
 
 int main(int argc, char* argv[])

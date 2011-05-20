@@ -1,3 +1,5 @@
-RunFitter.exe -M Migrad -d ./extractedSV0.root -c /amnt/remote/pkthafc.home/psteinb/development/sandbox/fitter/results/central/BinnedEML.env -D "data_muid" -T "z_muid_trueB,z_muid_trueC,z_muid_trueL" -o migrad -r 5 -m 1 > fit.Sherpa.log 2>&1 &
-RunFitter.exe -M Migrad -d $SRC/AlpgenZmumuJetVertexMassByFlav.root  -c /amnt/remote/pkthafc.home/psteinb/development/sandbox/fitter/results/central/BinnedEML.Alpgen.env -D "Data" -T "MC_Signal_B,MC_Signal_C,MC_Signal_L" -o results.alpgen -r 10 -m 1 > $SRC/results/central/fit.Alpgen.r10.log 2>&1 &
-RunFitter.exe -M Migrad -d /amnt/remote/pkthafc.home/psteinb/development/sandbox/fitter/Saclay_mumu.root  -c /amnt/remote/pkthafc.home/psteinb/development/sandbox/fitter/results/central/BinnedEML.Alpgen.env -D "data" -T "mcb,mcc,mcl" -o results.Saclay -r 5 -m 1 > $SRC/results/central/fit.Saclay.r10.log 2>&1 &
+RunFitter.exe -M Migrad -d $SRC/Sherpa_ee.root  -c $SRC/results/environments/Sherpa/BinnedEML.4params.Sherpa_ee_top.env -D "Data" -T "Zjets_b,Zjets_c,Zjets_l,TTbar" -o Sherpa_3Normalisations_ee_top -r 5 > $SRC/results/central/Sherpa_3Normalisations_ee_top.log 2>&1 &
+
+RunFitter.exe -M Migrad -d $SRC/Sherpa_mumu.root  -c $SRC/results/environments/Sherpa/BinnedEML.4params.Sherpa_mumu_top.env -D "Data" -T "Zjets_b,Zjets_c,Zjets_l,TTbar" -o Sherpa_3Normalisations_mumu_top -r 5 > $SRC/results/central/Sherpa_3Normalisations_mumu_top.log 2>&1 &
+
+RunFitter.exe -M Migrad -d $SRC/Sherpa_combined.root  -c $SRC/results/environments/Sherpa/BinnedEML.4params.Sherpa_joined_top.env -D "Data_joined" -T "Zjets_b_joined,Zjets_c_joined,Zjets_l_joined,TTbar_joined" -o Sherpa_3Normalisations_joined_top -r 5 > $SRC/results/central/Sherpa_3Normalisations_joined_top.log 2>&1 &

@@ -1,3 +1,6 @@
-RunFitterOnFractions.exe -M Migrad -d /home/psteinb/development/sandbox/fitter/ZJetsSherpa_combined.root  -c $SRC/results/environments/BinnedEMLFraction.1o3.Saclay_joined_scaled.env -D "Data_joined" -T "Zjets_b_joined,Zjets_l_joined,Zjets_c_joined" -o Saclay_joined_1o3 -r 5 > test.log 2>&1 &
-RunFitterOnFractions.exe -M Migrad -d /home/psteinb/development/sandbox/fitter/ZeeJetsSherpa.root  -c $SRC/results/environments/BinnedEMLFraction.1o3.Saclay_ee_scaled.env -D "Data" -T "Zjets_b,Zjets_l,Zjets_c" -o Saclay_ee_1o3 -r 5 > test.log 2>&1 &
-RunFitterOnFractions.exe -M Migrad -d /home/psteinb/development/sandbox/fitter/ZmumuJetsSherpa.root  -c $SRC/results/environments/BinnedEMLFraction.1o3.Saclay_mumu_scaled.env -D "Data" -T "Zjets_b,Zjets_l,Zjets_c" -o Saclay_mumu_1o3 -r 5 > test.log 2>&1 &
+RunFitterOnFractions.exe -M Migrad -d $SRC/Sherpa_ee.root  -c $SRC/results/environments/Sherpa/BinnedEMLFraction.1o3.Sherpa_ee_top.env -D "Data" -T "Zjets_b,Zjets_l,TTbar,Zjets_c" -o Sherpa_3fractionfit_ee_top -r 5 > $SRC/results/central/Sherpa_3fractionfit_ee_top.log 2>&1 &
+
+RunFitterOnFractions.exe -M Migrad -d $SRC/Sherpa_mumu.root  -c $SRC/results/environments/Sherpa/BinnedEMLFraction.1o3.Sherpa_mumu_top.env -D "Data" -T "Zjets_b,Zjets_l,TTbar,Zjets_c" -o Sherpa_3fractionfit_mumu_top -r 5 > $SRC/results/central/Sherpa_3fractionfit_mumu_top.log 2>&1 &
+
+RunFitterOnFractions.exe -M Migrad -d $SRC/Sherpa_combined.root  -c $SRC/results/environments/Sherpa/BinnedEMLFraction.1o3.Sherpa_joined_top.env -D "Data_joined" -T "Zjets_b_joined,Zjets_l_joined,TTbar_joined,Zjets_c_joined" -o Sherpa_3fractionfit_joined_top -r 5 > $SRC/results/central/Sherpa_3fractionfit_joined_top.log 2>&1 &
+

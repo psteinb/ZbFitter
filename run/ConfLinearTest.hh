@@ -269,7 +269,7 @@ void ConfLinearTest::printHelp(){
   std::cout << "\t -P <scale> scale data per experiment by <scale>" << std::endl;
   std::cout << "\t -T <ObjectName> define template (+systematics) object(s) to retrieve from root file" << std::endl;
   std::cout << "\t -s <step size> define step size to go from 0 .. 1 of the b fraction" << std::endl;
-  std::cout << "\t -r <begin,end> define range to vary b fraction" << std::endl;
+  std::cout << "\t -R <begin,end> define range to vary b fraction" << std::endl;
   std::cout << "\t -F do fraction fit" << std::endl;
   std::cout << "\t -h print this help" << std::endl;
   std::cout << std::endl;
