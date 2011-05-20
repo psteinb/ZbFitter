@@ -2,7 +2,7 @@ Parameter1.Name:                        f_{b}
 Parameter1.Start:			0.658 #173.8
 Parameter1.Step:			0.005
 Parameter1.low:				0.
-Parameter1.high:			0.865
+Parameter1.high:			1.
 Parameter2.Name:                        f_{light}
 Parameter2.Start:			0.135 #35.5
 Parameter2.Step:			0

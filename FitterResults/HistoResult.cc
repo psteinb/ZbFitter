@@ -59,10 +59,10 @@ void FitterResults::HistoResult::print(){
 
 
   //---------------- PLOTS ---------------- 
-  TCanvas myC(m_filename.c_str(),"",2400,1200);
+  TCanvas myC(m_filename.c_str(),"",2400,600);
   myC.Clear();
   myC.Draw();
-  myC.Divide(getNumberOfParameters(),2);
+  myC.Divide(getNumberOfParameters(),1);
 
   //---------------- DATA and fitted MC histos ---------------- 
   myC.cd(1);
@@ -109,15 +109,15 @@ void FitterResults::HistoResult::print(){
   // myC.cd(3);
   // m_dataHisto->Draw();
 
-  //---------------- TEMPLATES USED ---------------- 
-  int CanvasTot = getNumberOfParameters()*2;
-  int CanvasIdx = CanvasTot-getNumberOfParameters()+1;
-  for (int i = 0; i < (getNumberOfParameters()); ++i,CanvasIdx++)
-  {
-    myC.cd(CanvasIdx);
-    //    getFunction()->getTemplate(i)->getHisto()->SetLineColor(getScaledTemplateHistograms()->at(i)->GetLineColor());
-    getFunction()->getTemplate(i)->getHisto()->DrawCopy();
-  }
+  // //---------------- TEMPLATES USED ---------------- 
+  // int CanvasTot = getNumberOfParameters()*2;
+  // int CanvasIdx = CanvasTot-getNumberOfParameters()+1;
+  // for (int i = 0; i < (getNumberOfParameters()); ++i,CanvasIdx++)
+  // {
+  //   myC.cd(CanvasIdx);
+  //   //    getFunction()->getTemplate(i)->getHisto()->SetLineColor(getScaledTemplateHistograms()->at(i)->GetLineColor());
+  //   getFunction()->getTemplate(i)->getHisto()->DrawCopy();
+  // }
     
   myC.Update();
   myC.Print(".eps");

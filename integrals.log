@@ -5,3 +5,8 @@ AlpgenZee/MC_Signal_B, [100% ] I: 26.5 #pm 0.3  AlpgenZmumu/MC_Signal_B, [100% ]
 Sherpa_ee/mcl, [20.4%] I: (35.5 #pm 6.0)    Sherpa_mumu/mcl, [17.5%] I: (39.9 #pm 6.3)
 Sherpa_ee/mcc, [31.4%] I: (54.5 #pm 7.4)    Sherpa_mumu/mcc, [34.7%] I: (79.2 #pm 8.9)
 Sherpa_ee/mcb, [100% ] I: (173.8 #pm 13.2)  Sherpa_mumu/mcb, [100% ] I: (228.3 #pm 15.1)
+
+ZeeJetsSherpa/Zjets_l, [20.4%] I: (6.8 #pm 1.3)   ZmumuJetsSherpa/Zjets_l, [17.7%] I: (7.6 #pm 1.4)
+ZeeJetsSherpa/Zjets_c, [31.2%] I: (10.4 #pm 0.7)  ZmumuJetsSherpa/Zjets_c, [34.7%] I: (14.9 #pm 1.1)
+ZeeJetsSherpa/Zjets_b, [100.%] I: (33.3 #pm 1.3)  ZmumuJetsSherpa/Zjets_b, [100.%] I: (43.0 #pm 1.4)
+
