@@ -1,11 +1,23 @@
 0) To setup the package
    * setup root
    * setup tbb
-   * source setANALpath in the parent directory of the package
+   * source setupPATHS.sh in the parent directory of the package
    * source $SRC/makeAll.sh (I was too lazy to implement recursive building in GNUmake)
 
 1) run the fits
+see $SRC/results/central/do_3normalisations_top.sh or $SRC/results/central/do_1o3fractions_top.sh
+for a fit on 3 templates plus the fixed top background taken from Sherpa_XXX.root
+
+[FIXME: tbc.]
+
 
 2) run pseudo experiments
+see $SRC/results/ensemble/do_3normalisations_top.sh or $SRC/results/ensemble/do_1o3fractions_top.sh
+for a fit on 3 templates plus the fixed top background taken from Sherpa_XXX.root
+[watch out the pseudo experiments use different steering files from $SRC/results/environments/ as the fits in $SRC/results/central do]
+[FIXME: tbc.]
+
 
 3) run linearity tests
+see *outdated* $SRC/results/linear/doThis.sh
+tbc.
