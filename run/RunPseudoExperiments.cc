@@ -179,9 +179,9 @@ int main(int argc, char* argv[])
   myResults.Draw();
   myResults.Divide(3,m_templates.size());
   int padSize = 3*m_templates.size();
-  TArrow anArrow;
-  anArrow.SetLineColor(kBlue);
-  anArrow.SetLineWidth(2);
+  TLine anLine;
+  anLine.SetLineColor(kBlue);
+  anLine.SetLineWidth(2);
   int currentPad=0;
   int padStart=1;
   std::ostringstream expValueString;
@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < m_results.size(); ++i,padStart+=3)
   {
     expValueString.str("");
-    expValueString <</* "expected:\t"<<*/ (scaleExpectation*expected[i]) << " #pm " << (scaleExpectation*expectedErrors[i]);
+    expValueString <</* "expected:\t"<<*/ (expected[i]) << " #pm " << (expectedErrors[i]);
     for (int pad = 0; pad < 3; ++pad)
     {
       currentPad= pad + padStart;
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
       m_results[i][pad]->Draw("");
       if(pad<1){
         myResults.Update();
-        ArrowXNDC = (gPad->XtoPad(scaleExpectation*expected[i]) - gPad->GetUxmin())/(gPad->GetUxmax() - gPad->GetUxmin());
+        ArrowXNDC = (gPad->XtoPad(expected[i]) - gPad->GetUxmin())/(gPad->GetUxmax() - gPad->GetUxmin());
         if(ArrowXNDC<.5)
           expValue.SetX1NDC(.5);
         else
@@ -219,8 +219,8 @@ int main(int argc, char* argv[])
         expValue.AddText(expValueString.str().c_str());
         expValue.DrawClone();
         
-        anArrow.DrawArrow(gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymin(),
-                          gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymax(),0.03,"<|");
+        anLine.DrawLine(gPad->XtoPad(expected[i]),gPad->GetUymin(),
+                        gPad->XtoPad(expected[i]),gPad->GetUymax()/*,0.03,"<|"*/);
       }
     }
   }
@@ -240,10 +240,10 @@ int main(int argc, char* argv[])
     MeanCanvas.cd(pad);
     expValue.Clear();
     expValueString.str("");
-    expValueString <</* "expected:\t"<<*/ (scaleExpectation*expected[i]) << " #pm " << (scaleExpectation*expectedErrors[i]);
+    expValueString <</* "expected:\t"<<*/ (expected[i]) << " #pm " << (expectedErrors[i]);
     m_results[i][0]->Draw();
     MeanCanvas.Update();
-    ArrowXNDC = (gPad->XtoPad(scaleExpectation*expected[i]) - gPad->GetUxmin())/(gPad->GetUxmax() - gPad->GetUxmin());
+    ArrowXNDC = (gPad->XtoPad(expected[i]) - gPad->GetUxmin())/(gPad->GetUxmax() - gPad->GetUxmin());
     if(ArrowXNDC<.5)
       expValue.SetX1NDC(.5);
     else
@@ -257,8 +257,8 @@ int main(int argc, char* argv[])
     expValue.AddText(expValueString.str().c_str());
 
     expValue.DrawClone();
-    anArrow.DrawArrow(gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymin(),
-                      gPad->XtoPad(scaleExpectation*expected[i]),gPad->GetUymax(),0.03,"<|");
+    anLine.DrawLine(gPad->XtoPad(expected[i]),gPad->GetUymin(),
+                    gPad->XtoPad(expected[i]),gPad->GetUymax()/*,0.03,"<|"*/);
     // }
     
     
@@ -291,7 +291,7 @@ int main(int argc, char* argv[])
 
     gPad->SetTopMargin(.2);
     m_results[i][2]->SetStats(false);
-    m_results[i][2]->Draw();
+    m_results[i][2]->Draw("e0");
     if(m_results[i][2]->GetEntries()>0){
     m_results[i][2]->Fit(gaus,"VR+");
     stream << "#mu :\t" << gaus->GetParameter(1) << " #pm " << gaus->GetParError(1);

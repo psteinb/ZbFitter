@@ -246,9 +246,9 @@ int main(int argc, char* argv[])
   myResults.Draw();
   myResults.Divide(3,m_templates.size());
   int padSize = 3*m_templates.size();
-  TArrow anArrow;
-  anArrow.SetLineColor(kBlue);
-  anArrow.SetLineWidth(2);
+  TLine anLine;
+  anLine.SetLineColor(kBlue);
+  anLine.SetLineWidth(2);
   int currentPad=0;
   int padStart=1;
   std::ostringstream expValueString;
@@ -286,8 +286,8 @@ int main(int argc, char* argv[])
         expValue.AddText(expValueString.str().c_str());
         expValue.DrawClone();
         
-        anArrow.DrawArrow(gPad->XtoPad(expected[i]),gPad->GetUymin(),
-                          gPad->XtoPad(expected[i]),gPad->GetUymax(),0.03,"<|");
+        anLine.DrawLine(gPad->XtoPad(expected[i]),gPad->GetUymin(),
+                        gPad->XtoPad(expected[i]),gPad->GetUymax()/*,0.03,"<|"*/);
       }
     }
   }
@@ -324,8 +324,8 @@ int main(int argc, char* argv[])
     expValue.AddText(expValueString.str().c_str());
 
     expValue.DrawClone();
-    anArrow.DrawArrow(gPad->XtoPad(expected[i]),gPad->GetUymin(),
-                      gPad->XtoPad(expected[i]),gPad->GetUymax(),0.03,"<|");
+    anLine.DrawLine(gPad->XtoPad(expected[i]),gPad->GetUymin(),
+                    gPad->XtoPad(expected[i]),gPad->GetUymax()/*,0.03,"<|"*/);
     // }
     
     
