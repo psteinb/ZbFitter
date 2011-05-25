@@ -13,6 +13,8 @@
 #include "FitterResults/HistoResult.hh"
 #include "functions/BinnedEML.hh"
 #include "Studies/PseudoStudy.hh"
+#include "Studies/ProtoCreators.hh"
+
 
 #include "TString.h"
 #include "TRegexp.h"
@@ -29,27 +31,7 @@
 #include "AtlasStyle.h"
 
 
-struct defaultMCValues
-{
-  
 
-  void operator()(TH1* _total, const std::vector<TH1*>& _input){
-
-    if(_total->GetEntries()!=0){
-      _total->Reset("MICE");
-      _total->ResetStats();}
-    
-
-    for (int i = 0; i < _input.size(); ++i)
-    {
-      _total->Add(_input[i]);
-    }
-    
-  };
-
-  //private:
-
-};
 
 
 void createExpectedValuesFromTemplates(const std::vector<TH1*>& _templates,
@@ -144,7 +126,7 @@ int main(int argc, char* argv[])
 
    // ----- PSEUDO EXPERIMENTS ----- 
   double scaleExpectation = TMath::Abs(conf.p_dataScale);
-  PseudoStudy<defaultMCValues,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEML>  
+  PseudoStudy<FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEML>  
     aPseudoStudy(m_templates,
                  expected,
                  expectedErrors,
@@ -154,6 +136,7 @@ int main(int argc, char* argv[])
                  );
 
   aPseudoStudy.setInput(input);
+  aPseudoStudy.setProtoCreator(defaultMCValues());
   aPseudoStudy.setFitterConfigFile(conf.p_configFile);
   aPseudoStudy.setFitEngine(conf.p_fitEngine);
   aPseudoStudy.setFitMode(conf.p_fitMode);

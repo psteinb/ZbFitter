@@ -89,8 +89,8 @@ if __name__ == '__main__':
 
     file1 = ROOT.TFile(sys.argv[1])
     file2 = ROOT.TFile(sys.argv[2])
-    fileBase1 = file1.GetName().rstrip(".root")
-    fileBase2 = file2.GetName().rstrip(".root")
+    fileBase1 = os.path.split(file1.GetName())[-1].rstrip(".root")
+    fileBase2 = os.path.split(file2.GetName())[-1].rstrip(".root")
 
     listOfNames1 = listObjectNames(file1)
     listOfNames2 = listObjectNames(file2)
@@ -106,15 +106,18 @@ if __name__ == '__main__':
     else:
         loopList2 = loopList1[:]
    
+    loopList1.sort()
+    loopList2.sort()
+
     newName = fileBase1+"_"+fileBase2
     max2Loop = min(len(loopList1),len(loopList2))
     print max2Loop, " object to loop on"
     if(max2Loop==1):
         newName+="_"+str(loopList1[0]).split(";")[0]
-    aCanvas = ROOT.TCanvas(newName,"",1600,max2Loop*600)
+    aCanvas = ROOT.TCanvas(newName,"",max2Loop*800,600)
     aCanvas.Clear()
     aCanvas.Draw()
-    aCanvas.Divide(2,max2Loop)
+    aCanvas.Divide(max2Loop,1)
 
     for index in range(max2Loop):
         
@@ -126,28 +129,21 @@ if __name__ == '__main__':
         plot2.Sumw2()
         print ">>> processing %s (%i/%i)" % (loopList1[index],index+1,max2Loop)
         currentLine = (2*index)+1
-        aCanvas.cd(currentLine)
+        aCanvas.cd(index+1)
         int1,err1 = calculateIntegral(plot1)
         int2,err2 = calculateIntegral(plot2)
-        plot1.SetTitle(str("%s/%s, I: (%.1f #pm %.1f) " % (fileBase1,plot1.GetName(),int1,err1)))
-        plot2.SetTitle(str("%s/%s, I: (%.1f #pm %.1f) " % (fileBase2,plot2.GetName(),int2,err2)))
+        plot1.GetYaxis().SetTitle(plot1.GetName())
+        plot1.SetTitle(fileBase1)
+        plot2.SetTitle(fileBase2)
+#        plot1.SetTitle(str("%s/%s, I: (%.1f #pm %.1f) " % (fileBase1,plot1.GetName(),int1,err1)))
+  
+ #       plot2.SetTitle(str("%s/%s, I: (%.1f #pm %.1f) " % (fileBase2,plot2.GetName(),int2,err2)))
         print plot1.GetTitle(),plot2.GetTitle()
         plot1.SetMaximum(1.75*max(plot1.GetMaximum(),plot2.GetMaximum()))
         plot1.Draw("e1")
         plot2.SetLineColor(ROOT.kRed)
         plot2.SetMarkerColor(ROOT.kRed)
         plot2.Draw("e0same")
-
-        aCanvas.cd(currentLine+1)
-        scaledPlot1 = plot1.Clone("scaled1")
-        scaledPlot2 = plot2.Clone("scaled2")
-        scaledPlot1.Scale(1/int1)
-        scaledPlot2.Scale(1/int2)
-        scaledPlot1.SetMaximum(1.75*max(scaledPlot1.GetMaximum(),scaledPlot2.GetMaximum()))
-        scaledPlot1.Draw("e1")
-        scaledPlot2.SetLineColor(ROOT.kRed)
-        scaledPlot2.SetMarkerColor(ROOT.kRed)
-        scaledPlot2.Draw("e0same")
         leg = ROOT.TLegend(0.35,0.6,0.95,0.92)
         leg.SetFillColor(ROOT.kWhite)
         leg.SetShadowColor(ROOT.kWhite)
@@ -155,9 +151,20 @@ if __name__ == '__main__':
         leg.AddEntry(plot1,plot1.GetTitle(),"lep")
         leg.AddEntry(plot2,plot2.GetTitle(),"lep")
         leg.Draw()
+        aCanvas.Update()
+        #aCanvas.cd(currentLine+1)
+        #scaledPlot1 = plot1.Clone("scaled1")
+        #scaledPlot2 = plot2.Clone("scaled2")
+        #scaledPlot1.Scale(1/int1)
+        #scaledPlot2.Scale(1/int2)
+        #scaledPlot1.SetMaximum(1.75*max(scaledPlot1.GetMaximum(),scaledPlot2.GetMaximum()))
+        #scaledPlot1.Draw("e1")
+        #scaledPlot2.SetLineColor(ROOT.kRed)
+        #scaledPlot2.SetMarkerColor(ROOT.kRed)
+        #scaledPlot2.Draw("e0same")
         
         
-    aCanvas.Update()
+    #aCanvas.Update()
     aCanvas.Print(".eps")
     
     

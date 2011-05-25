@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __PSEUDOSTUDY_HH__
-#define __PSEUDOSTUDY_HH__
+#ifndef __BASESTUDY_HH__
+#define __BASESTUDY_HH__
 
 #include <string>
 #include <vector>
@@ -13,8 +13,6 @@
 #include "FitterResults/HistoResult.hh"
 #include "FitterResults/LLHResult.hh"
 #include "functions/SimpleMaxLLH.hh"
-#include "ProtoCreators.hh"
-
 
 #include "TRandom3.h"
 #include "TMath.h"
@@ -26,11 +24,11 @@ template<
   class InputT,
   class FunctionT=functions::SimpleMaxLLH
   >
-class PseudoStudy{
+class BaseStudy{
 
   InputT* m_input;
   FunctionT m_fitter;
-  BaseProtoCreator m_creator;
+  ProtoCreator m_creator;
   
   std::string m_fitConfigFile       ;
   std::string m_fitEngine       ;
@@ -200,7 +198,7 @@ class PseudoStudy{
 
 public:
   
-  PseudoStudy(const std::vector<TH1*>& _templates,
+  BaseStudy(const std::vector<TH1*>& _templates,
               const std::vector<double>& _expected,
               const std::vector<double>& _expectedErrors,
               const double& _dataIntegral,
@@ -213,7 +211,7 @@ public:
     m_fitConfigFile(""),       
     m_fitEngine("Minuit2"),       
     m_fitMode  ("Migrad"),       
-    m_baseName("PseudoStudy_"),
+    m_baseName("BaseStudy_"),
     m_templateTH1s(_templates.size(),0),
     m_total(0),
     m_resultTH1s(),
@@ -250,7 +248,7 @@ public:
     setupResults(_templates.size());
   };
 
-   ~PseudoStudy(){
+   ~BaseStudy(){
      delete m_input;
      
    }
@@ -258,7 +256,7 @@ public:
   //setter
   void setFitEngine( const std::string& _engine){m_fitEngine = _engine;};
   void setFitMode( const std::string& _mode){m_fitMode = _mode;};
-  void setProtoCreator(const BaseProtoCreator& _creator){m_creator = _creator;};
+  void setProtoCreator(const ProtoCreator& _creator){m_creator = _creator;};
   void setFitterConfigFile(const std::string& _file){m_fitConfigFile = _file;};
   void setInput(InputT* _input=0){
     if(m_input){
