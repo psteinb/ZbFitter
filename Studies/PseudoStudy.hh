@@ -19,6 +19,7 @@
 #include "TRandom3.h"
 #include "TMath.h"
 #include "TH1D.h"
+#include "TH2D.h"
 #include "TCanvas.h"
 #include "Math/Minimizer.h"
 
@@ -30,7 +31,7 @@ class PseudoStudy{
 
   InputT* m_input;
   FunctionT m_fitter;
-  BaseProtoCreator m_creator;
+  const BaseProtoCreator* m_creator;
   
   std::string m_fitConfigFile       ;
   std::string m_fitEngine       ;
@@ -51,6 +52,7 @@ class PseudoStudy{
   std::vector<TH1D> m_MigradPulls;
   std::vector<TH1D> m_means;
   std::vector<TH1D> m_sigmas;
+  std::vector<std::vector<TH2D> > m_correlations;
   
   std::vector<double> m_expectedValues   ;
   std::vector<double> m_expectedErrors      ;
@@ -65,6 +67,64 @@ class PseudoStudy{
 
   bool m_doPanicPrint;
   int m_verbosity;
+
+  void setupCorrelationResults(const int& _size){
+
+    int Xbinning = 50;
+    double expXDown = 0.;
+    double expXUp = 0.;
+
+    int Ybinning = 50;
+    double expYDown = 0.;
+    double expYUp = 0.;
+
+    std::ostringstream name("");
+    for (int col = 0; col < _size; ++col)
+    {
+      expXUp   = 2.*(m_expectedValues.at(col));
+
+          for (int row = 0; row < _size; ++row)
+          {
+            name.str("correlation_");
+            name << col << "_" << row;
+            expYUp   = 2.*(m_expectedValues.at(row));
+            m_correlations[col][row] = TH2D(name.str().c_str(),"",
+                                            Xbinning,expXDown,expXUp,
+                                            Ybinning,expYDown,expYUp
+                                            );
+          }
+    }
+    
+  }
+
+  void treatCorrelationResults(const std::vector<std::string>* _names){
+
+    int _size = _names->size();
+
+    for (int col = 0; col < _size; ++col)
+    {
+      for (int row = 0; row < _size; ++row)
+      {
+        m_correlations[col][row].GetXaxis()->SetTitle(_names->at(col).c_str());
+        m_correlations[col][row].GetYaxis()->SetTitle(_names->at(row).c_str());
+      }
+    }
+    
+  }
+  
+  void fillCorrelations(){
+
+    int _size = m_fitValues.size();
+    for (int col = 0; col < _size; ++col)
+    {
+      for (int row = 0; row < _size; ++row)
+      {
+        m_correlations[col][row].Fill(m_fitValues.at(col),m_fitValues.at(row));
+      }
+    }
+    
+  }
+
 
   //setups
   void setupData(TH1* _data){
@@ -123,7 +183,7 @@ class PseudoStudy{
       //m_sigmas[i].SetBit(TH1::kCanRebin);
     }
 
-
+    setupCorrelationResults(_size);
   }
 
   void preparePlots(const std::string& _baseName, FitterResults::HistoResult* _histo= 0, FitterResults::LLHResult* _llh = 0){
@@ -147,7 +207,7 @@ class PseudoStudy{
     m_total->ResetStats();
     
     //ProtoCreator creator;
-    m_creator(m_total,m_templateTH1s);
+    m_creator->operator()(m_total,m_templateTH1s);
     
   };  
 
@@ -209,7 +269,7 @@ public:
               ):
     m_input(new InputT()),
     m_fitter(),
-    m_creator(),
+    m_creator(0),
     m_fitConfigFile(""),       
     m_fitEngine("Minuit2"),       
     m_fitMode  ("Migrad"),       
@@ -225,6 +285,7 @@ public:
     m_MigradPulls(_templates.size()),
     m_means(_templates.size()),
     m_sigmas(_templates.size()),
+    m_correlations(_templates.size(),std::vector<TH2D>(_templates.size())),
     m_expectedValues    (_expected),   
     m_expectedErrors    (_expectedErrors),   
     m_dataIntegral      (_dataIntegral),   
@@ -258,7 +319,7 @@ public:
   //setter
   void setFitEngine( const std::string& _engine){m_fitEngine = _engine;};
   void setFitMode( const std::string& _mode){m_fitMode = _mode;};
-  void setProtoCreator(const BaseProtoCreator& _creator){m_creator = _creator;};
+  void setProtoCreator(const BaseProtoCreator* _creator){m_creator = _creator;};
   void setFitterConfigFile(const std::string& _file){m_fitConfigFile = _file;};
   void setInput(InputT* _input=0){
     if(m_input){
@@ -384,7 +445,24 @@ public:
 
   };
   
-  
+  void getCorrelationResults(std::vector<std::vector<TH2*> >& _results){
+
+    _results.clear();
+    
+    _results.resize(m_correlations.size(),std::vector<TH2*>(m_correlations[0].size()));
+    
+    for (int col = 0; col < m_correlations.size(); ++col)
+    {
+      for (int row = 0; row < m_correlations[0].size(); ++row)
+      {
+        _results[col][row] = &(m_correlations[col][row]);
+      }
+    }
+
+  };
+
+
+
 
   void experiment(){
     
@@ -504,7 +582,8 @@ public:
       if(!(status!=0)){
         //collect the errors
         aFitter.getMinosErrorSet(m_fitErrorsStatus,m_fitErrorsDown,m_fitErrorsUp);
-
+        m_fitValues.clear();
+        m_fitValues.resize(aFitter.getFitResults()->size(),0.);
         std::copy(aFitter.getFitResults()->begin()      ,
                   aFitter.getFitResults()->end()        ,
                   m_fitValues.begin());
@@ -516,6 +595,10 @@ public:
         //collect the results
         m_maxLLH->Fill(aFitter.getMinimizer()->MinValue());
         double pullSigma = 0.;
+        
+        //fill correlations
+        fillCorrelations();
+
         for (int i = 0; i < numParameters; ++i)
         {
          
@@ -567,8 +650,10 @@ public:
       m_data->Reset("MICE");
       m_data->ResetStats(); 
       
-      if(i<1)
+      if(i<1){
         treatResultsFromMinimizer(aFitter.getParameterNames());
+        treatCorrelationResults(aFitter.getParameterNames());
+      }
     }
     double irregulars = (nNon0Status/double(m_iterations))*100;
     std::cout << nNon0Status<< "/" <<m_iterations << " = ("<< std::setprecision(2) <<irregulars <<" %) were irregular!\n";

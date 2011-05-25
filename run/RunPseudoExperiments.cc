@@ -93,6 +93,7 @@ int main(int argc, char* argv[])
   aStyle->SetPadTopMargin(0.22);
   //aStyle->SetHistTopMargin(0.3);
   aStyle->SetOptStat(2210);
+  aStyle->SetPalette(1);
   //  aStyle->SetOptFit(1);
   gROOT->SetStyle("ATLAS");
   gROOT->ForceStyle();
@@ -136,7 +137,8 @@ int main(int argc, char* argv[])
                  );
 
   aPseudoStudy.setInput(input);
-  aPseudoStudy.setProtoCreator(defaultMCValues());
+  defaultMCValues aCreator;
+  aPseudoStudy.setProtoCreator(&aCreator);
   aPseudoStudy.setFitterConfigFile(conf.p_configFile);
   aPseudoStudy.setFitEngine(conf.p_fitEngine);
   aPseudoStudy.setFitMode(conf.p_fitMode);
@@ -155,7 +157,10 @@ int main(int argc, char* argv[])
     aPseudoStudy.getResultsOfParameter(i,m_results[i]);
   }
   
-  
+  std::vector<std::vector<TH2*> > m_correlations(m_templates.size());
+  aPseudoStudy.getCorrelationResults(m_correlations);
+
+
   // ----- DRAW RESULTS IN ONE PAD ----- 
   TCanvas myResults(conf.p_outputfile.c_str(),"",3000,2000);
   myResults.Clear();
@@ -308,6 +313,54 @@ int main(int argc, char* argv[])
   aPseudoStudy.getMaxLLHDistribution()->Draw();
   PseudoMaxLLH.Update();
   PseudoMaxLLH.Print(".eps");
+
+  std::vector<std::vector<TH2*> > m_correlations(m_templates.size());
+  aPseudoStudy.getCorrelationResults(m_correlations);
+  int ysize = 0;
+  int xsize = 0;
+  if(m_correlations.size() && m_correlations[0].size()){
+    xsize = m_correlations.size();
+    ysize = m_correlations[0].size();
+
+    name = conf.p_outputfile;
+    name += "_correlations";
+
+    TCanvas PseudoCorrelation(name.c_str(),"",xsize*800,ysize*600);
+
+    PseudoCorrelation.Clear();
+    PseudoCorrelation.Draw();
+    PseudoCorrelation.Divide(xsize,ysize);
+    
+    int padId = 0;
+    std::ostringstream correlationText;
+    for (int col = 0; col < m_correlations.size(); ++col)
+    {
+      for (int row = 0; row < m_correlations[0].size(); ++row)
+      {
+        padId = (m_correlations.size()*row)+1+col;
+        PseudoCorrelation.cd(padId);
+        m_correlations[col][row]->SetStats(false);
+        m_correlations[col][row]->Draw("colz");
+
+        correlationText.str("");
+        correlationText<< "correlation: " << m_correlations[col][row]->GetCorrelationFactor();
+        correlationText<< ", int: ";
+        correlationText << m_correlations[col][row]->Integral();
+        TPaveText aPave;
+        aPave.AddText(correlationText.str().c_str());
+        aPave.SetX1NDC(.1);
+        aPave.SetX2NDC(.9);
+        aPave.SetY1NDC(.85);
+        aPave.SetY2NDC(1.);
+        
+        aPave.DrawClone();
+        PseudoCorrelation.Update();
+      }
+    }
+    
+    PseudoCorrelation.Print(".eps");
+
+  }
 
   aPseudoStudy.printResults();
   return 0; 

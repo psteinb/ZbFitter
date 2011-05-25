@@ -5,7 +5,7 @@ class BaseProtoCreator
 {
 public:
 
-  virtual void operator()(TH1* _total, const std::vector<TH1*>& _input){
+  virtual void operator()(TH1* _total, const std::vector<TH1*>& _input) const {
     
     std::cerr << __FILE__ << ":BaseProtoCreator \t USED\n";
     
@@ -18,7 +18,7 @@ class defaultMCValues : public BaseProtoCreator
   
 public:
 
-  void operator()(TH1* _total, const std::vector<TH1*>& _input){
+  void operator()(TH1* _total, const std::vector<TH1*>& _input) const {
 
     if(_total->GetEntries()!=0){
       _total->Reset("MICE");
