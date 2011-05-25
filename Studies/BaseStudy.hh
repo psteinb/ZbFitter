@@ -17,18 +17,16 @@
 #include "TRandom3.h"
 #include "TMath.h"
 #include "TH1D.h"
+#include "TH2D.h"
 #include "TCanvas.h"
 #include "Math/Minimizer.h"
 
-template<
-  class InputT,
-  class FunctionT=functions::SimpleMaxLLH
-  >
+
 class BaseStudy{
 
-  InputT* m_input;
-  FunctionT m_fitter;
-  ProtoCreator m_creator;
+  // InputT* m_input;
+  // FunctionT m_fitter;
+  // ProtoCreator m_creator;
   
   std::string m_fitConfigFile       ;
   std::string m_fitEngine       ;
@@ -40,15 +38,17 @@ class BaseStudy{
   std::vector<TH1*> m_resultTH1s;
   TH1D* m_maxLLH;
 
-  int m_threads;
+  // int m_threads;
   int m_iterations;
 
   TRandom3 m_TRand3;
 
+  //results to produce
   std::vector<TH1D> m_pulls;
   std::vector<TH1D> m_MigradPulls;
   std::vector<TH1D> m_means;
   std::vector<TH1D> m_sigmas;
+  std::vector<TH2D> m_correlations;
   
   std::vector<double> m_expectedValues   ;
   std::vector<double> m_expectedErrors      ;
@@ -65,18 +65,18 @@ class BaseStudy{
   int m_verbosity;
 
   //setups
-  void setupData(TH1* _data){
-    m_input->setDataHisto(_data);
-    //m_input->setTemplateHistos(_templates);
-    m_input->initData();
-  }
+  // void setupData(TH1* _data){
+  //   m_input->setDataHisto(_data);
+  //   //m_input->setTemplateHistos(_templates);
+  //   m_input->initData();
+  // }
   
 
-  void setupInput(TH1* _data, const std::vector<TH1*> _templates){
-    m_input->setDataHisto(_data);
-    m_input->setTemplateHistos(_templates);
-    m_input->init();
-  }
+  // void setupInput(TH1* _data, const std::vector<TH1*> _templates){
+  //   m_input->setDataHisto(_data);
+  //   m_input->setTemplateHistos(_templates);
+  //   m_input->init();
+  // }
 
 
   template<typename T>
@@ -84,6 +84,10 @@ class BaseStudy{
     std::ostringstream value;
     value<< _text.c_str() << _aT;
     return value.str();
+  }
+
+  void setupCorrelationResult(){
+
   }
 
 
@@ -120,6 +124,8 @@ class BaseStudy{
       m_sigmas[i].GetXaxis()->SetTitle(addItemToText<int>("fitted error: ",i).c_str());
       //m_sigmas[i].SetBit(TH1::kCanRebin);
     }
+
+    setupCorrelationResults();
 
 
   }
@@ -180,21 +186,7 @@ class BaseStudy{
   };
 
 
-  void createScaledData(TH1* _data=0,
-                        const double& _integral=1.){
-
-    if(!_data){
-      std::cerr << __FILE__ << ":"<< __LINE__ <<"\t data histo pointer nil\n";
-      return ;}
-
-    
-
-    _data->Reset("MICE");
-    _data->ResetStats();
-    _data->FillRandom(m_total,_integral);
-    
-    return ;
-  }
+  
 
 public:
   
@@ -205,9 +197,9 @@ public:
               const int& _thr=1,
               const int& _iters=5000
               ):
-    m_input(new InputT()),
-    m_fitter(),
-    m_creator(),
+    // m_input(new InputT()),
+    // m_fitter(),
+    // m_creator(),
     m_fitConfigFile(""),       
     m_fitEngine("Minuit2"),       
     m_fitMode  ("Migrad"),       
@@ -248,10 +240,26 @@ public:
     setupResults(_templates.size());
   };
 
-   ~BaseStudy(){
-     delete m_input;
+  void createScaledData(TH1* _data=0,
+                        const double& _integral=1.){
+
+    if(!_data){
+      std::cerr << __FILE__ << ":"<< __LINE__ <<"\t data histo pointer nil\n";
+      return ;}
+
+    
+
+    _data->Reset("MICE");
+    _data->ResetStats();
+    _data->FillRandom(m_total,_integral);
+    
+    return ;
+  }
+
+   // ~BaseStudy(){
+   //   delete m_input;
      
-   }
+   // }
 
   //setter
   void setFitEngine( const std::string& _engine){m_fitEngine = _engine;};
