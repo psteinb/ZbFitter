@@ -91,6 +91,7 @@ public:
   void print() const{
     std::cout << "ExperimentPerformer at "<<m_scale<<std::endl;
     this->printContent();
+    m_PseudoStudy->printResults();
   };
 
   void prepare();
@@ -156,7 +157,8 @@ void ExperimentPerformer::prepare( )  {
                                                                                                                           );
 
    m_PseudoStudy->setProtoCreator(&aScaler);
-
+   //the following was a bad trick to work around problematic settings 
+   //the function createScaledConfigFileString returns the correct steering string for the config file that matches the current scale
    //m_PseudoStudy->setFitterConfigFile(createScaledConfigFileString(m_configuration.p_configFile,m_scale));
    m_PseudoStudy->setFitterConfigFile(m_configuration.p_configFile);
    m_PseudoStudy->setFitEngine(m_configuration.p_fitEngine);
@@ -171,6 +173,7 @@ void ExperimentPerformer::experiment( )  {
   
   // ----- PSEUDO EXPERIMENTS ----- 
   m_PseudoStudy->experiment();
+  
 
   std::vector<std::vector<TH1*> > m_results(m_templates.size());
   std::vector<double> metaMeans;metaMeans.reserve(m_templates.size());

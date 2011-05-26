@@ -66,7 +66,10 @@ public:
       }
       catch(std::exception& exc)
       {
-        std::cout << "## index " << i << " worker does not exist\n ";
+        if(i >= metaWorkers->size())
+          std::cout << "## index " << i << " worker does not exist\n ";
+        else
+          std::cout << "## exc   " << exc.what() << "\n ";
       }
     }
     

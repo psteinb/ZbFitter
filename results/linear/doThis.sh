@@ -1,2 +1,1 @@
-RunLinearTest.exe -M Migrad -d $SRC/Saclay_ee.root   -c $SRC/results/linear/BinnedEML.2params.env -D "data" -T "mcb,mccpl" -o Saclay_2p_ee -i 100 -r 5
-RunLinearTest.exe -M Migrad -d $SRC/Saclay_mumu.root -c $SRC/results/linear/BinnedEML.2params.env -D "data" -T "mcb,mccpl" -o Saclay_2p_mm -i 100 -r 5
+RunLinearTest.exe -M Migrad -d /home/psteinb/development/sandbox/ZbFitter/Sherpa_added.root -c /home/psteinb/development/sandbox/ZbFitter/results/environments/SherpaAdded/BinnedEML.4params.Sherpa_added_top.env -D "Data" -T "Zjets_b,Zjets_c,Zjets_l,TTbar" -o Sherpa_added_lin -i 1000 -r 5 -t 3
