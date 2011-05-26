@@ -277,7 +277,7 @@ public:
     m_templateTH1s(_templates.size(),0),
     m_total(0),
     m_resultTH1s(),
-    m_maxLLH(new TH1D("maxLLH",";max(logLH);N",200,-400,0)),
+    m_maxLLH(new TH1D("maxLLH",";max(logLH);N",200,-1000,0)),
     m_threads(_thr),
     m_iterations(_iters),
     m_TRand3(),
@@ -572,7 +572,7 @@ public:
       else{
         name << "_success";
         preparePlots(name.str(),histoResult,llhResult);
-        if(i % 5000 == 0 && m_verbosity<6){
+        if(i % 5000 == 0 && m_verbosity<3){
           aFitter.printTo(histoResult);
           aFitter.printTo(llhResult);
         }

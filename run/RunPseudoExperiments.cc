@@ -118,12 +118,27 @@ int main(int argc, char* argv[])
   TH1* m_data =  input->getDataDeepCopy();
 
    // ----- EXPECTED VALUES ----- 
+  MCValues aProtoMaker(conf.p_datadir.c_str(),conf.p_protoTitle);
+  std::vector<TH1*> m_protoFunctions(aProtoMaker.getProtoFunctions()->begin(),
+                                     aProtoMaker.getProtoFunctions()->end());
+
+
   std::vector<double> expected          ;
   std::vector<double> expectedErrors    ;
+  if(conf.p_protoTitle.empty())
   createExpectedValuesFromTemplates(m_templates,
                                     expected,          
                                     expectedErrors,
                                     m_data->Integral()*TMath::Abs(conf.p_dataScale));
+  else
+    createExpectedValuesFromTemplates(m_protoFunctions,
+                                      expected,          
+                                      expectedErrors,
+                                      m_data->Integral()*TMath::Abs(conf.p_dataScale));
+  // createExpectedValuesFromTemplates(m_templates,
+  //                                   expected,          
+  //                                   expectedErrors,
+  //                                   m_data->Integral()*TMath::Abs(conf.p_dataScale));
 
    // ----- PSEUDO EXPERIMENTS ----- 
   double scaleExpectation = TMath::Abs(conf.p_dataScale);
@@ -221,12 +236,17 @@ int main(int argc, char* argv[])
   MeanCanvas.Draw();
   MeanCanvas.Divide(m_templates.size(),1);
   int pad=1;
+  std::ostringstream dist2ExpectationString;
+
   for (int i = 0; i < m_results.size(); ++i,pad++)
   {
     MeanCanvas.cd(pad);
     expValue.Clear();
     expValueString.str("");
+    dist2ExpectationString.str("");
     expValueString <</* "expected:\t"<<*/ (expected[i]) << " #pm " << (expectedErrors[i]);
+    dist2ExpectationString << "(exp - <fit>): " << expected[i]-m_results[i][0]->GetMean();
+
     m_results[i][0]->Draw();
     MeanCanvas.Update();
     ArrowXNDC = (gPad->XtoPad(expected[i]) - gPad->GetUxmin())/(gPad->GetUxmax() - gPad->GetUxmin());
@@ -241,13 +261,14 @@ int main(int argc, char* argv[])
 
 
     expValue.AddText(expValueString.str().c_str());
+    expValue.AddText(dist2ExpectationString.str().c_str());
 
     expValue.DrawClone();
     anLine.DrawLine(gPad->XtoPad(expected[i]),gPad->GetUymin(),
                     gPad->XtoPad(expected[i]),gPad->GetUymax()/*,0.03,"<|"*/);
     // }
     
-    
+    std::cout << m_results[i][0]->GetXaxis()->GetTitle() << "]\t" << dist2ExpectationString.str() << std::endl;
   }
   MeanCanvas.Update();
   MeanCanvas.Print(".eps");

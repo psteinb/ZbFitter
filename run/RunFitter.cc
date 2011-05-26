@@ -286,9 +286,12 @@ int main(int argc, char* argv[])
   
 
   if(conf.p_msgLevel<3){
-    FitterResults::AbsResult* presult = new FitterResults::LLHPValue(0,conf.p_msgLevel,name,conf.p_rscFile);
-    if(conf.p_rscFile.size())
+    
+    if(conf.p_rscFile.size()){
+      FitterResults::AbsResult* presult = new FitterResults::LLHPValue(0,conf.p_msgLevel,name,conf.p_rscFile);
       fitter.printTo(presult);
+      delete presult;
+    }
     fitter.fit(true);
     fitter.printTo(chi2result);
   }
