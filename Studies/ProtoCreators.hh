@@ -113,4 +113,37 @@ public:
 
 };
 
+struct scaleMCByValue : public BaseProtoCreator
+{
+  double m_scale;
+
+public:
+  scaleMCByValue(const double& _scale=1.):
+    m_scale(_scale){};
+  
+  scaleMCByValue(const scaleMCByValue& _rhs):
+    m_scale(_rhs.m_scale){};
+
+
+  void operator()(TH1* _total, const std::vector<TH1*>& _input) const {
+
+    if(_total->GetEntries()!=0){
+      _total->Reset("MICE");
+      _total->ResetStats();}
+    
+
+    for (int i = 0; i < _input.size(); ++i)
+    {
+      if(i<1)
+        _total->Add(_input[i],m_scale);
+      else
+        _total->Add(_input[i]);
+    }
+    
+  };
+
+  //private:
+
+};
+
 #endif /* _PROTOCREATORS_H_ */

@@ -236,39 +236,19 @@ int main(int argc, char* argv[])
   MeanCanvas.Draw();
   MeanCanvas.Divide(m_templates.size(),1);
   int pad=1;
-  std::ostringstream dist2ExpectationString;
+
 
   for (int i = 0; i < m_results.size(); ++i,pad++)
   {
     MeanCanvas.cd(pad);
-    expValue.Clear();
-    expValueString.str("");
-    dist2ExpectationString.str("");
-    expValueString <</* "expected:\t"<<*/ (expected[i]) << " #pm " << (expectedErrors[i]);
-    dist2ExpectationString << "(exp - <fit>): " << expected[i]-m_results[i][0]->GetMean();
 
     m_results[i][0]->Draw();
     MeanCanvas.Update();
     ArrowXNDC = (gPad->XtoPad(expected[i]) - gPad->GetUxmin())/(gPad->GetUxmax() - gPad->GetUxmin());
-    if(ArrowXNDC<.5)
-      expValue.SetX1NDC(.5);
-    else
-      expValue.SetX1NDC(.17);
-    
-    expValue.SetY1NDC(1-aStyle->GetStatH()-.17);
-    expValue.SetX2NDC(expValue.GetX1NDC()+.33);
-    expValue.SetY2NDC(expValue.GetY1NDC()+.1);
-
-
-    expValue.AddText(expValueString.str().c_str());
-    expValue.AddText(dist2ExpectationString.str().c_str());
-
-    expValue.DrawClone();
     anLine.DrawLine(gPad->XtoPad(expected[i]),gPad->GetUymin(),
                     gPad->XtoPad(expected[i]),gPad->GetUymax()/*,0.03,"<|"*/);
     // }
-    
-    std::cout << m_results[i][0]->GetXaxis()->GetTitle() << "]\t" << dist2ExpectationString.str() << std::endl;
+
   }
   MeanCanvas.Update();
   MeanCanvas.Print(".eps");
@@ -363,9 +343,9 @@ int main(int argc, char* argv[])
 
         correlationText.str("");
         correlationText<< "correlation: " << m_correlations[col][row]->GetCorrelationFactor();
-        correlationText<< ", int: ";
-        correlationText << m_correlations[col][row]->Integral();
         TPaveText aPave;
+        aPave.SetFillColor(kWhite);
+        aPave.SetBorderSize(0.1);
         aPave.AddText(correlationText.str().c_str());
         aPave.SetX1NDC(.1);
         aPave.SetX2NDC(.9);

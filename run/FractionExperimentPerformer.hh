@@ -14,6 +14,7 @@
 #include "FitterInputs/NormedTH1.hh"
 #include "functions/BinnedEMLFraction.hh"
 #include "Studies/PseudoStudy.hh"
+#include "Studies/ProtoCreators.hh"
 #include "FitterInputs/NormalisationFunctors.hh"
 #include "FitterResults/HistoResult.hh"
 #include "run/BasePerformer.hh"
@@ -28,7 +29,7 @@ class FractionExperimentPerformer : public BasePerformer
   std::string m_outname;
   std::vector<TH1*> m_templates;
   TH1* m_data;
-  PseudoStudy<scaleMCByValue,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEMLFraction>*  m_PseudoStudy;
+  PseudoStudy<FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEMLFraction>*  m_PseudoStudy;
 
   void createExpectedValuesFromTemplates();
 public:
@@ -142,13 +143,13 @@ void FractionExperimentPerformer::prepare( )  {
   std::vector<double> expectedErrors    (m_templates.size(),1.);
   std::vector<double> expected    (getExpected()->begin(),getExpected()->end());
   
-  m_PseudoStudy = new PseudoStudy<scaleMCByValue,FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEMLFraction>(
+  m_PseudoStudy = new PseudoStudy<FitterInputs::NormedTH1<FitterInputs::Norm2Unity>, functions::BinnedEMLFraction>(
                                                                                                                           m_templates,expected,expectedErrors,
                                                                                                                           (m_data->Integral()),m_configuration.p_threads,
                                                                                                                           m_configuration.p_nIter
                                                                                                                           );
 
-   m_PseudoStudy->setProtoCreator(aScaler);
+   m_PseudoStudy->setProtoCreator(&aScaler);
    m_PseudoStudy->setFitterConfigFile(createScaledConfigFileString(m_configuration.p_configFile,m_scale));
    m_PseudoStudy->setFitEngine(m_configuration.p_fitEngine);
    m_PseudoStudy->setFitMode(m_configuration.p_fitMode);

@@ -388,12 +388,13 @@ public:
 
     for (; rItr!=rEnd; ++rItr)
     {
-      std::cout << rItr->GetName() << "("<< rItr->GetEntries()<<") "
-                <<"mean: " << rItr->GetMean()
-                <<", rms: " << rItr->GetRMS()
-                <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() 
-                <<", u/o: " << rItr->GetBinContent(0) << "/" <<   rItr->GetBinContent(rItr->GetNbinsX()+1)
-                << std::endl;
+      std::cout << rItr->GetName() << "("<< rItr->GetEntries()<<") " << std::setprecision(3)
+                <<"mean: " << double(rItr->GetMean())
+                <<", rms: " << double(rItr->GetRMS());
+      if(m_verbosity<3)
+        std::cout  <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() 
+                   <<", u/o: " << rItr->GetBinContent(0) << "/" <<   rItr->GetBinContent(rItr->GetNbinsX()+1);
+      std::cout << std::endl;
       rItr->Write();
     }
 
@@ -403,11 +404,12 @@ public:
     for (; rItr!=rEnd; ++rItr)
     {
         std::cout << rItr->GetName() << "("<< rItr->GetEntries()<<") "
-                  <<"mean: " << rItr->GetMean()
-                  <<", rms: " << rItr->GetRMS()
-                  <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() 
-                  <<", u/o: " << rItr->GetBinContent(0) << "/" <<   rItr->GetBinContent(rItr->GetNbinsX()+1)
-                  << std::endl;
+                  <<"mean: " << double(rItr->GetMean())
+                  <<", rms: " << double(rItr->GetRMS());
+        if(m_verbosity<3)
+          std::cout   <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() 
+                      <<", u/o: " << rItr->GetBinContent(0) << "/" <<   rItr->GetBinContent(rItr->GetNbinsX()+1);
+        std::cout << std::endl;
         rItr->Write();
     }
 
@@ -418,27 +420,30 @@ public:
     {
       std::cout << rItr->GetName() << "("<< rItr->GetEntries()<<") "
                 <<"mean: " << rItr->GetMean()
-                <<", rms: " << rItr->GetRMS()
-                <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax()
-                <<", u/o: " << rItr->GetBinContent(0) << "/" <<   rItr->GetBinContent(rItr->GetNbinsX()+1)
-                << std::endl;
+                <<", rms: " << rItr->GetRMS();
+      if(m_verbosity<3)
+        std::cout  <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax()
+                   <<", u/o: " << rItr->GetBinContent(0) << "/" <<   rItr->GetBinContent(rItr->GetNbinsX()+1);
+      std::cout       << std::endl;
       rItr->Write();
 
     }
 
-    std::cout << "-- Migrad pulls --\n";
-    rItr = m_MigradPulls.begin()    ;
-    rEnd = m_MigradPulls.end()      ;
-    for (; rItr!=rEnd; ++rItr)
-    {
-      std::cout << rItr->GetName() << "("<< rItr->GetEntries()<<") "
-                <<"mean: " << rItr->GetMean()
-                <<", rms: " << rItr->GetRMS()
-                <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() << std::endl;
-      rItr->Write();
 
+    if(m_verbosity<3){
+      std::cout << "-- Migrad pulls --\n";
+      rItr = m_MigradPulls.begin()    ;
+      rEnd = m_MigradPulls.end()      ;
+      for (; rItr!=rEnd; ++rItr)
+      {
+        std::cout << rItr->GetName() << "("<< rItr->GetEntries()<<") "
+                  <<"mean: " << rItr->GetMean()
+                  <<", rms: " << rItr->GetRMS()
+                  <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() << std::endl;
+        rItr->Write();
+
+      }
     }
-
 
     aNewFile.Write();
     aNewFile.Close();

@@ -44,11 +44,13 @@ void FitterResults::LLHPValue::calculate(){
   double IntErr = 0;
   double Int = m_maxLLH->IntegralAndError(m_maxLLH->FindBin(minValue),m_maxLLH->GetXaxis()->GetLast(),IntErr);
 
-  m_pValue = Int;
-  m_pValueError = IntErr;
+  m_pValue = Int/m_maxLLH->Integral();
+  m_pValueError = IntErr/m_maxLLH->Integral();
 
   TH1* overlay = createIntegralOverlay();
-  TCanvas aCanvas(m_filename.c_str(),"",800,600);
+  std::string name = m_filename;
+  name+="_pValue";
+  TCanvas aCanvas(name.c_str(),"",800,600);
   aCanvas.Clear();
   aCanvas.Draw();
   m_maxLLH->Draw();
