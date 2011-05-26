@@ -117,7 +117,7 @@ void core::FitCore<Fcn,Scr,Res>::printTo(Res* _result=0){
     _result->setParameterNames(names);
 
     //this is a crude method to determine which object was used for Fcn
-    //but I didn't consider using sizeof so elegant
+    //but I didn't consider using sizeof(Fcn) so elegant
     double sum = std::accumulate(m_fitResults.begin(),m_fitResults.end(),0.);
     sum *= 1./(m_fitResults.size());
     if (sum<1.)

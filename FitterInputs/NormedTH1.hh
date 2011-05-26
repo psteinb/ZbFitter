@@ -32,8 +32,9 @@ namespace FitterInputs {
     int operator()(const std::string& _name) const {
       TString metaName = _name.c_str();
       metaName.ToLower();
+      int value = 0;
       if(metaName.Contains("data"))
-        return 0;
+        value = 0;
       else
       // if(metaName.Contains("true") || metaName.Contains("mc") 
       //    || metaName.Contains("top") || metaName.Contains("ttbar") 
@@ -41,17 +42,18 @@ namespace FitterInputs {
       //    )
       {
         if(metaName.Contains("sys"))
-          return 2;
+          value = 2;
         if(metaName.Contains("up") || metaName.Contains("+"))
-          return 3;
+          value = 3;
         if(metaName.Contains("down") || metaName.Contains("-"))
-          return 4;
+          value = 4;
         if(metaName.Contains("total") || metaName.Contains("Total"))
-          return 5;
+          value = 5;
 
-        return 1;
+        value = 1;
       }
-
+      
+      return value;
     };
   };
   
