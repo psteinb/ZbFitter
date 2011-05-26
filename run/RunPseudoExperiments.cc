@@ -157,8 +157,6 @@ int main(int argc, char* argv[])
     aPseudoStudy.getResultsOfParameter(i,m_results[i]);
   }
   
-  std::vector<std::vector<TH2*> > m_correlations(m_templates.size());
-  aPseudoStudy.getCorrelationResults(m_correlations);
 
 
   // ----- DRAW RESULTS IN ONE PAD ----- 
