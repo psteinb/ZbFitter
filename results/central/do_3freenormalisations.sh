@@ -1,3 +1,5 @@
+RunFitter.exe -M Migrad -d $SRC/Sherpa_combined.root  -c $SRC/results/environments/Sherpa/BinnedEML.4params.Sherpa_joined_top_3free.env -D "Data_joined" -T "Zjets_b_joined,Zjets_c_joined,Zjets_l_joined,TTbar_joined" -o Sherpa_3Normalisations_joined_top -r 5 -p $SRC/results/central/Sherpa_3Normalisations_joined_15k_top_MeansSigmasPullsMaxLLH.root  
+
 RunFitter.exe -M Migrad -d $SRC/Sherpa_added.root  -c $SRC/results/environments/SherpaAdded/BinnedEML.4params.Sherpa_added_top_QCD.env -D "Data" -T "Zjets_b,Zjets_c,Zjets_l,TTbar,QCD" -o Sherpa_3Normalisations_added_top_QCD -r 5 -m 6  
 
 RunFitter.exe -M Migrad -d $SRC/Sherpa_added.root  -c $SRC/results/environments/SherpaAdded/BinnedEML.4params.Sherpa_added_top.env -D "Data" -T "Zjets_b,Zjets_c,Zjets_l,TTbar" -o Sherpa_3Normalisations_added_top -r 5 -m 6 -p $SRC/results/central/Sherpa_3Normalisations_added_15k_top_MeansSigmasPullsMaxLLH.root

@@ -156,8 +156,9 @@ void ExperimentPerformer::prepare( )  {
                                                                                                                           );
 
    m_PseudoStudy->setProtoCreator(&aScaler);
-   //m_PseudoStudy->setInput(input);
-   m_PseudoStudy->setFitterConfigFile(createScaledConfigFileString(m_configuration.p_configFile,m_scale));
+
+   //m_PseudoStudy->setFitterConfigFile(createScaledConfigFileString(m_configuration.p_configFile,m_scale));
+   m_PseudoStudy->setFitterConfigFile(m_configuration.p_configFile);
    m_PseudoStudy->setFitEngine(m_configuration.p_fitEngine);
    m_PseudoStudy->setFitMode(m_configuration.p_fitMode);
    m_PseudoStudy->setVerbosity(m_configuration.p_msgLevel);

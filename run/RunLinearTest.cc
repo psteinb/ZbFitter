@@ -105,19 +105,24 @@ void printResults(const std::vector<TGraphErrors*>& _results, const ConfLinearTe
   RFile.Append(".root");
   TFile newFile(RFile.Data(),"RECREATE");
 
-  TCanvas aCanvas(Canvas.Data(),"linear tests",3000,1000);
-  aCanvas.Clear();
-  aCanvas.Draw();
-  aCanvas.Divide(_results.size(),1);
-
+  
   TF1* fitline = new TF1("line","[0]*x+[1]",_results[0]->GetXaxis()->GetXmin(),_results[0]->GetXaxis()->GetXmax());
   fitline->SetParName(0,"a");
   fitline->SetParName(1,"b");
   TLine aLine;
   
+  std::string name = "";
+
   for (int i = 1; i < _results.size()+1; ++i)
   {
-    aCanvas.cd(i);
+    name = Canvas.Data();
+    name+=_results[i-1]->GetName();
+
+    TCanvas aCanvas(name.c_str(),"linear tests",800,600);
+    aCanvas.Clear();
+    aCanvas.Draw();
+    //aCanvas.Divide(_results.size(),1);
+    // aCanvas.cd(i);
     gStyle->SetOptFit(1112);
     
     if(_name.find("rel")!=std::string::npos){
@@ -151,10 +156,10 @@ void printResults(const std::vector<TGraphErrors*>& _results, const ConfLinearTe
       
     _results[i-1]->Fit(fitline,"R");
     _results[i-1]->Write(_results[i-1]->GetName());
+    aCanvas.Update();
+    aCanvas.Print(".eps");
 
   }
-  aCanvas.Update();
-  aCanvas.Print(".eps");
   newFile.Close();
 }
 
@@ -283,8 +288,8 @@ int main(int argc, char* argv[])
      resultsNormedY[idx]->SetMaximum(maxY);
    }
 
-   printResults(resultsNormedY,conf,"_relLinear");
-   printResults(results,conf,"_absLinear");
+   // printResults(resultsNormedY,conf,"_relLinear");
+   // printResults(results,conf,"_absLinear");
    printResults(resultsVsExpected,conf,"_expectedLinear");
   
   return 0; 
