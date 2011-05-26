@@ -42,6 +42,7 @@ class MCValues : public BaseProtoCreator
   std::vector<TH1*> m_functions;
   std::vector<std::string> m_histoNames;
   TFile* m_file;
+  int m_rebin;
   
   void loadHistoNamesFromString(const std::string& _text=""){
     
@@ -56,11 +57,12 @@ class MCValues : public BaseProtoCreator
   }
   
 public:
-  MCValues(const std::string& _file="",const std::string& _text=""):
+  MCValues(const std::string& _file="",const std::string& _text="", const int& _rebin=1):
     externalProtoFunctions(!_text.empty()),
     m_functions(),
     m_histoNames(),
-    m_file(TFile::Open(_file.c_str()))
+    m_file(TFile::Open(_file.c_str())),
+    m_rebin(_rebin)
   {
     loadHistoNamesFromString(_text);
     m_functions.clear();
@@ -73,10 +75,12 @@ public:
         std::string name = m_histoNames[i];
         name += "_proto";
         meta = dynamic_cast<TH1*>(m_file->Get(m_histoNames[i].c_str())->Clone(name.c_str()));
-        meta->SetDirectory(0);
+        
       }
       if (meta)
       {
+        meta->SetDirectory(0);
+        meta->Rebin(m_rebin);
         m_functions.push_back(meta);
       }
         
@@ -88,7 +92,7 @@ public:
     return &m_functions;
   }
 
-  void operator()(TH1* _total, const std::vector<TH1*>& _input){
+  void operator()(TH1* _total, const std::vector<TH1*>& _input) const {
 
     if(_total->GetEntries()!=0){
       _total->Reset("MICE");

@@ -7,5 +7,5 @@ RunPseudoExperiments.exe -M Migrad -d $SRC/Lecce_Sherpa_mumu_Systematics.root -c
 
 RunPseudoExperiments.exe -M Migrad -d $SRC/Lecce_Sherpa_mumu_Systematics.root -c $SRC/results/environments/Lecce/BinnedEML.4params.Sherpa_added_top_Pseudo.env -D "baseline_Mass_DATA" -T "baseline_MC_beauty_fit,baseline_MC_charm_fit,baseline_MC_light_fit,baseline_MC_fit_bckTOT" -o Lecce_Wbmu -i 10000 -r 5 -p "Wbmu_MC_beauty_fit_Wb,Wbmu_MC_charm_fit_Wb,Wbmu_MC_light_fit_Wb,Wbmu_MC_fit_bckTOT" > Wbmu.log 2>&1 &
 
-RunPseudoExperiments.exe -M Migrad -d $SRC/Lecce_Sherpa_mumu_Systematics.root -c $SRC/results/environments/Lecce/BinnedEML.4params.Sherpa_added_top_Pseudo.env -D "baseline_Mass_DATA" -T "baseline_MC_beauty_fit,baseline_MC_charm_fit,baseline_MC_light_fit,baseline_MC_fit_bckTOT" -o Lecce_Wbmu -i 10000 -r 5 > Wbmu.log 2>&1 &
+RunPseudoExperiments.exe -M Migrad -d $SRC/Lecce_Sherpa_mumu_Systematics.root -c $SRC/results/environments/Lecce/BinnedEML.4params.Sherpa_added_top_Pseudo.env -D "baseline_Mass_DATA" -T "baseline_MC_beauty_fit,baseline_MC_charm_fit,baseline_MC_light_fit,baseline_MC_fit_bckTOT" -o Lecce_baseline -i 10000 -r 5 > baseline.log 2>&1 &
 

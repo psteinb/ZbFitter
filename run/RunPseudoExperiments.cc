@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
   TH1* m_data =  input->getDataDeepCopy();
 
    // ----- EXPECTED VALUES ----- 
-  MCValues aProtoMaker(conf.p_datadir.c_str(),conf.p_protoTitle);
+  MCValues aProtoMaker(conf.p_datadir.c_str(),conf.p_protoTitle,conf.p_rebin);
   std::vector<TH1*> m_protoFunctions(aProtoMaker.getProtoFunctions()->begin(),
                                      aProtoMaker.getProtoFunctions()->end());
 
@@ -152,8 +152,8 @@ int main(int argc, char* argv[])
                  );
 
   aPseudoStudy.setInput(input);
-  defaultMCValues aCreator;
-  aPseudoStudy.setProtoCreator(&aCreator);
+  
+  aPseudoStudy.setProtoCreator(&aProtoMaker);
   aPseudoStudy.setFitterConfigFile(conf.p_configFile);
   aPseudoStudy.setFitEngine(conf.p_fitEngine);
   aPseudoStudy.setFitMode(conf.p_fitMode);
