@@ -5,19 +5,38 @@
    * source $SRC/makeAll.sh (I was too lazy to implement recursive building in GNUmake)
 
 1) run the fits
-see $SRC/results/central/do_3normalisations_top.sh or $SRC/results/central/do_1o3fractions_top.sh
+* see $SRC/results/central/do_3normalisations_top.sh or $SRC/results/central/do_1o3fractions_top.sh
 for a fit on 3 templates plus the fixed top background taken from Sherpa_XXX.root
+
+* if goodness-of-fit information is needed, run the fit with options -P <fileLocation> (and -m 1) and the respective root file from a pseudo experiment (this contains the maxLLH distribution to
+calculate the p-value from)
 
 [FIXME: tbc.]
 
 
 2) run pseudo experiments
-see $SRC/results/ensemble/do_3normalisations_top.sh or $SRC/results/ensemble/do_1o3fractions_top.sh
-for a fit on 3 templates plus the fixed top background taken from Sherpa_XXX.root
-[watch out the pseudo experiments use different steering files from $SRC/results/environments/ as the fits in $SRC/results/central do]
-[FIXME: tbc.]
+* see e.g. $SRC/results/ensemble/do_3normalisations_top.sh or $SRC/results/ensemble/do_1o3fractions_top.sh
+  for a fit on 3 templates plus the fixed top background taken from Sherpa_XXX.root
+
+* watch out that for pseudo experiments you need to use different .env steering files from $SRC/results/environments/ as the fits in $SRC/results/central do,
+they are indicated by a dub "_Pseudo". This is due to the fact, that the number expected events per channel needs to be calculated applying the MC fractions to the
+statistics we see in data in order for the pulls to come out right
+
+3) systematics
+
+* use the scripts from $SRC/results/comparisons to generate a root file that contains all templates including their systematic variations
+* run pseudo experiments with the nominal pseudo steering files from $SRC/results/environments/
+* invoke the RunPseudoExperiments with the -p flag to configure distributions to generate the proto function from (they need to be the systematic variations) and use the standard templates for fitting through the -T flag
+* a systematic uncertainty is given by the difference between the mean of all fitted values in parameter X from a pseudo experiment with systematics compared to a  pseudo experiment without systematics
+  (this information can be obtained either by grepping the log files for e.g. mean_par0 or by opening the results and reading off the values by hand)
+
 
 
 3) run linearity tests
-see *outdated* $SRC/results/linear/doThis.sh
-tbc.
+see $SRC/results/linear/doThis.sh
+
+* due to technical reasons there are 2 approaches implemented 
+--> linearity test on fractions simply scans the directory where the configuration file <steering.env> is located for versions as <steering_50.env>, <steering_75.env> that contain the configuration for scaling the b content by 50%, 75% etc. (this was the way, the current figure in the note was made)
+
+--> linearity tests on normalisations do not do that, it rather tries to supply different proto functions to the pseudo experiment 
+    (there currently [revision 443c855] is the problem that the fits seems to yield the correct "scaled" results for the first experiment, but this seems to be lost later and linearity is not given!!)
