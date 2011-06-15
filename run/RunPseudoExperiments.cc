@@ -113,10 +113,10 @@ void printMeans(const std::vector<std::vector<TH1*> >& _results, const std::vect
   TString title = "";
   for (int i = 0; i < _results.size(); ++i,pad++)
   {
-    title = _results[i][0]->GetTitle();
+    title = _results[i][0]->GetXaxis()->GetTitle();
     title.ToLower();
-    if(templateNames.Contains("ttbar") || templateNames.Contains("top") || templateNames.Contains("qcd"))
-      continue;
+    if(title.Contains("ttbar") || title.Contains("top") || title.Contains("qcd")){
+      continue;}
 
     MeanCanvas.cd(pad);
 
@@ -165,9 +165,9 @@ void printPulls(const std::vector<std::vector<TH1*> >& _results, const std::stri
   {
     stream.str("");
     fitValues.Clear();
-    title = _results[i][2]->GetTitle();
+    title = _results[i][2]->GetXaxis()->GetTitle();
     title.ToLower();
-    if(templateNames.Contains("ttbar") || templateNames.Contains("top") || templateNames.Contains("qcd"))
+    if(title.Contains("ttbar") || title.Contains("top") || title.Contains("qcd"))
       continue;
     PullCanvas.cd(pad);
 
@@ -399,12 +399,12 @@ int main(int argc, char* argv[])
   // ----- DRAW ONLY MEAN RESULTS ----- 
   std::string name = conf.p_outputfile;
   name += "_means";
-  printMeans(m_results,expected,name);
+  printMeans(m_results,expected,name,&conf);
 
   // ----- DRAW ONLY PULL RESULTS  ----- 
   name = conf.p_outputfile;
   name += "_pulls";
-  printPulls(m_results,name);
+  printPulls(m_results,name,&conf);
 
 
   // ----- DRAW maxLLH RESULTS  ----- 
