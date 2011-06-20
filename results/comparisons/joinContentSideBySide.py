@@ -61,6 +61,9 @@ if __name__ == '__main__':
         plot1 = file1.Get(name)
         plot1.Print("")
         plot2 = file2.Get(name)
+        if not plot2.__nonzero__():
+            print "<<< skipped"
+            continue
         plot2.Print("")
         newPlot = combineHistos(fileNew,plot1,plot2)
         if newPlot:
