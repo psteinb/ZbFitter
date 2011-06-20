@@ -59,15 +59,13 @@ void FitterResults::HistoResult::print(){
 
 
   //---------------- PLOTS ---------------- 
-  int NColumns = (isFractionFit()) ? 3 : 2;
-
-  TCanvas myC(m_filename.c_str(),"",NColumns*800,600);
-  myC.Clear();
-  myC.Draw();
-  myC.Divide(/*getNumberOfParameters()*/NColumns,1);
+  TCanvas fitCanvas(m_filename.c_str(),"",800,600);
+  fitCanvas.Clear();
+  fitCanvas.Draw();
+  fitCanvas.cd(0);
 
   //---------------- DATA and fitted MC histos ---------------- 
-  myC.cd(1);
+
   double highest = std::max(newStack.GetMaximum(),m_dataHisto->GetMaximum());
   newStack.SetMaximum(1.5*highest);
   newStack.Draw("BAR");
@@ -84,9 +82,23 @@ void FitterResults::HistoResult::print(){
   leg.SetFillColor(kWhite);
   leg.SetLineColor(kWhite);
   leg.Draw();
+  fitCanvas.Update();
+  fitCanvas.Print(".eps");
+
+  
 
   //---------------- RESUTLS ---------------- 
-  myC.cd(2);
+  TString valName = m_filename.c_str();
+  valName.ReplaceAll("_fit","_values");
+
+  int NColumns = (isFractionFit()) ? 2 : 1;
+
+  TCanvas valCanvas(valName.Data(),"",NColumns*800,600);
+  valCanvas.Clear();
+  valCanvas.Draw();
+  
+  valCanvas.Divide(/*getNumberOfParameters()*/NColumns,1);
+  valCanvas.cd(1);
   TPaveText mtext(0.2,0.2,.9,.9,"ARC");
   for (int i = 0; i < getNumberOfParameters(); ++i)
   {
@@ -96,7 +108,7 @@ void FitterResults::HistoResult::print(){
   TPaveText abstext(0.2,0.2,.9,.9,"ARC");
   if(isFractionFit()){
     //---------------- RESULTS ON FRACTIONS ---------------- 
-    myC.cd(3);
+    valCanvas.cd(2);
     
     std::ostringstream label;
     label.str("");
@@ -108,22 +120,9 @@ void FitterResults::HistoResult::print(){
     }
     abstext.Draw();
   }
-  
-  // myC.cd(3);
-  // m_dataHisto->Draw();
-
-  // //---------------- TEMPLATES USED ---------------- 
-  // int CanvasTot = getNumberOfParameters()*2;
-  // int CanvasIdx = CanvasTot-getNumberOfParameters()+1;
-  // for (int i = 0; i < (getNumberOfParameters()); ++i,CanvasIdx++)
-  // {
-  //   myC.cd(CanvasIdx);
-  //   //    getFunction()->getTemplate(i)->getHisto()->SetLineColor(getScaledTemplateHistograms()->at(i)->GetLineColor());
-  //   getFunction()->getTemplate(i)->getHisto()->DrawCopy();
-  // }
-    
-  myC.Update();
-  myC.Print(".eps");
+      
+  valCanvas.Update();
+  valCanvas.Print(".eps");
 
   newFile->Write();
   newFile->Close();

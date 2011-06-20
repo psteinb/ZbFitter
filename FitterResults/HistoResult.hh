@@ -27,12 +27,12 @@ private:
 
 
   void treatInputHistosForResult(){
-    int color = 2;
-    for (int i = 0; i < getNumberOfParameters(); ++i,color++)
+
+    for (int i = 0; i < getNumberOfParameters(); ++i)
     {
-      getScaledTemplateHistograms()->at(i)->SetFillColor(color);
-      getScaledTemplateHistograms()->at(i)->SetLineColor(color);
-      getScaledTemplateHistograms()->at(i)->SetMarkerColor(color);
+      getScaledTemplateHistograms()->at(i)->SetFillColor(this->getColor(i));
+      getScaledTemplateHistograms()->at(i)->SetLineColor(this->getColor(i));
+      getScaledTemplateHistograms()->at(i)->SetMarkerColor(this->getColor(i));
     }
   }
 
