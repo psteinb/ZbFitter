@@ -36,10 +36,6 @@ namespace FitterInputs {
       if(metaName.Contains("data"))
         value = 0;
       else
-      // if(metaName.Contains("true") || metaName.Contains("mc") 
-      //    || metaName.Contains("top") || metaName.Contains("ttbar") 
-      //    || metaName.Contains("zjets_") 
-      //    )
       {
         if(metaName.Contains("sys"))
           value = 2;
