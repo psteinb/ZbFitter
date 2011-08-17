@@ -31,8 +31,9 @@ private:
     for (int i = 0; i < getNumberOfParameters(); ++i)
     {
       getScaledTemplateHistograms()->at(i)->SetFillColor(this->getColor(i));
-      getScaledTemplateHistograms()->at(i)->SetLineColor(this->getColor(i));
-      getScaledTemplateHistograms()->at(i)->SetMarkerColor(this->getColor(i));
+      getScaledTemplateHistograms()->at(i)->SetLineColor(kBlack);
+      //getScaledTemplateHistograms()->at(i)->SetMarkerColor(this->getColor(i));
+      getScaledTemplateHistograms()->at(i)->SetDrawOption("HIST");
     }
   }
 
@@ -58,6 +59,8 @@ private:
           meta->SetDirectory(_file->GetDirectory("/"));
         }
       }
+      if(m_dataHisto)
+        m_dataHisto->SetDirectory(_file->GetDirectory("/"));
     }
     else
       std::cerr << __FILE__ << ":" << __LINE__ << "\t file does not exist\n";

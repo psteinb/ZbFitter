@@ -68,7 +68,7 @@ void FitterResults::HistoResult::print(){
 
   double highest = std::max(newStack.GetMaximum(),m_dataHisto->GetMaximum());
   newStack.SetMaximum(1.5*highest);
-  newStack.Draw("BAR");
+  newStack.Draw("HIST");
   newStack.GetXaxis()->SetTitle("m_{SV} [GeV]");
   newStack.GetYaxis()->SetTitle("N / 0.5 GeV");
   m_dataHisto->SetMarkerSize(1.5*m_dataHisto->GetMarkerSize());
@@ -81,7 +81,7 @@ void FitterResults::HistoResult::print(){
   leg.AddEntry(m_dataHisto,"data","lep");
   for (int i = 0; i < getNumberOfParameters(); ++i)
   {
-    leg.AddEntry(getScaledTemplateHistograms()->at(i),getParameterNames()->at(i).c_str(),"lep");
+    leg.AddEntry(getScaledTemplateHistograms()->at(i),getParameterNames()->at(i).c_str(),"f");
   }
   leg.SetFillColor(kWhite);
   leg.SetLineColor(kWhite);
