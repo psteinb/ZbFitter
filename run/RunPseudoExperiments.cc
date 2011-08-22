@@ -98,6 +98,9 @@ void printMeans(const std::vector<std::vector<TH1*> >& _results, const std::vect
   TString templateNames = _conf->p_tempTitle.c_str();
   templateNames.ToLower();
 
+  if(templateNames.Contains("background"))
+    width-=1;
+
   if(templateNames.Contains("ttbar") || templateNames.Contains("top"))
     width-=1;
 
@@ -115,7 +118,7 @@ void printMeans(const std::vector<std::vector<TH1*> >& _results, const std::vect
   {
     title = _results[i][0]->GetXaxis()->GetTitle();
     title.ToLower();
-    if(title.Contains("ttbar") || title.Contains("top") || title.Contains("qcd")){
+    if(title.Contains("ttbar") || title.Contains("top") || title.Contains("qcd") || ){
       continue;}
 
     MeanCanvas.cd(pad);

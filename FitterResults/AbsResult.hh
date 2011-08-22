@@ -3,8 +3,9 @@
 #define ABSRESULT_H
 #include "Math/Minimizer.h"
 #include "functions/AbsFittingFunction.hh"
-
+#include "TColor.h"
 #include "TH1.h"
+#include "TROOT.h"
 
 
 class TObject;
@@ -33,6 +34,8 @@ class AbsResult
   std::vector<int>    		m_minosStatus		;
   std::vector<TH1*>    		m_templatesScaled	;
 
+  std::vector<int>    		m_colors		;
+
 protected:
   
 public:
@@ -49,8 +52,18 @@ public:
     m_minosUp(),    
     m_minosDown(),  
     m_minosStatus(),
-    m_templatesScaled()
-  {};
+    m_templatesScaled(),
+    m_colors()
+  {
+    
+    int colors[] = {kRed,kGreen,kWhite,TColor::GetColor(255,255,153),
+                    kPink,kTeal,kMagenta,kSpring,
+                    kViolet,kYellow,kBlue,kOrange};
+    m_colors.clear();
+    m_colors.resize(16);
+    m_colors.assign(colors,colors+16);
+
+  };
 
   //we don't take owner ship, we just want to read values
   ~AbsResult(){};
@@ -147,7 +160,20 @@ public:
     }
       
 
+   
   };
+
+   int getColor(const int& _index){
+      int value = 0;
+      try{
+        value = m_colors.at(_index);
+      }
+      catch(std::exception& _exc){
+        value = kAzure;
+      }
+      return value;
+   };
+
 };
 }; // end of package namespace
 
