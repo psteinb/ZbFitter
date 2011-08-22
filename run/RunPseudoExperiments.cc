@@ -118,7 +118,8 @@ void printMeans(const std::vector<std::vector<TH1*> >& _results, const std::vect
   {
     title = _results[i][0]->GetXaxis()->GetTitle();
     title.ToLower();
-    if(title.Contains("ttbar") || title.Contains("top") || title.Contains("qcd") || ){
+    if(title.Contains("ttbar") || title.Contains("top") 
+       || title.Contains("qcd") || title.Contains("background")){
       continue;}
 
     MeanCanvas.cd(pad);
@@ -170,7 +171,8 @@ void printPulls(const std::vector<std::vector<TH1*> >& _results, const std::stri
     fitValues.Clear();
     title = _results[i][2]->GetXaxis()->GetTitle();
     title.ToLower();
-    if(title.Contains("ttbar") || title.Contains("top") || title.Contains("qcd"))
+    if(title.Contains("ttbar") || title.Contains("top") || 
+       title.Contains("qcd") || title.Contains("background"))
       continue;
     PullCanvas.cd(pad);
 

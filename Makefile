@@ -42,4 +42,5 @@ install :
 
 runners : 
 	make -C $(SRC)/run RunFitter.exe
+	make -C $(SRC)/run RunPseudoExperiments.exe
 
