@@ -112,7 +112,7 @@ namespace FitterInputs {
      */
     virtual ~NormedTH1 ( );
 
-
+    
     void init();
     void initData();
 
@@ -123,42 +123,43 @@ namespace FitterInputs {
      * from files
      */
     void loadData (const std::string& _fileName = "", const std::string& _histoNames = "", const short& _rebin=1 ) ;
-    void setDataHisto (TH1* _iHisto=0) {
-      if(_iHisto){
-        //delete this->m_data;
-        this->m_data = _iHisto;
-      }
-      else
-        std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer nil\n";
-    };
-
-    TH1* getDataDeepCopy(){
-      std::string name = m_data->GetName();name+="_new";
-      TH1* value = dynamic_cast<TH1*>(m_data->Clone(name.c_str()));
-      value->SetDirectory(0);
-      return value;
-    };
+    
+    /**
+       set m_data to _iHisto
+    */
+    void setDataHisto (TH1* _iHisto=0);
+    
+    /**
+       get a copy of the data object performing a call to new
+       [method uses TH1::Clone, new object may not transfer its ownership]
+     */
+    TH1* getDataDeepCopy();
 
     /**
+       master method to load all Templates from files, 
+       if _fileNames is has multiple commas in it, loadTemplatesFromMultipleFiles is called
+       if _fileNames has no commas in it, loadTemplatesFromOneFile is called
      * @param  _fileNames (comma-separated) file(s) name(s)
      * @param  _histoNames comma-separated list of histo names to load from _fileNames
      */
     void loadTemplates (const std::string& _fileNames = "", const std::string& _histoNames = "", const short& _rebin=1 ) ;
-    void addTemplateHisto(TH1* _iHisto=0){
-      if(_iHisto)
-      {
-        if((m_templates.capacity()-m_templates.size())<1)
-          m_templates.reserve(m_templates.capacity()+1);
-        m_templates.push_back(_iHisto);
-      }
-      else
-        std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer nil\n";
-    }
 
+    /**
+       _iHisto is added to m_templates
+    */
+    void addTemplateHisto(TH1* _iHisto=0);
+
+    /**
+       external set method
+    */
     void setTemplateHistos(const std::vector<TH1*>& _templates){
       m_templates = _templates;
     };
     
+    /**
+       retrieve a copy of the templates
+       [method uses TH1::Clone, new object may not transfer its ownership]
+    */
     void getTemplatesDeepCopy(std::vector<TH1*>&);
     
     /**
@@ -166,36 +167,7 @@ namespace FitterInputs {
      */
     virtual void getData (std::vector<FitterData>& _data );
 
-    void clear(){
-      delete m_data;
-      m_data = 0;
-
-      delete m_totalMC;
-      m_totalMC = 0;
-
-      for (int i = 0; i < m_templates.size(); ++i)
-      {
-        if(!m_templates.at(i)){
-          delete m_templates.at(i);
-          m_templates.at(i) = 0;
-        }
-      
-      }
-      m_templates.clear();
-
-
-      for (int i = 0; i < m_files.size(); ++i)
-      {
-        if(!m_files.at(i)){
-          m_files.at(i)->Close();
-          delete m_files.at(i);
-          m_files.at(i) = 0;
-        }
-      
-      }
-      m_files.clear();
-  
-    };
+    void clear();
 
 
     

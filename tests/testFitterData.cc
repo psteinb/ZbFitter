@@ -24,7 +24,8 @@ public:
     weights.push_back(5);
     weights.push_back(6);
   };
-
+  
+  
   virtual ~ObjFixture()  { BOOST_TEST_MESSAGE( "teardown fixture" ); };
 
   FitterInputs::FitterData m_fData;

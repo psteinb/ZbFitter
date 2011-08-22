@@ -79,6 +79,24 @@ void FitterInputs::NormedTH1<NormFunc>::loadData (const std::string& _fileName, 
 }
 
 template<typename NormFunc>
+void FitterInputs::NormedTH1<NormFunc>::setDataHisto(TH1* _iHisto) {
+      if(_iHisto){
+        //delete this->m_data;
+        this->m_data = _iHisto;
+      }
+      else
+        std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer nil\n";
+}
+
+template<typename NormFunc>
+TH1* FitterInputs::NormedTH1<NormFunc>::getDataDeepCopy(){
+      std::string name = m_data->GetName();name+="_new";
+      TH1* value = dynamic_cast<TH1*>(m_data->Clone(name.c_str()));
+      value->SetDirectory(0);
+      return value;
+}
+
+template<typename NormFunc>
 void FitterInputs::NormedTH1<NormFunc>::loadTemplatesFromOneFile (const std::string& _fileNames, const std::string& _histoNames , const short& _rebin){
 
 
@@ -180,6 +198,18 @@ void FitterInputs::NormedTH1<NormFunc>::loadTemplates (const std::string& _fileN
 }
 
 template<typename NormFunc>
+void FitterInputs::NormedTH1<NormFunc>::addTemplateHisto(TH1* _iHisto){
+      if(_iHisto)
+      {
+        if((m_templates.capacity()-m_templates.size())<1)
+          m_templates.reserve(m_templates.capacity()+1);
+        m_templates.push_back(_iHisto);
+      }
+      else
+        std::cerr << __FILE__ << ":"<< __LINE__ <<"\t inline TH1 pointer nil\n";
+}
+
+template<typename NormFunc>
 void FitterInputs::NormedTH1<NormFunc>::pushBinContentsToVector(TH1* _hist, std::vector<double>& _target){
 
   _target.clear();
@@ -233,6 +263,38 @@ void FitterInputs::NormedTH1<NormFunc>::getData (std::vector<FitterData>& _data 
 }
 
 template<typename NormFunc>
+void FitterInputs::NormedTH1<NormFunc>::clear(){
+      delete m_data;
+      m_data = 0;
+
+      delete m_totalMC;
+      m_totalMC = 0;
+
+      for (int i = 0; i < m_templates.size(); ++i)
+      {
+        if(!m_templates.at(i)){
+          delete m_templates.at(i);
+          m_templates.at(i) = 0;
+        }
+      
+      }
+      m_templates.clear();
+
+
+      for (int i = 0; i < m_files.size(); ++i)
+      {
+        if(!m_files.at(i)){
+          m_files.at(i)->Close();
+          delete m_files.at(i);
+          m_files.at(i) = 0;
+        }
+      
+      }
+      m_files.clear();
+  
+    }
+
+template<typename NormFunc>
 void FitterInputs::NormedTH1<NormFunc>::init(){
   m_values.clear();
   this->setupFitterData();
@@ -252,6 +314,7 @@ void FitterInputs::NormedTH1<NormFunc>::initData(){
   //   m_values[i].print();
   // }
 }
+
 
 
 template<typename NormFunc>
