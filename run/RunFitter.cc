@@ -17,6 +17,7 @@
 #include "FitterInputs/NormalisationFunctors.hh"
 #include "FitterResults/HistoResult.hh"
 #include "FitterResults/LLHResult.hh"
+#include "FitterResults/FileResult.hh"
 #include "FitterResults/LLHPValue.hh"
 #include "FitterResults/Chi2Result.hh"
 #include "functions/BinnedEML.hh"
@@ -270,6 +271,7 @@ int main(int argc, char* argv[])
   name = conf.p_outputfile;
   name += "_LLH";
   FitterResults::AbsResult* lresult = new FitterResults::LLHResult(0,conf.p_msgLevel,name);
+  FitterResults::AbsResult* fresult = new FitterResults::FileResult(0,conf.p_msgLevel,name);
   
 
 
@@ -297,13 +299,15 @@ int main(int argc, char* argv[])
   }
   else
     fitter.fit(false);
-  
+
+  fitter.printTo(fresult);
   fitter.printTo(hresult);
   fitter.printTo(lresult);
 
   //clean-up
   delete lresult;
   delete hresult;
+  delete fresult;
   return 0; 
    
 
