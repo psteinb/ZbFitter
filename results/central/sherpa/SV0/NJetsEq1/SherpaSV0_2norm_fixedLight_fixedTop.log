@@ -1,0 +1,247 @@
+RunFitter running on
+[-d] data path/file = /home/psteinb/development/sandbox/ZbFitter/bundles/sherpa/NJetsEq1/SherpaSV0_NJetsEq1.root
+[-o] output file name =
+Sherpa_2norm_fixedLight_fixedTop
+[-c] config file name =
+SherpaSV0_2norm_fixedLight_fixedTop.env
+[-m] message level = 3
+[-t] N(threads) = 1
+[-E] fitEngine = Minuit2
+[-M] fitMode = Migrad
+[-P] rscFile = 
+[-r] rebin = 5
+[-D] dataTitle = Data
+[-T] tempTitle = TrueB,TrueC,TrueL,Top
+Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
+Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
+NormedTH1::loadTemplatesFromOneFile	loaded TrueB from /home/psteinb/development/sandbox/ZbFitter/bundles/sherpa/NJetsEq1/SherpaSV0_NJetsEq1.root
+Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
+NormedTH1::loadTemplatesFromOneFile	loaded TrueC from /home/psteinb/development/sandbox/ZbFitter/bundles/sherpa/NJetsEq1/SherpaSV0_NJetsEq1.root
+Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
+NormedTH1::loadTemplatesFromOneFile	loaded TrueL from /home/psteinb/development/sandbox/ZbFitter/bundles/sherpa/NJetsEq1/SherpaSV0_NJetsEq1.root
+Warning in <TH1D::Sumw2>: Sum of squares of weights structure already created
+NormedTH1::loadTemplatesFromOneFile	loaded Top from /home/psteinb/development/sandbox/ZbFitter/bundles/sherpa/NJetsEq1/SherpaSV0_NJetsEq1.root
+
+
+original	TrueB_new	26.948(13.474) , max 6.53049, w: 0.5
+TH1.Print Name  = TrueB_new, Entries= 1481, Total sum= 26.948
+ fSumw[0]=0, x=-0.25, error=0
+ fSumw[1]=0.177162, x=0.25, error=0.0508977
+ fSumw[2]=3.16019, x=0.75, error=0.258083
+ fSumw[3]=6.53049, x=1.25, error=0.493338
+ fSumw[4]=6.02888, x=1.75, error=0.38072
+ fSumw[5]=5.08661, x=2.25, error=0.365617
+ fSumw[6]=3.32343, x=2.75, error=0.295909
+ fSumw[7]=1.4139, x=3.25, error=0.172938
+ fSumw[8]=0.722564, x=3.75, error=0.121002
+ fSumw[9]=0.296514, x=4.25, error=0.0762413
+ fSumw[10]=0.150025, x=4.75, error=0.0573519
+ fSumw[11]=0.05821, x=5.25, error=0.0367213
+ fSumw[12]=0, x=5.75, error=0
+ fSumw[13]=0, x=6.25, error=0
+ fSumw[14]=0, x=6.75, error=0
+ fSumw[15]=0, x=7.25, error=0
+ fSumw[16]=0, x=7.75, error=0
+ fSumw[17]=0, x=8.25, error=0
+ fSumw[18]=0, x=8.75, error=0
+ fSumw[19]=0, x=9.25, error=0
+ fSumw[20]=0, x=9.75, error=0
+ fSumw[21]=0, x=10.25, error=0
+
+
+scaled	TrueB_new	 entries: 1 ( integral: 0.5) , max 0.242337
+TH1.Print Name  = TrueB_new, Entries= 1481, Total sum= 1
+ fSumw[0]=0, x=-0.25, error=0
+ fSumw[1]=0.00657423, x=0.25, error=0.00188874
+ fSumw[2]=0.11727, x=0.75, error=0.00957708
+ fSumw[3]=0.242337, x=1.25, error=0.0183071
+ fSumw[4]=0.223723, x=1.75, error=0.014128
+ fSumw[5]=0.188757, x=2.25, error=0.0135675
+ fSumw[6]=0.123328, x=2.75, error=0.0109808
+ fSumw[7]=0.0524677, x=3.25, error=0.00641747
+ fSumw[8]=0.0268133, x=3.75, error=0.00449022
+ fSumw[9]=0.0110032, x=4.25, error=0.0028292
+ fSumw[10]=0.00556722, x=4.75, error=0.00212825
+ fSumw[11]=0.00216009, x=5.25, error=0.00136267
+ fSumw[12]=0, x=5.75, error=0
+ fSumw[13]=0, x=6.25, error=0
+ fSumw[14]=0, x=6.75, error=0
+ fSumw[15]=0, x=7.25, error=0
+ fSumw[16]=0, x=7.75, error=0
+ fSumw[17]=0, x=8.25, error=0
+ fSumw[18]=0, x=8.75, error=0
+ fSumw[19]=0, x=9.25, error=0
+ fSumw[20]=0, x=9.75, error=0
+ fSumw[21]=0, x=10.25, error=0
+
+
+original	TrueC_new	9.72803(4.86401) , max 4.96925, w: 0.5
+TH1.Print Name  = TrueC_new, Entries= 470, Total sum= 9.72803
+ fSumw[0]=0, x=-0.25, error=0
+ fSumw[1]=0.173332, x=0.25, error=0.0539621
+ fSumw[2]=2.49214, x=0.75, error=0.243636
+ fSumw[3]=4.96925, x=1.25, error=0.678984
+ fSumw[4]=1.74756, x=1.75, error=0.399236
+ fSumw[5]=0.126029, x=2.25, error=0.0441368
+ fSumw[6]=0.0157549, x=2.75, error=0.0157549
+ fSumw[7]=0.20396, x=3.25, error=0.20396
+ fSumw[8]=0, x=3.75, error=0
+ fSumw[9]=0, x=4.25, error=0
+ fSumw[10]=0, x=4.75, error=0
+ fSumw[11]=0, x=5.25, error=0
+ fSumw[12]=0, x=5.75, error=0
+ fSumw[13]=0, x=6.25, error=0
+ fSumw[14]=0, x=6.75, error=0
+ fSumw[15]=0, x=7.25, error=0
+ fSumw[16]=0, x=7.75, error=0
+ fSumw[17]=0, x=8.25, error=0
+ fSumw[18]=0, x=8.75, error=0
+ fSumw[19]=0, x=9.25, error=0
+ fSumw[20]=0, x=9.75, error=0
+ fSumw[21]=0, x=10.25, error=0
+
+
+scaled	TrueC_new	 entries: 1 ( integral: 0.5) , max 0.510818
+TH1.Print Name  = TrueC_new, Entries= 470, Total sum= 1
+ fSumw[0]=0, x=-0.25, error=0
+ fSumw[1]=0.0178178, x=0.25, error=0.00554707
+ fSumw[2]=0.256182, x=0.75, error=0.0250447
+ fSumw[3]=0.510818, x=1.25, error=0.0697967
+ fSumw[4]=0.179642, x=1.75, error=0.0410398
+ fSumw[5]=0.0129552, x=2.25, error=0.00453708
+ fSumw[6]=0.00161954, x=2.75, error=0.00161954
+ fSumw[7]=0.0209662, x=3.25, error=0.0209662
+ fSumw[8]=0, x=3.75, error=0
+ fSumw[9]=0, x=4.25, error=0
+ fSumw[10]=0, x=4.75, error=0
+ fSumw[11]=0, x=5.25, error=0
+ fSumw[12]=0, x=5.75, error=0
+ fSumw[13]=0, x=6.25, error=0
+ fSumw[14]=0, x=6.75, error=0
+ fSumw[15]=0, x=7.25, error=0
+ fSumw[16]=0, x=7.75, error=0
+ fSumw[17]=0, x=8.25, error=0
+ fSumw[18]=0, x=8.75, error=0
+ fSumw[19]=0, x=9.25, error=0
+ fSumw[20]=0, x=9.75, error=0
+ fSumw[21]=0, x=10.25, error=0
+
+
+original	TrueL_new	3.1747(1.58735) , max 1.3114, w: 0.5
+TH1.Print Name  = TrueL_new, Entries= 20, Total sum= 3.1747
+ fSumw[0]=0, x=-0.25, error=0
+ fSumw[1]=1.3114, x=0.25, error=0.547506
+ fSumw[2]=1.30147, x=0.75, error=0.568101
+ fSumw[3]=0.295592, x=1.25, error=0.1867
+ fSumw[4]=0.0963492, x=1.75, error=0.0963492
+ fSumw[5]=0, x=2.25, error=0
+ fSumw[6]=0.0151041, x=2.75, error=0.0151041
+ fSumw[7]=0, x=3.25, error=0
+ fSumw[8]=0.154781, x=3.75, error=0.154781
+ fSumw[9]=0, x=4.25, error=0
+ fSumw[10]=0, x=4.75, error=0
+ fSumw[11]=0, x=5.25, error=0
+ fSumw[12]=0, x=5.75, error=0
+ fSumw[13]=0, x=6.25, error=0
+ fSumw[14]=0, x=6.75, error=0
+ fSumw[15]=0, x=7.25, error=0
+ fSumw[16]=0, x=7.75, error=0
+ fSumw[17]=0, x=8.25, error=0
+ fSumw[18]=0, x=8.75, error=0
+ fSumw[19]=0, x=9.25, error=0
+ fSumw[20]=0, x=9.75, error=0
+ fSumw[21]=0, x=10.25, error=0
+
+
+scaled	TrueL_new	 entries: 1 ( integral: 0.5) , max 0.41308
+TH1.Print Name  = TrueL_new, Entries= 20, Total sum= 1
+ fSumw[0]=0, x=-0.25, error=0
+ fSumw[1]=0.41308, x=0.25, error=0.172459
+ fSumw[2]=0.40995, x=0.75, error=0.178946
+ fSumw[3]=0.0931089, x=1.25, error=0.0588088
+ fSumw[4]=0.0303491, x=1.75, error=0.0303491
+ fSumw[5]=0, x=2.25, error=0
+ fSumw[6]=0.00475767, x=2.75, error=0.00475767
+ fSumw[7]=0, x=3.25, error=0
+ fSumw[8]=0.0487545, x=3.75, error=0.0487545
+ fSumw[9]=0, x=4.25, error=0
+ fSumw[10]=0, x=4.75, error=0
+ fSumw[11]=0, x=5.25, error=0
+ fSumw[12]=0, x=5.75, error=0
+ fSumw[13]=0, x=6.25, error=0
+ fSumw[14]=0, x=6.75, error=0
+ fSumw[15]=0, x=7.25, error=0
+ fSumw[16]=0, x=7.75, error=0
+ fSumw[17]=0, x=8.25, error=0
+ fSumw[18]=0, x=8.75, error=0
+ fSumw[19]=0, x=9.25, error=0
+ fSumw[20]=0, x=9.75, error=0
+ fSumw[21]=0, x=10.25, error=0
+
+
+original	Top_new	0(0) , max 0, w: 0.5
+TH1.Print Name  = Top_new, Entries= 0, Total sum= 0
+ fSumw[0]=0, x=-0.25, error=0
+ fSumw[1]=0, x=0.25, error=0
+ fSumw[2]=0, x=0.75, error=0
+ fSumw[3]=0, x=1.25, error=0
+ fSumw[4]=0, x=1.75, error=0
+ fSumw[5]=0, x=2.25, error=0
+ fSumw[6]=0, x=2.75, error=0
+ fSumw[7]=0, x=3.25, error=0
+ fSumw[8]=0, x=3.75, error=0
+ fSumw[9]=0, x=4.25, error=0
+ fSumw[10]=0, x=4.75, error=0
+ fSumw[11]=0, x=5.25, error=0
+ fSumw[12]=0, x=5.75, error=0
+ fSumw[13]=0, x=6.25, error=0
+ fSumw[14]=0, x=6.75, error=0
+ fSumw[15]=0, x=7.25, error=0
+ fSumw[16]=0, x=7.75, error=0
+ fSumw[17]=0, x=8.25, error=0
+ fSumw[18]=0, x=8.75, error=0
+ fSumw[19]=0, x=9.25, error=0
+ fSumw[20]=0, x=9.75, error=0
+ fSumw[21]=0, x=10.25, error=0
+
+
+scaled	Top_new	 entries: -nan ( integral: -nan) , max -3.40282e+38
+TH1.Print Name  = Top_new, Entries= 0, Total sum= -nan
+ fSumw[0]=-nan, x=-0.25, error=-nan
+ fSumw[1]=-nan, x=0.25, error=-nan
+ fSumw[2]=-nan, x=0.75, error=-nan
+ fSumw[3]=-nan, x=1.25, error=-nan
+ fSumw[4]=-nan, x=1.75, error=-nan
+ fSumw[5]=-nan, x=2.25, error=-nan
+ fSumw[6]=-nan, x=2.75, error=-nan
+ fSumw[7]=-nan, x=3.25, error=-nan
+ fSumw[8]=-nan, x=3.75, error=-nan
+ fSumw[9]=-nan, x=4.25, error=-nan
+ fSumw[10]=-nan, x=4.75, error=-nan
+ fSumw[11]=-nan, x=5.25, error=-nan
+ fSumw[12]=-nan, x=5.75, error=-nan
+ fSumw[13]=-nan, x=6.25, error=-nan
+ fSumw[14]=-nan, x=6.75, error=-nan
+ fSumw[15]=-nan, x=7.25, error=-nan
+ fSumw[16]=-nan, x=7.75, error=-nan
+ fSumw[17]=-nan, x=8.25, error=-nan
+ fSumw[18]=-nan, x=8.75, error=-nan
+ fSumw[19]=-nan, x=9.25, error=-nan
+ fSumw[20]=-nan, x=9.75, error=-nan
+ fSumw[21]=-nan, x=10.25, error=-nan
+MINOS	FAILED TO GET ERRORS FOR: parameter 0	[minos status: 0], [error: 0]
+		FCN: -nan, fitted: nan, fittedError: nan
+MINOS	FAILED TO GET ERRORS FOR: parameter 1	[minos status: 0], [error: 0]
+		FCN: -nan, fitted: nan, fittedError: nan
+MINOS	FAILED TO GET ERRORS FOR: parameter 2	[minos status: 0], [error: 0]
+		FCN: -nan, fitted: 3.17, fittedError: 0
+MINOS	FAILED TO GET ERRORS FOR: parameter 3	[minos status: 0], [error: 0]
+		FCN: -nan, fitted: 0.008, fittedError: 0
+ Kolmo Prob  h1 = Data, sum bin content =33  effective entries =33
+ Kolmo Prob  h2 = added, sum bin content =nan  effective entries =0
+ Kolmo Prob     = 0, Max Dist = -nan
+KOLMOGOROV prob = 0
+Info in <TCanvas::Print>: eps file ./Sherpa_2norm_fixedLight_fixedTop_fit.eps has been created
+Info in <TCanvas::Print>: eps file ./Sherpa_2norm_fixedLight_fixedTop_values.eps has been created
+
+Info in <TCanvas::Print>: eps file ./Sherpa_2norm_fixedLight_fixedTop_LLH.eps has been created

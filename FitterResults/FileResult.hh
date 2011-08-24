@@ -25,7 +25,7 @@ private:
   std::string m_filename;
   std::string m_filenameCore;
   
-  std::vector<TNamed*> fileContent;
+  std::vector<TH1*> fileContent;
 
   // void setDirectoryOfContentTo(TFile* _file=0);
   void addCovarianceFromMinimizer();
@@ -49,7 +49,7 @@ public:
     fileContent()
   {
     TH1::AddDirectory(kFALSE);
-    fileContent.reserve(3);
+    fileContent.reserve(6);
   };
 
   /**
@@ -75,7 +75,7 @@ public:
 
   // std::string getParameterResult(const int& _idx,const double& _norm=1.);
   //transferring ownership
-  void addObjectToSave(TNamed* _object){
+  void addObjectToSave(TH1* _object){
     if(!(fileContent.size()<fileContent.capacity()))
       fileContent.reserve(fileContent.capacity()+1);
     
