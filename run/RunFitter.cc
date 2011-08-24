@@ -269,9 +269,12 @@ int main(int argc, char* argv[])
   name += "_fit";
   FitterResults::AbsResult* hresult = new FitterResults::HistoResult(0,conf.p_msgLevel,name);
   name = conf.p_outputfile;
+  name += "_values";
+  FitterResults::AbsResult* fresult = new FitterResults::FileResult(0,conf.p_msgLevel,name);
+  name = conf.p_outputfile;
   name += "_LLH";
   FitterResults::AbsResult* lresult = new FitterResults::LLHResult(0,conf.p_msgLevel,name);
-  FitterResults::AbsResult* fresult = new FitterResults::FileResult(0,conf.p_msgLevel,name);
+  
   
 
 

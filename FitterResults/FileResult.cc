@@ -75,6 +75,7 @@ void FitterResults::FileResult::print(){
 
   TFile* newFile=0;
   std::string name = m_filename;
+
   if(!(m_filename.find(".root")!=std::string::npos))
     name += ".root";
   newFile = new TFile(name.c_str(),"RECREATE");
@@ -85,13 +86,14 @@ void FitterResults::FileResult::print(){
   int minosStatus = 0;
   double minosUp =0.;
   double minosDown =0.;
-
+  std::string currentLabel;
   for (int i = 0; i < getNumberOfParameters(); ++i)
   {
+    currentLabel = getParameterNames()->at(i);
     tgraph->SetPoint(i,double(i),getResults()->at(i));
-    tgraph->GetXaxis()->SetBinLabel(i+1,getParameterNames()->at(i).c_str());
+    tgraph->GetXaxis()->SetBinLabel(i+1,currentLabel.c_str());
     getMinosResultsForIndex(i,minosStatus,minosUp,minosDown);
-    tgraph->SetPointError(0.,0.,minosDown,minosUp);
+    tgraph->SetPointError(i,0.,0.,TMath::Abs(minosDown),TMath::Abs(minosUp));
   }
   fileContent.push_back(tgraph);
 
