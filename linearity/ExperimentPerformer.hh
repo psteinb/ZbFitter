@@ -19,7 +19,7 @@
 //#include "tbb/blocked_range.h"
 
 
-#include "run/ConfLinearTest.hh"
+#include "lineariy/ConfLinearTest.hh"
 #include "core/FitCore.hh"
 #include "FitterInputs/NormedTH1.hh"
 #include "functions/BinnedEML.hh"
@@ -27,8 +27,8 @@
 #include "Studies/ProtoCreators.hh"
 #include "FitterInputs/NormalisationFunctors.hh"
 #include "FitterResults/HistoResult.hh"
-#include "run/BasePerformer.hh"
-#include "run/LinearTestFunctors.hh"
+#include "lineariy/BasePerformer.hh"
+#include "lineariy/LinearTestFunctors.hh"
 
 
 
