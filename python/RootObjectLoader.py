@@ -89,9 +89,12 @@ class RootObjectLoader:
                         currFile = currFiles[0]
                 else:
                     print fileName, " does not exist"
+                    continue
 
                 if not currFile:
-                    raise Exception("%s not loaded" % fileName)
+                    print "%s not loaded" % fileName
+                    continue
+
                 tnamed = currFile.Get(v.split(":")[-1])
                 if tnamed.__nonzero__():
                     self.loadedDict[sec].append(tnamed)
