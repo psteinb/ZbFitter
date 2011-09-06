@@ -69,12 +69,12 @@ void FitterResults::HistoResult::print(){
   double highest = std::max(newStack.GetMaximum(),m_dataHisto->GetMaximum());
   newStack.SetMaximum(1.5*highest);
   newStack.Draw("HIST");
-  newStack.GetXaxis()->SetTitle("m_{SV} [GeV]");
+  //  newStack.GetXaxis()->SetTitle("m_{SV} [GeV]");
   newStack.GetYaxis()->SetTitle("N / 0.5 GeV");
   m_dataHisto->SetMarkerSize(1.5*m_dataHisto->GetMarkerSize());
   m_dataHisto->SetMarkerStyle(8);
   m_dataHisto->SetStats(0);
-  m_dataHisto->GetXaxis()->SetTitle("m_{SV} [GeV]");
+  //m_dataHisto->GetXaxis()->SetTitle("m_{SV} [GeV]");
   m_dataHisto->GetYaxis()->SetTitle("N / 0.5 GeV");
   m_dataHisto->Draw("e1same");
   TLegend leg(0.6,0.7,0.92,0.92);
