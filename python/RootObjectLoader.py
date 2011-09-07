@@ -77,7 +77,13 @@ class RootObjectLoader:
         for sec in self.cfgParser.sections():
             self.loadedDict[sec] = []
             self.tFiles[sec] = []
+            commands = []
             for k,v in self.cfgParser.items(sec):
+
+                if not v.count(".root") and v.count("[]."):
+                    commands.append(v)
+                    continue
+
                 fileName = self.replaceDirString(v.split(":")[0])
                 currFile = None
                 if fileName and os.path.isfile(fileName):
@@ -101,6 +107,17 @@ class RootObjectLoader:
 #                    print ">> object %s found in %s " % (v.split(":")[0],v.split(":")[-1])
                 else:
                     print ">> object %s not found in %s " % (v.split(":")[-1],fileName)
+
+            for loaded in self.loadedDict[sec]:
+                if not loaded.__nonzero__():
+                    continue 
+
+                for cmd in commands:
+                    try:
+                        eval(cmd.replace("[]","loaded"))
+                    except Exception as inst:
+                        print "unable to execute %s on %s" % (cmd,loaded.GetName())
+                    
 
         if _verbose:
             self.printLoadedObjects()

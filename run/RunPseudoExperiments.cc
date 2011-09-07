@@ -291,13 +291,10 @@ void createExpectedValuesFromTemplates(const std::vector<TH1*>& _templates,
 
   for (int i = 0; i < _templates.size(); ++i)
   {
-    // #ifndef __DATAEXP__
-    // _expected[i] = integrals[i];
-    // _errors[i] = errors[i];
-    // #else
+
     _expected[i] = (integrals[i]/total)*_dataIntegral;
     _errors[i] = (errors[i]/total)*_expected[i];
-    // #endif
+
     std::cout << "expected value ["<<i <<"]\t ("<<integrals[i] <<") --> "<<_expected[i]<<" +/- "<<_errors[i] <<std::endl;
   }
 
