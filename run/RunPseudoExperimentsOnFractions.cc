@@ -382,7 +382,6 @@ int main(int argc, char* argv[])
                  );
 
   aPseudoStudy.setInput(input);
-  
   aPseudoStudy.setProtoCreator(&aProtoMaker);
   aPseudoStudy.setFitterConfigFile(conf.p_configFile);
   aPseudoStudy.setFitEngine(conf.p_fitEngine);
