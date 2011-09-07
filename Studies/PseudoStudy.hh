@@ -21,6 +21,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TCanvas.h"
+#include "TString.h"
 #include "Math/Minimizer.h"
 
 template<
@@ -164,8 +165,8 @@ class PseudoStudy{
       expSigmaDown = 0.;
       expSigmaUp = 1.*(m_expectedValues.at(i));
 
-      m_pulls[i] = TH1D(addItemToText<int>("pull_par",i).c_str(),"pull",80,-8,8);
-      m_pulls[i].GetXaxis()->SetTitle(addItemToText<int>("pull: ",i).c_str());
+      m_pulls[i] = TH1D(TString::Format("pull_par%i",i).Data(),"pull",80,-8,8);
+      m_pulls[i].GetXaxis()->SetTitle(TString::Format("pull (%i)",i).Data());
       //m_pulls[i].SetBit(TH1::kCanRebin);
 
       m_MigradPulls[i] = TH1D(addItemToText<int>("Migrad_pull_par",i).c_str(),"pull",80,-8,8);
@@ -223,21 +224,21 @@ class PseudoStudy{
     std::vector<TH1D>::iterator rEnd = m_means.end()      ;
     for (short i = 0; rItr!=rEnd; ++rItr,i++)
     {
-      rItr->GetXaxis()->SetTitle(addItemToText<std::string>("fitted ",_names->at(i)).c_str());
+      rItr->GetXaxis()->SetTitle(TString::Format("fitted %s",_names->at(i).c_str()).Data());
     }
 
     rItr = m_sigmas.begin()    ;
     rEnd = m_sigmas.end()      ;
     for (short i = 0; rItr!=rEnd; ++rItr,i++)
     {
-      rItr->GetXaxis()->SetTitle(addItemToText<std::string>("#sigma ",_names->at(i)).c_str());
+      rItr->GetXaxis()->SetTitle(TString::Format("#sigma(%s)",_names->at(i).c_str()).Data());
     }
 
     rItr = m_pulls.begin()    ;
     rEnd = m_pulls.end()      ;
     for (short i = 0; rItr!=rEnd; ++rItr,i++)
     {
-      rItr->GetXaxis()->SetTitle(addItemToText<std::string>("pull ",_names->at(i)).c_str());
+      rItr->GetXaxis()->SetTitle(TString::Format("pull(%s)",_names->at(i).c_str()).Data());
     }
   };
 
