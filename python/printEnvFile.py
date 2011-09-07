@@ -32,10 +32,14 @@ class printEnvFile:
         self.parser.add_option("-2", "--make22env", dest="make22env",action="store_true",
                                help="pruduce environment for 2-2 fit")
 
+        self.parser.add_option("-F", "--doFractins", dest="doFractions",action="store_true",
+                               help="pruduce environments fraction fits")
+
         self.rootFile = None
         self.make31env = False
         self.make22env = False
         self.valueDict = {}
+        self.doFractions = False
 
     def initFromInput(self):
 
@@ -56,12 +60,18 @@ class printEnvFile:
                 raise Exception("%s does not exist" % filename)
 
         if "make31env" in self.parsedOpts.keys():
-            self.make31env = True
-            self.make22env = False
+            self.make31env = self.parsedOpts["make31env"]
+        else:
+            self.make31env = False
+            
         
         if "make22env" in self.parsedOpts.keys():
-            self.make22env = True
-            self.make31env = False
+            self.make22env = self.parsedOpts["make22env"]
+        else:
+            self.make22env = False
+
+        if "doFractions" in self.parsedOpts.keys():
+            self.doFractions = True
 
 
     def fillValues(self):
@@ -71,23 +81,34 @@ class printEnvFile:
         TrueL 		= self.rootFile.Get("TrueL")
         Top   		= self.rootFile.Get("Top")
         Background      = self.rootFile.Get("Background")
+        
+        if Background.__nonzero__():
+            total        = sum([float(item.Integral()) for item in [TrueB,TrueC,TrueL,Background]])
+        else:
+            total        = sum([float(item.Integral()) for item in [TrueB,TrueC,TrueL,Top]])
 
         for item in [TrueB,TrueC,TrueL,Top,Background]:
             if item.__nonzero__():
-                self.valueDict[item.GetName()] = item.Integral()
+                if not self.doFractions:
+                    self.valueDict[item.GetName()] = item.Integral()
+                else:
+                    self.valueDict[item.GetName()] = item.Integral()/float(total)
 
 
     def print31Environment(self):
+        print ""
         print "%-40s %10s" % ("Parameter1.Name:","N_{b}")
         print "%-40s %9.1f" % ("Parameter1.Start:",self.valueDict["TrueB"])
         print "%-40s %10s" % ("Parameter1.Step:","0.1")
         print "%-40s %10s" % ("Parameter1.low:","0.")
         print "%-40s %10s" % ("Parameter2.Name:","N_{c}")
         print "%-40s %9.1f" % ("Parameter2.Start:",self.valueDict["TrueC"])
+            
         print "%-40s %10s" % ("Parameter2.Step:","0.1")
         print "%-40s %10s" % ("Parameter2.low:","0.")
         print "%-40s %10s" % ("Parameter3.Name:","N_{l}")
         print "%-40s %9.1f" % ("Parameter3.Start:",self.valueDict["TrueL"])
+
         print "%-40s %10s" % ("Parameter3.Step:","0.1")
         print "%-40s %10s" % ("Parameter3.low:","0.")
         print "%-40s %10s" % ("#fixed Parameters","")
@@ -105,6 +126,7 @@ class printEnvFile:
         print "%-40s %10s" % ("MaxIterations:","100000")
 
     def print22Environment(self):
+        print ""
         print "%-40s %10s" % ("Parameter1.Name:","N_{b}")
         print "%-40s %9.1f" % ("Parameter1.Start:",self.valueDict["TrueB"])
         print "%-40s %10s" % ("Parameter1.Step:","0.1")
@@ -116,6 +138,7 @@ class printEnvFile:
         print "%-40s %10s" % ("#fixed Parameters","")
         print "%-40s %10s" % ("Parameter3.Name:","N_{l}")
         print "%-40s %9.1f" % ("Parameter3.Start:",self.valueDict["TrueL"])
+
         print "%-40s %10s" % ("Parameter3.Step:","0.")
 
         if "Background" in self.valueDict.keys():
@@ -130,15 +153,49 @@ class printEnvFile:
         print "%-40s %10s" % ("MaxFunCalls:","1000000")
         print "%-40s %10s" % ("MaxIterations:","100000")
 
+    def print22EnvironmentOnFractions(self):
+        print ""
+        print "%-40s %10s" % ("Parameter1.Name:","N_{b}")
+        print "%-40s %2.5f" % ("Parameter1.Start:",self.valueDict["TrueB"])
+        print "%-40s %10s" % ("Parameter1.Step:","0.1")
+        print "%-40s %10s" % ("Parameter1.low:","0.")
+        if "Background" in self.valueDict.keys():
+            print "%-40s %2.5f" % ("Parameter1.high:",float(1-self.valueDict["TrueL"]-self.valueDict["Background"]))
+        else:
+            print "%-40s %2.5f" % ("Parameter1.high:",float(1-self.valueDict["TrueL"]-self.valueDict["Top"]))
+        print "%-40s %10s" % ("#fixed Parameters","")
+        print "%-40s %10s" % ("Parameter2.Name:","N_{l}")
+        print "%-40s %2.5f" % ("Parameter2.Start:",self.valueDict["TrueL"])
+        print "%-40s %10s" % ("Parameter2.Step:","0.")
+
+        if "Background" in self.valueDict.keys():
+            print "%-40s %10s" % ("Parameter3.Name:","N_{background}")
+            print "%-40s %2.5f" % ("Parameter3.Start:",self.valueDict["Background"])
+        else:
+            print "%-40s %10s" % ("Parameter3.Name:","N_{top}")
+            print "%-40s %2.5f" % ("Parameter3.Start:",self.valueDict["Top"])
+        print "%-40s %10s" % ("Parameter3.Step:","0.")
+
+        print "%-40s %10s" % ("Parameter4.Name:","N_{c}")
+        print "%-40s %2.5f" % ("Parameter4.Start:",self.valueDict["TrueC"])
+        print "%-40s %10s" % ("Parameter4.Omit:","True")
+        print "%-40s %10s" % ("Tolerance:","0.0005")
+        print "%-40s %10s" % ("MaxFunCalls:","1000000")
+        print "%-40s %10s" % ("MaxIterations:","100000")
+
     def Run(self):
 
         self.fillValues()
         
-        if self.make31env:
-            self.print31Environment()
-
-        if self.make22env:
-            self.print22Environment()
+        if self.doFractions:
+            self.print22EnvironmentOnFractions()
+        else:
+            if self.make31env:
+                self.print31Environment()
+            elif self.make22env:
+                self.print22Environment()
+            else:
+                print "no printing scheme specified"
         
         self.rootFile.Close()
         
@@ -155,7 +212,8 @@ if __name__=="__main__":
     else:
         try:
             printer.Run()
-        except:
+        except Exception as inst:
+            print "failed to call printEnvFile.Run()\n\t>>> ",inst
             sys.exit(-1)
         else:
             sys.exit(0)

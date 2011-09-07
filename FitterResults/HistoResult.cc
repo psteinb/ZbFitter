@@ -163,7 +163,7 @@ std::string FitterResults::HistoResult::getParameterResult(const int& _idx, cons
       minosUp = TMath::Sqrt((Up*Up*_norm*_norm) + (normError*normError*centralValue*centralValue));
     }
 
-    if(minosStatus<0){
+    if(minosStatus<0 || !(minosUp!=minosDown)){
       _text << " +/- " << symmError << ")";
      }
      else{

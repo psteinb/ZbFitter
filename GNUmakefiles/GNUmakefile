@@ -44,17 +44,13 @@ ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell root-config --glibs)
 ROOTLDFLAGS   = $(shell root-config --ldflags)
 
-# Fortran Compiler Flags
-FC = g77
-FCFLAGS = -ggdb3 -fno-automatic -fvxt -fdollar-ok -fno-backslash \
-          -ffixed-line-length-132 -fno-second-underscore
 
 # C++ - Compiler Flags
 CXX = g++
 
 #check if any optimisation is requested
 ifndef CXXOPTFLAGS
-	CXXOPTFLAGS = -ggdb3 -O0
+	CXXOPTFLAGS = -g -ggdb3 -O0
 endif
 
 #user may introduce special debug symbol flags as well, -ggdb etc.

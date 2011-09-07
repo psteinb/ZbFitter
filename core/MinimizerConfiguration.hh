@@ -118,6 +118,7 @@ class MinimizerConfiguration
   void loadItemsFromMap();
   
   int itemsToConfigure;
+  int itemsFixed;
   int itemsTotal;
 
 public:
@@ -127,6 +128,7 @@ public:
     m_names(),
     m_namesConfigured(),
     itemsToConfigure(0),
+    itemsFixed(0),
     itemsTotal(0)
   {};
 
@@ -175,6 +177,7 @@ public:
 
 
   int getNumberOfParametersConfigured(){return itemsToConfigure;};
+  int getNumberOfParametersFixed(){return itemsFixed;};
   int getNumberOfParameters(){return itemsTotal;};
 
   MinimConfigItem* getItem(const int& _index){

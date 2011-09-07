@@ -53,6 +53,7 @@ namespace functions {
     std::vector<double> m_parametersUp;
     std::vector<double> m_parametersDown;
     int m_nParameters;
+    int m_nFixedParameters;
     std::vector<FitterInputs::FitterData> m_input;
 
     virtual void loadSystematics ();
@@ -70,6 +71,7 @@ namespace functions {
       m_parametersUp(),
       m_parametersDown(),
       m_nParameters(3),
+      m_nFixedParameters(0),
       m_input(),
       m_data(),
       m_templates(),
@@ -81,6 +83,7 @@ namespace functions {
       m_parametersUp(_rhs.m_parametersUp),
       m_parametersDown(_rhs.m_parametersDown),
       m_nParameters(_rhs.m_nParameters),
+      m_nFixedParameters(_rhs.m_nFixedParameters),
       m_input(_rhs.m_input),
       m_data(_rhs.m_data),
       m_templates(_rhs.m_templates),
@@ -123,6 +126,9 @@ namespace functions {
     };
   
     virtual int getNumberOfParameters() const {return m_nParameters;};
+    virtual int getNumberOfFixedParameters() const {return m_nFixedParameters;};
+    virtual int getNFixedParameters() const {};
+    virtual void setNumberOfFixedParameters(const int& _new)  { m_nFixedParameters = _new;};
     
     virtual double getParameterValue(const short& _idx) const {return m_parameters.at(_idx);};
     virtual void setParameterValue(const short& _idx, double& _value)  {

@@ -22,20 +22,23 @@ double functions::BinnedEMLFraction::getLogTerm(const short& _bin,const double& 
   //double binWidth = m_templates.at(0).getHisto()->GetBinWidth(1);
   double value =0;  
 
-  for (short i=0; i < (this->getNumberOfParameters()-1); ++i)
+  //-1 for the parameter omitted needs to be the last one
+  int parameterRange = this->getNumberOfParameters()-1;
+
+  for (short i=0; i < (parameterRange); ++i)
   {
 
     value+=((getParameterValue(i))*(m_templates.at(i).getContent()->at(_bin))*_total);
 
   }
 
-
+  
   double last = std::accumulate(getParameters()->begin(), 
-                                getParameters()->begin()+this->getNumberOfParameters()-1,
+                                getParameters()->begin()+parameterRange,
                                 1.,
                                 std::minus<double>());
 
-  setParameterValue(this->getNumberOfParameters()-1,last);
+  setParameterValue(parameterRange,last);
 
   value+=((last)*(m_templates.back().getContent()->at(_bin))*_total);
   
@@ -87,7 +90,7 @@ double functions::BinnedEMLFraction::operator()(const double* _values ){
   //according to the TMinuit2 manual, one may instead double the LLH to get correct errors
   logLHValue *= 2;
 
-#ifdef __DEBUG__  
+#ifdef __DEBUG_EML___  
   std::cout << "for parameters: \t";
   std::copy(getParameters()->begin(),
             getParameters()->end(),

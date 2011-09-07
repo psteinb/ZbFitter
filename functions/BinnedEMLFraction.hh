@@ -48,7 +48,8 @@ namespace functions {
 
     double getLogTerm(const short& _bin,const double& _totalExpect );
 
-
+    void setNumberOfFixedParameters(const int& _new)  { AbsFittingFunction::setNumberOfFixedParameters(_new);};
+    int getNFixedParameters() const { return this->getNumberOfFixedParameters();};
 
   };
 }; // end of package namespace

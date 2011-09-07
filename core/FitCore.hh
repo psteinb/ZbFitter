@@ -89,6 +89,7 @@ namespace core {
 
     void loadDataToFunction(){
       m_fcn.setupFromInput(m_resources);
+      m_fcn.setNumberOfFixedParameters(m_paramConfiguration.getNumberOfParametersFixed());
     };
 
     void runMinos();

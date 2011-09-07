@@ -123,7 +123,7 @@ void core::FitCore<Fcn,Scr,Res>::printTo(Res* _result=0){
     //but I didn't consider using sizeof(Fcn) so elegant
     double sum = std::accumulate(m_fitResults.begin(),m_fitResults.end(),0.);
     sum *= 1./(m_fitResults.size());
-    if (sum<1.)
+    if (sum<1.1)
       _result->doFractions(true);
 
     //do printing

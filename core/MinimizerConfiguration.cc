@@ -68,6 +68,9 @@ void core::MinimizerConfiguration::loadItemsFromMap(){
     itemsTotal++;
     if(!metaConfigItem.omitMeFromFit)
       itemsToConfigure++;
+    
+    if(metaConfigItem.isFixed() || metaConfigItem.omitMeFromFit)
+      itemsFixed++;
   }
   
   
