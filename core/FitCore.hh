@@ -309,6 +309,10 @@ namespace core {
       return m_paramConfiguration.getConfiguredNames();
     }
 
+    MinimizerConfiguration* getConfiguration() {
+      return &m_paramConfiguration;
+    }
+
   };
 }; // end of package namespace
 

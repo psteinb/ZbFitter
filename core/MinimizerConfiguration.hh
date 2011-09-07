@@ -177,6 +177,13 @@ public:
   int getNumberOfParametersConfigured(){return itemsToConfigure;};
   int getNumberOfParameters(){return itemsTotal;};
 
+  MinimConfigItem* getItem(const int& _index){
+    MinimConfigItem* value=0;
+    if(_index>-1 && _index<m_items.size())
+      value = &(m_items[_index]);
+    
+    return value;
+  };
 };
 
 };

@@ -9,6 +9,7 @@
 #include <iomanip>
 
 #include "core/FitCore.hh"
+#include "core/MinimizerConfiguration.hh"
 #include "FitterInputs/NormedTH1.hh"
 #include "FitterResults/HistoResult.hh"
 #include "FitterResults/LLHResult.hh"
@@ -219,6 +220,13 @@ class PseudoStudy{
     _data->ResetStats();
   };
   
+  void treatFitterConfiguration(core::MinimizerConfiguration* _config){
+    for (int i = 0; i < m_expectedValues.size(); ++i)
+    {
+      _config->getItem(i)->setItem("start",TString::Format("%.2f",m_expectedValues[i]).Data());
+    }
+  }
+
   void treatResultsFromMinimizer(const std::vector<std::string>* _names){
     std::vector<TH1D>::iterator rItr = m_means.begin()    ;
     std::vector<TH1D>::iterator rEnd = m_means.end()      ;
@@ -551,6 +559,8 @@ public:
       aFitter.configureKeyWithValue("Engine",m_fitEngine);
       aFitter.configureKeyWithValue("Mode",m_fitMode);
       aFitter.setupMachinery();
+
+      this->treatFitterConfiguration(aFitter.getConfiguration());
 
       //run the fitter on data from the input file
       if(m_verbosity>2)

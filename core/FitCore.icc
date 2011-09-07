@@ -28,6 +28,13 @@ void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
   std::vector<std::string> dummy;//can be used to set the names from e.g. data
   m_paramConfiguration.init(m_configMap,dummy);
   
+
+}
+
+template <class Fcn, class Scr, class Res>
+int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
+
+  int value =0;
   // Set the free variables to be minimized!
   m_paramConfiguration.configureMinimizer(m_minimizer);
   
@@ -35,11 +42,7 @@ void core::FitCore<Fcn,Scr,Res>::setupMachinery(){
   /// load data/templates to Likelihood function
   /////////////////////////////////////////
   loadDataToFunction();
-}
 
-template <class Fcn, class Scr, class Res>
-int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
-  int value =0;
   /////////////////////////////////////////
   /// laod data/templates to Likelihood function
   /////////////////////////////////////////
