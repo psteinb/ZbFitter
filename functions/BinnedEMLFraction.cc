@@ -23,7 +23,7 @@ double functions::BinnedEMLFraction::getLogTerm(const short& _bin,const double& 
   double value =0;  
 
   //-1 for the parameter omitted needs to be the last one
-  int parameterRange = this->getNumberOfParameters()-1;
+  int parameterRange = this->getNumberOfParameters()/*-1*/;
 
   for (short i=0; i < (parameterRange); ++i)
   {
@@ -33,16 +33,11 @@ double functions::BinnedEMLFraction::getLogTerm(const short& _bin,const double& 
   }
 
   
-  double last = std::accumulate(getParameters()->begin(), 
-                                getParameters()->begin()+parameterRange,
-                                1.,
-                                std::minus<double>());
-
-  setParameterValue(parameterRange,last);
-
-  value+=((last)*(m_templates.back().getContent()->at(_bin))*_total);
   
-  if(value)
+
+  //value+=((last)*(m_templates.back().getContent()->at(_bin))*_total);
+  
+  if(value>0.)
     return std::log(value);
   else
     return 0.;
@@ -53,18 +48,34 @@ double functions::BinnedEMLFraction::operator()(const double* _values ){
   
 
   
-  // double meta[this->getNumberOfParameters()];
-  // std::copy(_values, 
-  //           _values+this->getNumberOfParameters(),
-  //           meta);
 
-  // double lastParameter = std::accumulate(_values, 
-  //                                        _values+this->getNumberOfParameters()-1,
-  //                                        1.,
-  //                                        std::minus<double>());
-  // meta[this->getNumberOfParameters()-1] = lastParameter;
-  
   setParameters(_values);
+
+  /////////////////////////////////////////
+  /// FIXME: this section would need to optimised for I assume (hard-coded) that the last parameter is in "omitted" state
+  /////////////////////////////////////////
+
+  int parameterRange = this->getNumberOfParameters()-1;
+  double last = std::accumulate(getParameters()->begin(), 
+                                getParameters()->begin()+parameterRange,
+                                1.,
+                                std::minus<double>());
+
+  
+  setParameterValue(parameterRange,std::fabs(last));
+  
+  double sumOfParameters = std::accumulate(getParameters()->begin(), 
+                                           getParameters()->end(),
+                                           0.);
+  
+  /////////////////////////////////////////
+  /// FIXME: safe-guard against the minimization to violate unitarity of all fractions
+  /////////////////////////////////////////
+
+  // if(last<0 || sumOfParameters>1)
+  //   return 0.;
+  /////////////////////////////////////////
+  /// start the computation of the LLH
 
   double totalData = std::accumulate(m_data.getContent()->begin(), 
                                      m_data.getContent()->end(),

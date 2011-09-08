@@ -131,7 +131,7 @@ namespace functions {
     virtual void setNumberOfFixedParameters(const int& _new)  { m_nFixedParameters = _new;};
     
     virtual double getParameterValue(const short& _idx) const {return m_parameters.at(_idx);};
-    virtual void setParameterValue(const short& _idx, double& _value)  {
+    virtual void setParameterValue(const short& _idx, const double& _value)  {
       if(_idx<m_parameters.size())
         m_parameters[_idx] = _value;
     };
