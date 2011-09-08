@@ -32,7 +32,7 @@ class printEnvFile:
         self.parser.add_option("-2", "--make22env", dest="make22env",action="store_true",
                                help="pruduce environment for 2-2 fit")
 
-        self.parser.add_option("-F", "--doFractins", dest="doFractions",action="store_true",
+        self.parser.add_option("-F", "--doFractions", dest="doFractions",action="store_true",
                                help="pruduce environments fraction fits")
 
         self.rootFile = None
@@ -71,7 +71,7 @@ class printEnvFile:
             self.make22env = False
 
         if "doFractions" in self.parsedOpts.keys():
-            self.doFractions = True
+            self.doFractions = self.parsedOpts["doFractions"]
 
 
     def fillValues(self):
