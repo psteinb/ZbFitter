@@ -155,7 +155,7 @@ class printEnvFile:
 
     def print22EnvironmentOnFractions(self):
         print ""
-        print "%-40s %10s" % ("Parameter1.Name:","N_{b}")
+        print "%-40s %10s" % ("Parameter1.Name:","f_{b}")
         print "%-40s %2.5f" % ("Parameter1.Start:",self.valueDict["TrueB"])
         print "%-40s %10s" % ("Parameter1.Step:","0.1")
         print "%-40s %10s" % ("Parameter1.low:","0.")
@@ -164,19 +164,19 @@ class printEnvFile:
         else:
             print "%-40s %2.5f" % ("Parameter1.high:",float(1-self.valueDict["TrueL"]-self.valueDict["Top"]))
         print "%-40s %10s" % ("#fixed Parameters","")
-        print "%-40s %10s" % ("Parameter2.Name:","N_{l}")
+        print "%-40s %10s" % ("Parameter2.Name:","f_{l}")
         print "%-40s %2.5f" % ("Parameter2.Start:",self.valueDict["TrueL"])
         print "%-40s %10s" % ("Parameter2.Step:","0.")
 
         if "Background" in self.valueDict.keys():
-            print "%-40s %10s" % ("Parameter3.Name:","N_{background}")
+            print "%-40s %10s" % ("Parameter3.Name:","f_{background}")
             print "%-40s %2.5f" % ("Parameter3.Start:",self.valueDict["Background"])
         else:
-            print "%-40s %10s" % ("Parameter3.Name:","N_{top}")
+            print "%-40s %10s" % ("Parameter3.Name:","f_{top}")
             print "%-40s %2.5f" % ("Parameter3.Start:",self.valueDict["Top"])
         print "%-40s %10s" % ("Parameter3.Step:","0.")
 
-        print "%-40s %10s" % ("Parameter4.Name:","N_{c}")
+        print "%-40s %10s" % ("Parameter4.Name:","f_{c}")
         print "%-40s %2.5f" % ("Parameter4.Start:",self.valueDict["TrueC"])
         print "%-40s %10s" % ("Parameter4.Omit:","True")
         print "%-40s %10s" % ("Tolerance:","0.0005")
