@@ -171,7 +171,7 @@ class BundleHistos:
                 self.Histos2Write[fit].SetBinError(abin,symmUncert)
                 self.Graphs2Write[fit].SetPoint(abin,binCenter,central)
                 self.Graphs2Write[fit].SetPointError(abin,binUncert,binUncert,UncertDown,UncertUp)
-                print "[f:%i,bin:%i] %s: added [x,y] = %.2f, %.2f; sigma(x) = %.2f, sigma(y) = %.2f, <up/down> = %.2f/%.2f" % % (fit,abin,self.fitnames[fit], binCenter,central,binUncert,symmUncert,UncertUp,UncertDown)
+                print "[f:%i,bin:%i] %s: added [x,y] = %.2f, %.2f; sigma(x) = %.2f, sigma(y) = %.2f, <up/down> = %.2f/%.2f" % (fit,abin,self.fitnames[fit], binCenter,central,binUncert,symmUncert,UncertUp,UncertDown)
 
         return
     
