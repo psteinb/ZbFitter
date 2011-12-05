@@ -37,11 +37,15 @@ class BundleHistos:
         self.loaded = None
         self.openedFiles = []
         self.nBins = 0
+        self.obsName = ""
         self.nFits = 0
         self.fitNames = []
         self.BinBorders = set()
         self.UpperBinLimit = 0
         self.LowerBinLimit = 0
+        self.Histos2Write = []
+        self.Graphs2Write = []
+        self.outFile = None
 
     def initFromInput(self):
         print "%s >> parseInput" % self.__class__
@@ -112,22 +116,27 @@ class BundleHistos:
     def collectData(self):
 
         self.nBins = len(self.loadedKeys.keys())
+        
 
         centralValueObjs = [ item.Get("centralValues") for item in self.openedFiles if item.Get("centralValues").__nonzero__() ]
         if len(centralValueObjs):
             self.nFits = centralValueObjs[0].GetNbinsX()
             for item in range(1,self.nFits+1):
                 self.fitNames.append(str(centralValueObjs[0].GetXaxis().GetBinLabel(item)))
-
+            
                 
-        for item,content in self.loadedKeys.keys():
+        for item,content in self.loadedKeys:
+            if not self.obsName and content.has_key("ObservableName"):
+                self.obsName = content["ObservableName"]
+
             if content.has_key("binID"):
                 self.BinBorders.insert(float(content["binID"]))
             elif content.has_key("binValue"):
                 self.BinBorders.insert(float(content["binValue"].split(",")[0]))
                 if len(content["binValue"].split(","))>1:
                     self.BinBorders.insert(float(content["binValue"].split(",")[-1]))
-                
+            else:
+                print ">> %s does not have binID nor binValue, skipping \n%s" % (item,content)
 
         self.UpperBinLimit = max(self.BinBorders)
         self.LowerBinLimit = min(self.BinBorders)
@@ -135,13 +144,42 @@ class BundleHistos:
         return
 
     def createResultHistos(self):
-        
+        self.outFile = ROOT.TFile(self.outputname,"RECREATE")
+
+        for idx in range(self.nFits):
+            self.Histos2Write.append(ROOT.TH1D(self.fitNames[idx]+"_symm",";%s;N_{%s}" % (self.obsName,self.fitNames[idx]),self.nBins,self.LowerBinLimit,self.UpperBinLimit))
+            self.Graphs2Write.append(ROOT.TGraphAsymmErrors(self.nBins))
+            self.Graphs2Write[-1].GetYaxis().SetName("N_{%s}" % self.fitNames[idx])
+            self.Graphs2Write[-1].GetYaxis().SetName(self.obsName)
+            self.Graphs2Write[-1].SetName(self.fitNames[idx]+"_asymm")
+            
         return
 
     def fillResultHistos(self):
+
+        for abin in range(1,self.nBins+1):
+            for fit in range(self.nFits):
+
+                central = self.openedFiles[abin].Get("centralValues").GetBinContent(abin)
+                symmUncert = self.openedFiles[abin].Get("SymmErrors").GetBinContent(abin)
+                UncertUp = self.openedFiles[abin].Get("AsymmErrorsUp").GetBinContent(abin)
+                UncertDown = self.openedFiles[abin].Get("AsymmErrorsDown").GetBinContent(abin)
+                binUncert = self.Histos2Write[fit].GetXaxis().GetBinWidth(abin)/2
+                binCenter = self.Histos2Write[fit].GetXaxis().GetBinCenter(abin)
+
+                self.Histos2Write[fit].SetBinContent(abin,central)
+                self.Histos2Write[fit].SetBinError(abin,symmUncert)
+                self.Graphs2Write[fit].SetPoint(abin,binCenter,central)
+                self.Graphs2Write[fit].SetPointError(abin,binUncert,binUncert,UncertDown,UncertUp)
+                print "[f:%i,bin:%i] %s: added [x,y] = %.2f, %.2f; sigma(x) = %.2f, sigma(y) = %.2f, <up/down> = %.2f/%.2f" % % (fit,abin,self.fitnames[fit], binCenter,central,binUncert,symmUncert,UncertUp,UncertDown)
+
         return
     
     def writeAll(self):
+        
+        self.outFile.Write()
+        self.outFile.Close()
+
         return
     
 
