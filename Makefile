@@ -43,7 +43,7 @@ install :
 
 runners : 
 	make -C $(SRC)/run RunFitter.exe
-	make -C $(SRC)/run RunFitterOnFractions.exe
+#	make -C $(SRC)/run RunFitterOnFractions.exe
 	make -C $(SRC)/run RunPseudoExperiments.exe
 	make -C $(SRC)/run RunPseudoExperimentsOnFractions.exe
 
