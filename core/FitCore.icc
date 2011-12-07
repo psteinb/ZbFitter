@@ -106,7 +106,7 @@ int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
 
 
 template <class Fcn, class Scr, class Res>
-void core::FitCore<Fcn,Scr,Res>::printTo(Res* _result=0){
+void core::FitCore<Fcn,Scr,Res>::printTo(Res* _result){
   if(_result){
 
     _result->setMinimizer(dynamic_cast<ROOT::Math::Minimizer*>(m_minimizer));

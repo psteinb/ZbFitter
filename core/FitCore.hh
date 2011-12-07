@@ -198,7 +198,7 @@ namespace core {
     {
       std::map<std::string,std::string>::const_iterator cfgItr = m_configMap.find(_name);
       if(cfgItr!=m_configMap.end())
-        return *(cfgItr);
+        return (cfgItr->second);
       else
         return "";
     }

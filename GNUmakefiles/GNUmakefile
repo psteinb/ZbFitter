@@ -46,7 +46,9 @@ ROOTLDFLAGS   = $(shell root-config --ldflags)
 
 
 # C++ - Compiler Flags
+ifndef CXX
 CXX = g++
+endif
 
 #check if any optimisation is requested
 ifndef CXXOPTFLAGS

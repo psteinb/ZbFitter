@@ -151,7 +151,7 @@ class PseudoStudy{
     
   };  
 
-  void prepareData(TH1*& _data=0){
+  void prepareData(TH1*& _data){
     _data = (TH1*)m_templateTH1s[0]->Clone("data");
     _data->SetDirectory(0);
     _data->Reset("MICE");
