@@ -41,6 +41,8 @@ install :
 	@echo
 	make -C $(SRC)/Studies installdirs
 
+rebuild : clean all
+
 runners : 
 	make -C $(SRC)/run RunFitter.exe
 #	make -C $(SRC)/run RunFitterOnFractions.exe
