@@ -33,13 +33,21 @@ class printEnvFile:
                                help="pruduce environment for 2-2 fit")
 
         self.parser.add_option("-F", "--doFractions", dest="doFractions",action="store_true",
-                               help="pruduce environments fraction fits")
+                               help="produce environments fraction fits")
+
+        self.parser.add_option("-N", "--ObjectNames", 
+                               dest="ObjectNames",
+                               action="store",
+                               default=["TrueB","TrueC","TrueL","Top","Background"],
+                               help="override default object names following: TrueB,TrueC,TrueL,Top,Background")
 
         self.rootFile = None
+        self.objectNames = []
         self.make31env = False
         self.make22env = False
         self.valueDict = {}
         self.doFractions = False
+        self.objDict = {}
 
     def initFromInput(self):
 
@@ -72,31 +80,53 @@ class printEnvFile:
 
         if "doFractions" in self.parsedOpts.keys():
             self.doFractions = self.parsedOpts["doFractions"]
+            
+        if "ObjectNames" in self.parsedOpts.keys():
+            self.objectNames = [ item for item in self.parsedOpts["ObjectNames"].split(",") ]
+
+
+    def findObjectName(self,_contained):
+
+        meta = _contained.lower()
+        valueL = [ item for item in self.objectNames if item.lower().count(meta) ]
+        if not valueL:
+            self.rootFile.ls()
+            raise KeyError("item dubbed "+_contained+" not found in provided object names "+str(self.objectNames))
+        else:
+            return valueL[0]
+        
+    def loadObjects(self):
+       
+        for item in self.objectNames:
+            try:
+                self.objDict[item] = self.rootFile.Get(self.findObjectName(item))
+            except Exception as inst:
+                self.objDict[item] = None
+                print inst
+            else:
+                if self.objDict[item].__nonzero__():    
+                    print ">>> loaded ",item
+                else:
+                    print ">>> item *%s* not found in input file %s" % (item,self.rootFile.GetName())
+                    
 
 
     def fillValues(self):
 
-        TrueB 		= self.rootFile.Get("TrueB")
-        TrueC 		= self.rootFile.Get("TrueC")
-        TrueL 		= self.rootFile.Get("TrueL")
-        Top   		= self.rootFile.Get("Top")
-        Background      = self.rootFile.Get("Background")
-        
-        if Background.__nonzero__():
-            total        = sum([float(item.Integral()) for item in [TrueB,TrueC,TrueL,Background]])
-        else:
-            total        = sum([float(item.Integral()) for item in [TrueB,TrueC,TrueL,Top]])
+        self.loadObjects()        
 
-        for item in [TrueB,TrueC,TrueL,Top,Background]:
+        total        = sum([float(item.Integral()) for item in self.objDict.values()])
+        for item in self.objDict.values():
             if item.__nonzero__():
                 if not self.doFractions:
-                    self.valueDict[item.GetName()] = item.Integral()
+                    self.valueDict[item.GetName().split("_")[0]] = item.Integral()
                 else:
-                    self.valueDict[item.GetName()] = item.Integral()/float(total)
+                    self.valueDict[item.GetName().split("_")[0]] = item.Integral()/float(total)
 
 
     def print31Environment(self):
         print ""
+
         print "%-40s %10s" % ("Parameter1.Name:","N_{b}")
         print "%-40s %9.1f" % ("Parameter1.Start:",self.valueDict["TrueB"])
         print "%-40s %10s" % ("Parameter1.Step:","0.1")
@@ -210,12 +240,12 @@ if __name__=="__main__":
         print "FAILED TO INIT HISTOS!"
         sys.exit(-1)
     else:
-        try:
-            printer.Run()
-        except Exception as inst:
-            print "failed to call printEnvFile.Run()\n\t>>> ",inst
-            sys.exit(-1)
-        else:
-            sys.exit(0)
+        #try:
+        printer.Run()
+        #except Exception as inst:
+        #    print "failed to call printEnvFile.Run()\n\t>>> ",inst
+        #    sys.exit(-1)
+        #else:
+        #    sys.exit(0)
         
 
