@@ -38,7 +38,7 @@ class printEnvFile:
         self.parser.add_option("-N", "--ObjectNames", 
                                dest="ObjectNames",
                                action="store",
-                               default=["TrueB","TrueC","TrueL","Top","Background"],
+                               default="TrueB,TrueC,TrueL,Top,Background",
                                help="override default object names following: TrueB,TrueC,TrueL,Top,Background")
 
         self.rootFile = None
@@ -236,8 +236,8 @@ if __name__=="__main__":
     
     try: 
         printer.initFromInput()
-    except:
-        print "FAILED TO INIT HISTOS!"
+    except Exception as inst:
+        print "FAILED TO INIT HISTOS!", inst
         sys.exit(-1)
     else:
         #try:
