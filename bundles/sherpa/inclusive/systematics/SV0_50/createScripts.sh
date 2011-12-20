@@ -1,1 +1,6 @@
-for item in `find . -type f -name "bundle*cfg"|grep -v template|sed -e s/.*_sumSV12mass_(.*).cfg.*/1/|sort`;do cp bundleIP3DSV1_70_allJets_sumSV12mass_template.cfg bundleIP3DSV1_70_allJets_sumSV12mass_${item}.cfg;sed -i -e "s/_JER_/_${item}_/g" bundleIP3DSV1_70_allJets_sumSV12mass_${item}.cfg;done
+
+for item in `find ${PWD} -name "bundle*cfg"|grep -v template|sed -e 's/.*_sumSV0mass_\(.*\)\.cfg.*/\1/'|sort`;do 
+    echo $item
+    cp -v bundleSV0_50_allJets_sumSV0mass_template.cfg bundleSV0_50_allJets_sumSV0mass_${item}.cfg
+    sed -i -e "s/_JER_/_${item}_/g" bundleSV0_50_allJets_sumSV0mass_${item}.cfg
+done
