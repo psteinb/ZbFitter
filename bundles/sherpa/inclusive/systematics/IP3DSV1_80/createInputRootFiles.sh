@@ -6,7 +6,7 @@ if [[ -n $1 ]];then
 	python $SRC/python/bundleHistos.py -f $file -o ${file/.cfg/.root} > ${file/.cfg/.log} 2>&1 &
     done
 else
-    for file in `pwd`/*;do
+    for file in `pwd`/*cfg;do
 	echo -e "\nprocessing " $file
 	python $SRC/python/bundleHistos.py -f $file -o ${file/.cfg/.root} > ${file/.cfg/.log} 2>&1 &
     done
