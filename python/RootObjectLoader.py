@@ -21,6 +21,7 @@ class RootObjectLoader:
         self.cfgParser = ConfigParser()
         self.tFiles = {}
         self.loadedDict = {}
+        self.loadedCommands = {}
         self.setConfigFile(_configFile)
 
     def setConfigFile(self,_cfile):
@@ -76,6 +77,7 @@ class RootObjectLoader:
         
         for sec in self.cfgParser.sections():
             self.loadedDict[sec] = []
+            self.loadedCommands[sec] = []
             self.tFiles[sec] = []
             commands = []
             for k,v in self.cfgParser.items(sec):
@@ -107,6 +109,9 @@ class RootObjectLoader:
 #                    print ">> object %s found in %s " % (v.split(":")[0],v.split(":")[-1])
                 else:
                     print ">> object %s not found in %s " % (v.split(":")[-1],fileName)
+
+                if v.lower().count("[]"):
+                    self.loadedCommands.append(v)
 
             for loaded in self.loadedDict[sec]:
                 if not loaded.__nonzero__():

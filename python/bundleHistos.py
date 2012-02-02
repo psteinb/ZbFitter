@@ -77,7 +77,7 @@ class BundleHistos:
             index = objects.index(name)
             meta = self.openedFiles[index].Get(name)
             if meta.__nonzero__():
-                self.dictToWrite[meta] = names[index]
+                self.dictToWrite[names[index]] = meta
             else:
                 print "could not load %s from %s" % (name,files[index])
         
@@ -88,9 +88,21 @@ class BundleHistos:
         function to load dictToWrite from objectDB
         """
         self.dictToWrite = {}
+        #print self.objectDB.loadedCommands
         for key,value in self.objectDB.loadedDict.iteritems():
             for item in value:
-                self.dictToWrite[item] = key
+                self.dictToWrite[key] = item
+
+            # if self.objectDB.loadedCommands.has_key(key):
+            #     for cmd in self.objectDB.loadedCommands[key]:
+            #         try:
+            #             eval(cmd.replace("[]","self.dictToWrite["+key+"]"))
+            #         except:
+            #             print ">> command %s failed on object named [%s], %s" % (cmd,key,self.dictToWrite[key].GetName())
+            #         else:
+            #             print ">> command %s succeeded for [%s]" % (cmd,key)
+            # else:
+            #     print ">> no commands found for ",key
         return 0
 
         
@@ -103,7 +115,7 @@ class BundleHistos:
         nfile = ROOT.TFile.Open(self.outputname,"RECREATE")
 
         for key,value in self.dictToWrite.iteritems():
-            meta = key.Clone(value)
+            meta = value.Clone(key)
             meta.SetDirectory(nfile)
             print "adding %s to %s" % (value,self.outputname)
             meta.Write()
