@@ -164,6 +164,12 @@ void printPulls(const std::vector<std::vector<TH1*> >& _results, const std::stri
       continue;
     PullCanvas.cd(pad);
 
+    TF1 gaus(TString::Format("Gaus_pull%i",i),"gaus(0)",_results[i][2]->GetXaxis()->GetXmin(),_results[i][2]->GetXaxis()->GetXmax());
+    gaus.SetParameter(0,_results[i][2]->GetEntries());
+    gaus.SetParameter(1,0.);
+    gaus.SetParameter(2,1.);
+
+    gPad->SetLogy();
     gPad->SetTopMargin(.2);
     _results[i][2]->SetStats(false);
     _results[i][2]->SetTitleSize(_results[i][2]->GetTitleSize()*1.5);
@@ -171,25 +177,26 @@ void printPulls(const std::vector<std::vector<TH1*> >& _results, const std::stri
     _results[i][2]->SetYTitle(TString::Format("N_{events} / %.1f",_results[i][2]->GetXaxis()->GetBinWidth(2) ));
     _results[i][2]->Draw("e0");
     if(_results[i][2]->GetEntries()>0){
-    _results[i][2]->Fit(gaus,"VR+");
-    stream << "#mu :  " << TString::Format("%.3f",gaus->GetParameter(1)) << " #pm " 
-           << TString::Format("%.3f",gaus->GetParError(1)) 
-           << ";  #sigma :  " << TString::Format("%.3f",gaus->GetParameter(2)) << " #pm "  
-           << TString::Format("%.3f",gaus->GetParError(2));
+      _results[i][2]->Fit(&gaus,"VR+");
+      stream << "#mu :  " << TString::Format("%.3f",gaus.GetParameter(1)) << " #pm " 
+             << TString::Format("%.3f",gaus.GetParError(1)) 
+             << ";  #sigma :  " << TString::Format("%.3f",gaus.GetParameter(2)) << " #pm "  
+             << TString::Format("%.3f",gaus.GetParError(2));
+      
+      fitValues.AddText(stream.str().c_str());
 
-    fitValues.AddText(stream.str().c_str());
-
-    stream.str("");
-    stream << "chi2/NDF :  " << gaus->GetChisquare() << " / " << gaus->GetNDF();
-    fitValues.AddText(stream.str().c_str());
-    stream.str("");
-    stream << "Prob(chi2) :  " << TString::Format("%.3f",TMath::Prob(gaus->GetChisquare(),gaus->GetNDF()));
-    fitValues.AddText(stream.str().c_str());
-    fitValues.SetX1NDC(.15);
-    fitValues.SetX2NDC(.85);
-    fitValues.SetY1NDC(.82);
-    fitValues.SetY2NDC(.98);
-    fitValues.DrawClone();
+      stream.str("");
+      stream << "chi2/NDF :  " << gaus.GetChisquare() << " / " << gaus.GetNDF();
+      fitValues.AddText(stream.str().c_str());
+      stream.str("");
+      stream << "Prob(chi2) :  " << TString::Format("%.3f",TMath::Prob(gaus.GetChisquare(),gaus.GetNDF()));
+      fitValues.AddText(stream.str().c_str());
+      fitValues.SetX1NDC(.15);
+      fitValues.SetX2NDC(.85);
+      fitValues.SetY1NDC(.82);
+      fitValues.SetY2NDC(.98);
+      fitValues.DrawClone();
+      _results[i][2]->SetDrawOption("e0");
     }
     PullCanvas.Update();
   }
