@@ -111,6 +111,10 @@ void printMeans(const std::vector<std::vector<TH1*> >& _results, const std::vect
 
     MeanCanvas.cd(pad);
 
+    _results[i][0]->SetTitleSize(_results[i][0]->GetTitleSize()*1.5);
+    _results[i][0]->SetTitleOffset(_results[i][0]->GetTitleOffset()*.75);
+    _results[i][0]->SetYTitle(TString::Format("N_{events} / %.1f",_results[i][0]->GetXaxis()->GetBinWidth(2) ));
+
     _results[i][0]->Draw();
     MeanCanvas.Update();
     ArrowXNDC = (gPad->XtoPad(_expected[i]) - gPad->GetUxmin())/(gPad->GetUxmax() - gPad->GetUxmin());
@@ -121,7 +125,7 @@ void printMeans(const std::vector<std::vector<TH1*> >& _results, const std::vect
   }
   MeanCanvas.Update();
   MeanCanvas.Print(".eps");
-
+  MeanCanvas.SaveAs(TString::Format("%s.C",MeanCanvas.GetName()));
 }
 
 void printPulls(const std::vector<std::vector<TH1*> >& _results, const std::string& _file="", ConfPseudoExperiment* _conf=0){
@@ -134,10 +138,7 @@ void printPulls(const std::vector<std::vector<TH1*> >& _results, const std::stri
   TString templateNames = _conf->p_tempTitle.c_str();
   templateNames.ToLower();
 
-  if(templateNames.Contains("ttbar") || templateNames.Contains("top"))
-    width-=1;
-
-  if(templateNames.Contains("qcd"))
+  if(templateNames.Contains("ttbar") || templateNames.Contains("top") || templateNames.Contains("background",TString::kIgnoreCase) || templateNames.Contains("qcd"))
     width-=1;
 
   PullCanvas.Divide(width,1);
@@ -165,16 +166,24 @@ void printPulls(const std::vector<std::vector<TH1*> >& _results, const std::stri
 
     gPad->SetTopMargin(.2);
     _results[i][2]->SetStats(false);
+    _results[i][2]->SetTitleSize(_results[i][2]->GetTitleSize()*1.5);
+    _results[i][2]->SetTitleOffset(_results[i][2]->GetTitleOffset()*.75);
+    _results[i][2]->SetYTitle(TString::Format("N_{events} / %.1f",_results[i][2]->GetXaxis()->GetBinWidth(2) ));
     _results[i][2]->Draw("e0");
     if(_results[i][2]->GetEntries()>0){
     _results[i][2]->Fit(gaus,"VR+");
-    stream << "#mu :\t" << gaus->GetParameter(1) << " #pm " << gaus->GetParError(1);
+    stream << "#mu :  " << TString::Format("%.3f",gaus->GetParameter(1)) << " #pm " 
+           << TString::Format("%.3f",gaus->GetParError(1)) 
+           << ";  #sigma :  " << TString::Format("%.3f",gaus->GetParameter(2)) << " #pm "  
+           << TString::Format("%.3f",gaus->GetParError(2));
+
+    fitValues.AddText(stream.str().c_str());
+
+    stream.str("");
+    stream << "chi2/NDF :  " << gaus->GetChisquare() << " / " << gaus->GetNDF();
     fitValues.AddText(stream.str().c_str());
     stream.str("");
-    stream << "#sigma :\t" << gaus->GetParameter(2) << " #pm " << gaus->GetParError(2);
-    fitValues.AddText(stream.str().c_str());
-    stream.str("");
-    stream << "chi2/NDF :\t" << gaus->GetChisquare() << " / " << gaus->GetNDF();
+    stream << "Prob(chi2) :  " << TString::Format("%.3f",TMath::Prob(gaus->GetChisquare(),gaus->GetNDF()));
     fitValues.AddText(stream.str().c_str());
     fitValues.SetX1NDC(.15);
     fitValues.SetX2NDC(.85);
@@ -186,6 +195,7 @@ void printPulls(const std::vector<std::vector<TH1*> >& _results, const std::stri
   }
   PullCanvas.Update();
   PullCanvas.Print(".eps");
+  PullCanvas.SaveAs(TString::Format("%s.C",PullCanvas.GetName()));
 
 }
 
@@ -197,7 +207,9 @@ void printCorrelations(const std::vector<std::vector<TH2*> >& _results, const st
     xsize = _results.size();
     ysize = _results[0].size();
 
-
+    TString rfileName = _file.c_str();
+    rfileName += ".root";
+    TFile correlationRFile(rfileName.Data(),"RECREATE");
     TCanvas PseudoCorrelation(_file.c_str(),"",xsize*800,ysize*600);
 
     PseudoCorrelation.Clear();
@@ -214,6 +226,7 @@ void printCorrelations(const std::vector<std::vector<TH2*> >& _results, const st
         PseudoCorrelation.cd(padId);
         _results[col][row]->SetStats(false);
         _results[col][row]->Draw("colz");
+        _results[col][row]->SetDirectory(correlationRFile.GetDirectory("/"));
 
         correlationText.str("");
         correlationText<< "correlation: " << _results[col][row]->GetCorrelationFactor();
@@ -232,7 +245,20 @@ void printCorrelations(const std::vector<std::vector<TH2*> >& _results, const st
     }
     
     PseudoCorrelation.Print(".eps");
+    correlationRFile.Write();
 
+    ///////////////////////////////////////////////////////////////////////
+    //stupid root, Close calls delete of all contained objects!
+    for (int col = 0; col < _results.size(); ++col)
+    {
+      for (int row = 0; row < _results[0].size(); ++row)
+      {
+        _results[col][row]->SetDirectory(0);
+      }
+    }
+
+    correlationRFile.Close();
+    
   }
 
 
@@ -244,9 +270,19 @@ void printMaxLLH(TH1* _maxLLH, const std::string& _file=""){
   PseudoMaxLLH.Clear();
   PseudoMaxLLH.Draw();
   PseudoMaxLLH.cd(0);
+  Double_t lowBound = _maxLLH->GetXaxis()->GetXmin();
+  Double_t upBound = _maxLLH->GetXaxis()->GetXmax();
+  Double_t lowMeanMinusSigma = _maxLLH->GetMean()-(4*_maxLLH->GetRMS());
+  Double_t upMeanPlusSigma = _maxLLH->GetMean()+(4*_maxLLH->GetRMS());
+
+  _maxLLH->GetXaxis()->SetRangeUser((lowMeanMinusSigma>lowBound) ? lowMeanMinusSigma : lowBound,
+                                    (upMeanPlusSigma<upBound) ? upMeanPlusSigma : upBound);
+  _maxLLH->SetXTitle("-1 log(#it{L})|_{max}");
+  _maxLLH->SetYTitle(TString::Format("N_{events} / %.1f",_maxLLH->GetXaxis()->GetBinWidth(2)));
   _maxLLH->Draw();
   PseudoMaxLLH.Update();
   PseudoMaxLLH.Print(".eps");
+  PseudoMaxLLH.SaveAs(TString::Format("%s.C",PseudoMaxLLH.GetName()));
 
 }
 
