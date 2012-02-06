@@ -207,7 +207,7 @@ void PseudoStudy<InputT,FunctionT>::printResults(){
   std::vector<TH1D>::const_iterator rItr = m_means.begin()    ;
   std::vector<TH1D>::const_iterator rEnd = m_means.end()      ;
   std::string rootFileName = m_baseName;
-  rootFileName += "_MeansSigmasPullsMaxLLH.root";
+  rootFileName += "_results.root";
   TFile aNewFile(rootFileName.c_str(),"RECREATE");
 
   m_maxLLH->SetDirectory(aNewFile.GetDirectory("/"));
@@ -257,20 +257,20 @@ void PseudoStudy<InputT,FunctionT>::printResults(){
   }
 
 
-  if(m_verbosity<3){
-    std::cout << "-- Migrad pulls --\n";
-    rItr = m_MigradPulls.begin()    ;
-    rEnd = m_MigradPulls.end()      ;
-    for (; rItr!=rEnd; ++rItr)
-    {
-      std::cout << rItr->GetName() << "("<< rItr->GetEntries()<<") "
-                <<"mean: " << rItr->GetMean()
-                <<", rms: " << rItr->GetRMS()
-                <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() << std::endl;
-      rItr->Write();
 
-    }
+  std::cout << "-- Migrad pulls --\n";
+  rItr = m_MigradPulls.begin()    ;
+  rEnd = m_MigradPulls.end()      ;
+  for (; rItr!=rEnd; ++rItr)
+  {
+    std::cout << rItr->GetName() << "("<< rItr->GetEntries()<<") "
+              <<"mean: " << rItr->GetMean()
+              <<", rms: " << rItr->GetRMS()
+              <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax() << std::endl;
+    rItr->Write();
+
   }
+
 
   aNewFile.Write();
   aNewFile.Close();
@@ -417,21 +417,21 @@ void PseudoStudy<InputT,FunctionT>::experiment(){
         
       //fill correlations
       fillCorrelations();
-
-      for (int i = 0; i < numParameters; ++i)
+      bool MinosSuccess = false;
+      for (int i = 0; i < numParameters; ++i,MinosSuccess = false)
       {
          
         m_means[i].Fill(m_fitValues[i]);
-
+        fitError = fitSymmErrors[i];
         expError = m_expectedErrors[i];
         expValue = m_expectedValues[i];
 
-        bool MinosSuccess = false;
+        
         try{
-          MinosSuccess = TMath::Abs(m_fitErrorsStatus.at(i))<10;
+          MinosSuccess = (TMath::Abs(m_fitErrorsStatus.at(i)) != 0) ? false : true;
         }
         catch(std::exception& exc){
-          MinosSuccess = true;
+          MinosSuccess = false;
         }
 
         if(MinosSuccess){
@@ -442,16 +442,18 @@ void PseudoStudy<InputT,FunctionT>::experiment(){
           else
             pullSigma = TMath::Abs(m_fitErrorsUp[i]);
 
+          if(pullSigma!=0.)
+            pullValues[i] = (expValue - m_fitValues[i])/(pullSigma);
         }
         else{
           nMinosFailed++;
           m_sigmas[i].Fill(fitSymmErrors[i]);
-          pullSigma = fitSymmErrors[i];
+          //pullSigma = fitSymmErrors[i];
         }
 
 
-        pullValues[i] = (m_fitValues[i] - (expValue))/(pullSigma);
-        MigradPullValues[i] = (m_fitValues[i] - (m_expectedValues[i]))/(fitError);
+        if(fitError!=0.)
+          MigradPullValues[i] = ((m_expectedValues[i]) - m_fitValues[i])/(fitError);
 
         // std::cout << "fit results: "<< totalSmearedData <<" (" <<totalData <<")\n"
         //           << i << ": (fit)\t" << m_fitValues[i] << " +/- " << pullSigma << " (Migrad: "<< aFitter.getMinimizer()->Errors()[i] <<")\n"

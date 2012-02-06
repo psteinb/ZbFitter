@@ -69,7 +69,12 @@ int core::FitCore<Fcn,Scr,Res>::fit(const bool& _verbose){
   m_minimizer->Minimize(); 
   watch.Stop();
   value = m_minimizer->Status();
-
+  // status = 0    : all successful
+  // status = 1    : Covariance was made pos defined
+  // status = 2    : Hesse is invalid
+  // status = 3    : Edm is above max
+  // status = 4    : Reached call limit
+  // status = 5    : Any other failure
   
   
   if(_verbose){
@@ -171,8 +176,17 @@ void core::FitCore<Fcn,Scr,Res>::runMinos(){
   {
     minosStatus = false;
     minosStatus = m_minimizer->GetMinosError(i,dDown,dUp,iStatus);
-    m_minosDown[i] = dDown;
-    m_minosUp[i] = dUp;
+    // get the minos error for parameter i, return false if Minos failed
+    //   A minimizaiton must be performed befre, return false if no minimization has been done
+    //   In case of Minos failed the status error is updated as following
+  // status += 10 * minosStatus where the minos status is:
+  //      status = 1    : maximum number of function calls exceeded when running for lower error
+  //      status = 2    : maximum number of function calls exceeded when running for upper error
+  //      status = 3    : new minimum found when running for lower error
+  //      status = 4    : new minimum found when running for upper error
+  //      status = 5    : any other failure
+
+  
     
     if(!minosStatus){
       m_minosStatus[i] = (-1)*iStatus;
@@ -180,9 +194,15 @@ void core::FitCore<Fcn,Scr,Res>::runMinos(){
                 << "\t[minos status: "<<m_minosStatus[i] <<"], [error: "<<iStatus <<"]\n" 
                 << "\t\tFCN: " << m_minimizer->MinValue() 
                 << ", fitted: " << m_minimizer->X()[i]
-                << ", fittedError: " << m_minimizer->Errors()[i]<< std::endl ;}
-    else
+                << ", fittedError: " << m_minimizer->Errors()[i]<< std::endl ;
+      m_minosDown[i] = 0.;
+      m_minosUp[i] = 0.;
+    }
+    else{
       m_minosStatus[i] = iStatus;
+      m_minosDown[i] = dDown;
+      m_minosUp[i] = dUp;
+    }
   }
 
 }
