@@ -14,6 +14,6 @@ echo "using input files from $SRC/bundles/alpgen/inclusive/systematics/IP3DSV1_8
 	set +x
     done
 
-    if [[ -e $SRC/bundles/alpgen/inclusive/systematics/IP3DSV1_80/shapeIP3DSV1_80_allJets_sumSV12mass.root ]];then
-	RunFitter.exe -M Migrad -d $SRC/bundles/alpgen/inclusive/systematics/IP3DSV1_80/shapeIP3DSV1_80_allJets_sumSV12mass.root -c Alpgen_shapeIP3DSV1_80_allJets_sumSV12mass_3norm_background.env -D "PseudoData" -T "TrueB_varied,TrueC_varied,TrueL_varied,Background_varied" -o Alpgen_shapeIP3DSV1_80_allJets_sumSV12mass_3norm_background -r 5 > `pwd`/Alpgen_shapeIP3DSV1_80_allJets_sumSV12mass_3norm_background.log 2>&1 &
+    if [[ -e $SRC/bundles/alpgen/inclusive/systematics/IP3DSV1_80/shapeIP3DSV1_80_allJets_sumSV12mass_AltSignal.root ]];then
+	RunFitter.exe -M Migrad -d $SRC/bundles/alpgen/inclusive/systematics/IP3DSV1_80/shapeIP3DSV1_80_allJets_sumSV12mass_AltSignal.root -c Alpgen_shapeIP3DSV1_80_allJets_sumSV12mass_AltSignal_3norm_background.env -D "PseudoData" -T "TrueB_varied,TrueC_varied,TrueL_varied,Background_varied" -o Alpgen_shapeIP3DSV1_80_allJets_sumSV12mass_AltSignal_3norm_background -r 5 > `pwd`/Alpgen_shapeIP3DSV1_80_allJets_sumSV12mass_AltSignal_3norm_background.log 2>&1 &
     fi
