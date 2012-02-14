@@ -4,7 +4,7 @@ DEFAULTPATH=$SRC/bundles/alpgen/inclusive/systematics/IP3DSV1_80/
 if [[ -z $1 ]];then
     echo "no input given, using files from $DEFAULTPATH"
     TARGETS=`find $DEFAULTPATH/ -iname "custom*root"`
-    
+    TARGETS="${TARGETS} `find $DEFAULTPATH/ -iname "shape*root"`"
 else
     TARGETS=$*
 fi
