@@ -87,8 +87,10 @@ void FitterResults::HistoResult::print(){
   leg.SetLineColor(kWhite);
   leg.Draw();
   fitCanvas.Update();
+  TString fName = fitCanvas.GetName();
+  fName+=".C";
   fitCanvas.Print(".eps");
-
+  fitCanvas.SaveAs(fName.Data());
   
 
   //---------------- RESUTLS ---------------- 
@@ -126,7 +128,10 @@ void FitterResults::HistoResult::print(){
   }
       
   valCanvas.Update();
+  fName = valCanvas.GetName();
+  fName+=".C";
   valCanvas.Print(".eps");
+  valCanvas.SaveAs(fName.Data());
 
   newFile->Write();
   newFile->Close();
