@@ -1,9 +1,9 @@
 
 TARGETS=0
-DEFAULTPATH=$SRC/bundles/sherpa/inclusive/systematics/IP3DSV1_70/
+DEFAULTPATH=$SRC/bundles/sherpa/inclusive/systematics/IP3DSV1_80/
 if [[ -z $1 ]];then
     echo "no input given, using files from $DEFAULTPATH"
-    TARGETS=`find $DEFAULTPATH/ -iname "bundle*root"`
+    TARGETS=`find $DEFAULTPATH/ -iname "custom*root"`
     
 else
     TARGETS=$*
