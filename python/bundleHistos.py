@@ -53,7 +53,7 @@ class BundleHistos:
         if self.parsedOpts['filename']:
             self.configFile = self.parsedOpts['filename']
             filename = self.configFile.split("/")[-1]
-
+            print "opening DB from",self.configFile 
             self.objectDB.setConfigFile(self.configFile)
             self.objectDB.openFiles(False)
             self.initDictFromDatabase()

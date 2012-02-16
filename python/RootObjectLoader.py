@@ -81,10 +81,10 @@ class RootObjectLoader:
             self.tFiles[sec] = []
             commands = []
             for k,v in self.cfgParser.items(sec):
-
+                print ">>",k,v
                 if v.count("[]."):
                     commands.append(v)
-                    self.loadedCommands.append(v)
+                    self.loadedCommands[sec].append(v)
                     continue
 
                 if not v.lower().count(".root"):
