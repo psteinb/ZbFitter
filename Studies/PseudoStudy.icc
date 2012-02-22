@@ -53,7 +53,7 @@ void PseudoStudy<InputT,FunctionT>::setupResults(const int& _size){
     m_pulls[i] = TH1D(TString::Format("pull_par%i",i).Data(),"pull",80,-8,8);
     m_pulls[i].GetXaxis()->SetTitle(TString::Format("pull (%i)",i).Data());
 
-    m_bias[i] = TH1D(TString::Format("bias_par%i",i).Data(),"bias",80,-8,8);
+    m_bias[i] = TH1D(TString::Format("bias_par%i",i).Data(),"bias",160,-40,40);
     m_bias[i].GetXaxis()->SetTitle(TString::Format("bias (%i)",i).Data());
 
     //m_pulls[i].SetBit(TH1::kCanRebin);
