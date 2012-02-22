@@ -414,6 +414,11 @@ int main(int argc, char* argv[])
   name += "_pulls";
   printPulls(m_results,name,&conf);
 
+// ----- DRAW ONLY PULL RESULTS  ----- 
+  name = conf.p_outputfile;
+  name += "_bias";
+  printBias(m_results,name,&conf);
+
 
   // ----- DRAW maxLLH RESULTS  ----- 
   name = conf.p_outputfile;

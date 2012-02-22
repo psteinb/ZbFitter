@@ -128,6 +128,56 @@ void printMeans(const std::vector<std::vector<TH1*> >& _results, const std::vect
   MeanCanvas.SaveAs(TString::Format("%s.C",MeanCanvas.GetName()));
 }
 
+void printBias(const std::vector<std::vector<TH1*> >& _results, 
+               const std::string& _file="", 
+               ConfPseudoExperiment* _conf=0){
+
+  TCanvas BiasCanvas(_file.c_str(),"",3000,1000);
+  BiasCanvas.Clear();
+  BiasCanvas.Draw();
+  int width = _results.size();
+  TString templateNames = _conf->p_tempTitle.c_str();
+  templateNames.ToLower();
+
+  if(templateNames.Contains("background"))
+    width-=1;
+
+  if(templateNames.Contains("ttbar") || templateNames.Contains("top"))
+    width-=1;
+
+  if(templateNames.Contains("qcd"))
+    width-=1;
+  
+  BiasCanvas.Divide(width,1);
+  int pad=1;
+  double ArrowXNDC = 0.;
+  TLine anLine;
+  anLine.SetLineColor(kBlue);
+  anLine.SetLineWidth(2);
+  TString title = "";
+  for (int i = 0; i < _results.size(); ++i,pad++)
+  {
+    title = _results[i][3]->GetXaxis()->GetTitle();
+    title.ToLower();
+    if(title.Contains("ttbar") || title.Contains("top") 
+       || title.Contains("qcd") || title.Contains("background")){
+      continue;}
+
+    BiasCanvas.cd(pad);
+
+    _results[i][3]->SetTitleSize(_results[i][3]->GetTitleSize()*1.5);
+    _results[i][3]->SetTitleOffset(_results[i][3]->GetTitleOffset()*.75);
+    _results[i][3]->SetYTitle(TString::Format("N_{events} / %.1f",_results[i][3]->GetXaxis()->GetBinWidth(2) ));
+
+    _results[i][3]->Draw();
+    BiasCanvas.Update();
+
+  }
+  BiasCanvas.Update();
+  BiasCanvas.Print(".eps");
+  BiasCanvas.SaveAs(TString::Format("%s.C",BiasCanvas.GetName()));
+}
+
 void printPulls(const std::vector<std::vector<TH1*> >& _results, const std::string& _file="", ConfPseudoExperiment* _conf=0){
 
   TCanvas PullCanvas(_file.c_str(),"",3000,1500);
