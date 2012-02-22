@@ -51,6 +51,7 @@ class PseudoStudy{
   TRandom3 m_TRand3;
 
   std::vector<TH1D> m_pulls;
+  std::vector<TH1D> m_bias;
   std::vector<TH1D> m_MigradPulls;
   std::vector<TH1D> m_means;
   std::vector<TH1D> m_sigmas;

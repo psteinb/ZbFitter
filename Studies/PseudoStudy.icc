@@ -52,6 +52,10 @@ void PseudoStudy<InputT,FunctionT>::setupResults(const int& _size){
 
     m_pulls[i] = TH1D(TString::Format("pull_par%i",i).Data(),"pull",80,-8,8);
     m_pulls[i].GetXaxis()->SetTitle(TString::Format("pull (%i)",i).Data());
+
+    m_bias[i] = TH1D(TString::Format("pull_par%i",i).Data(),"pull",80,-8,8);
+    m_bias[i].GetXaxis()->SetTitle(TString::Format("pull (%i)",i).Data());
+
     //m_pulls[i].SetBit(TH1::kCanRebin);
 
     m_MigradPulls[i] = TH1D(addItemToText<int>("Migrad_pull_par",i).c_str(),"pull",80,-8,8);
@@ -97,6 +101,13 @@ void PseudoStudy<InputT,FunctionT>::treatResultsFromMinimizer(const std::vector<
   {
     rItr->GetXaxis()->SetTitle(TString::Format("pull(%s)",_names->at(i).c_str()).Data());
   }
+
+  rItr = m_bias.begin()    ;
+  rEnd = m_bias.end()      ;
+  for (short i = 0; rItr!=rEnd; ++rItr,i++)
+  {
+    rItr->GetXaxis()->SetTitle(TString::Format("bias(%s)",_names->at(i).c_str()).Data());
+  }
 }
 
 template<
@@ -125,6 +136,7 @@ PseudoStudy<InputT,FunctionT>::PseudoStudy(const std::vector<TH1*>& _templates,
   m_iterations(_iters),
   m_TRand3(),
   m_pulls(_templates.size()),
+  m_bias(_templates.size()),
   m_MigradPulls(_templates.size()),
   m_means(_templates.size()),
   m_sigmas(_templates.size()),
@@ -166,7 +178,7 @@ void PseudoStudy<InputT,FunctionT>::getResultsOfParameter(const int& _idx,std::v
   if(!(_idx<m_templateTH1s.size()))
     return;
 
-  _results.resize(3);
+  _results.resize(4);
     
   try{
     _results[0] = &(m_means.at(_idx));
@@ -192,6 +204,15 @@ void PseudoStudy<InputT,FunctionT>::getResultsOfParameter(const int& _idx,std::v
   catch(std::exception& exc){
     std::cerr << __FILE__ <<":"<< __LINE__ <<"\t unable to return m_pulls item at "<< _idx<<" due to \n\t"<< exc.what()<<std::endl;
     _results[2] = 0;
+  }
+
+ 
+  try{
+    _results[3] = &(m_bias.at(_idx));
+  }
+  catch(std::exception& exc){
+    std::cerr << __FILE__ <<":"<< __LINE__ <<"\t unable to return m_pulls item at "<< _idx<<" due to \n\t"<< exc.what()<<std::endl;
+    _results[3] = 0;
   }
 
   return;
@@ -256,6 +277,21 @@ void PseudoStudy<InputT,FunctionT>::printResults(){
 
   }
 
+  std::cout << "-- bias --\n";
+  rItr = m_bias.begin()    ;
+  rEnd = m_bias.end()      ;
+  for (; rItr!=rEnd; ++rItr)
+  {
+    std::cout << rItr->GetName() << "("<< rItr->GetEntries()<<") "
+              <<"mean: " << rItr->GetMean()
+              <<", rms: " << rItr->GetRMS();
+    if(m_verbosity<3)
+      std::cout  <<", xmin/xmax: " << rItr->GetXaxis()->GetXmin() << "/" <<  rItr->GetXaxis()->GetXmax()
+                 <<", u/o: " << rItr->GetBinContent(0) << "/" <<   rItr->GetBinContent(rItr->GetNbinsX()+1);
+    std::cout       << std::endl;
+    rItr->Write();
+
+  }
 
 
   std::cout << "-- Migrad pulls --\n";
@@ -320,6 +356,7 @@ void PseudoStudy<InputT,FunctionT>::experiment(){
   double pullSigma=0.;
     
   std::vector<double> pullValues(numParameters,0.);
+  std::vector<double> biasValues(numParameters,0.);
   std::vector<double> MigradPullValues(numParameters,0.);
 
   std::vector<double> fitSymmErrors(numParameters,0.);
@@ -442,6 +479,8 @@ void PseudoStudy<InputT,FunctionT>::experiment(){
           else
             pullSigma = TMath::Abs(m_fitErrorsUp[i]);
 
+          biasValues[i] = (expValue - m_fitValues[i]);
+
           if(pullSigma!=0.)
             pullValues[i] = (expValue - m_fitValues[i])/(pullSigma);
         }
@@ -463,6 +502,7 @@ void PseudoStudy<InputT,FunctionT>::experiment(){
       for (int i = 0; i < pullValues.size(); ++i)
       {
         m_pulls[i].Fill(pullValues[i]);
+        m_bias[i].Fill(biasValues[i]);
         m_MigradPulls[i].Fill(MigradPullValues[i]);
       }
     }
