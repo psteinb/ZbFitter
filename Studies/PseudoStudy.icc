@@ -45,15 +45,26 @@ void PseudoStudy<InputT,FunctionT>::setupResults(const int& _size){
 
   for (int i = 0; i < _size; ++i)
   {
-    expMeanDown = 0.*m_expectedValues.at(i);
-    expMeanUp = 2.*(m_expectedValues.at(i));
-    expSigmaDown = 0.;
-    expSigmaUp = 1.*(m_expectedValues.at(i));
+    expSigmaDown = 0;
+    expSigmaUp = 500;
+
+    if(m_expectedValues.at(i)>2e3){
+      expMeanDown = m_expectedValues.at(i)-1000;
+      expMeanUp = (m_expectedValues.at(i))+1000;
+    }
+    else{
+      expMeanDown = 0.1*m_expectedValues.at(i);
+      expMeanUp = 2.*(m_expectedValues.at(i));
+    }
 
     m_pulls[i] = TH1D(TString::Format("pull_par%i",i).Data(),"pull",80,-8,8);
     m_pulls[i].GetXaxis()->SetTitle(TString::Format("pull (%i)",i).Data());
 
-    m_bias[i] = TH1D(TString::Format("bias_par%i",i).Data(),"bias",160,-80,80);
+    if(m_expectedValues.at(i)>2e3)
+      m_bias[i] = TH1D(TString::Format("bias_par%i",i).Data(),"bias",800,-1.6e3,1.6e3);
+    else
+      m_bias[i] = TH1D(TString::Format("bias_par%i",i).Data(),"bias",800,-400,400);
+
     m_bias[i].GetXaxis()->SetTitle(TString::Format("bias (%i)",i).Data());
 
     //m_pulls[i].SetBit(TH1::kCanRebin);
@@ -62,13 +73,14 @@ void PseudoStudy<InputT,FunctionT>::setupResults(const int& _size){
     m_MigradPulls[i].GetXaxis()->SetTitle(addItemToText<int>("pull: ",i).c_str());
     //m_MigradPulls[i].SetBit(TH1::kCanRebin);
 
-    m_means[i] = TH1D(addItemToText<int>("mean_par",i).c_str(),"mean fitted",
-                      80,expMeanDown,expMeanUp);
+      m_means[i] = TH1D(addItemToText<int>("mean_par",i).c_str(),"mean fitted",
+                        100,expMeanDown,expMeanUp);
+    
     m_means[i].GetXaxis()->SetTitle(addItemToText<int>("fitted: ",i).c_str());
     //m_means[i].SetBit(TH1::kCanRebin);
 
     m_sigmas[i] = TH1D(addItemToText<int>("sigma_par",i).c_str(),"sigma fitted",
-                       80,expSigmaDown,expSigmaUp);
+                       250,expSigmaDown,expSigmaUp);
     m_sigmas[i].GetXaxis()->SetTitle(addItemToText<int>("fitted error: ",i).c_str());
     //m_sigmas[i].SetBit(TH1::kCanRebin);
   }
@@ -479,7 +491,7 @@ void PseudoStudy<InputT,FunctionT>::experiment(){
           else
             pullSigma = TMath::Abs(m_fitErrorsUp[i]);
 
-          biasValues[i] = (expValue - m_fitValues[i]);
+          biasValues[i] = m_fitValues[i] - expValue ;
 
           if(pullSigma!=0.)
             pullValues[i] = (expValue - m_fitValues[i])/(pullSigma);
